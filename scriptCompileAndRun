@@ -1,0 +1,35 @@
+#!/bin/sh
+
+#http://stackoverflow.com/questions/3598664/creating-a-shell-script-to-run-java-program?rq=1
+
+# prepare variables
+#macroName="kaon+-p-pT-eta-phi";
+macroName="kaon+-p-pT-eta-phiv2";
+#macroName="altgraphv2";
+outExecutableName=$macroName;
+outLogName=$macroName".out";
+path_to_Pythia="../PYTHIA/pythia8175";
+pythiaInclude=$path_to_Pythia"/include";
+pythiaLib=$path_to_Pythia"/lib";
+
+# delete older executable files
+rm $outExecutableName
+
+# Compile files
+#g++ $macroName".C" -o $outExecutableName `root-config --cflags --libs` -I$pythiaInclude
+#g++ $macroName".cc" -o $outExecutableName `root-config --cflags --libs` -I$pythiaInclude
+#g++ $macroName".cc" -o $outExecutableName `root-config --cflags --libs` -I$pythiaInclude -L$pythiaLib
+#g++ $macroName".cc" -o $outExecutableName -I$pythiaInclude -L$pythiaLib
+
+# !! must use below line to compile Pythia code outside /PYTHIA/pythia8175, took me hours to be able to compile it
+#g++ -O2 -ansi -pedantic -W -Wall -Wshadow -I$pythiaInclude $macroName.cc -o $outExecutableName -L$pythiaLib/archive -lpythia8 -llhapdfdummy 
+
+# !! position of `root-config --cflags --glibs` matters, no idea why? Usually works if it is after "code file" and "-o" argument.
+g++ -I$pythiaInclude $macroName.cc -o $outExecutableName -L$pythiaLib/archive -lpythia8 -llhapdfdummy `root-config --cflags --glibs`
+
+
+# Run files
+#./$outExecutableName
+
+# run and save stdout to a file
+./$outExecutableName > $outLogName

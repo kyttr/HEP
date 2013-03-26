@@ -1,0 +1,11 @@
+#!/bin/sh
+
+#http://stackoverflow.com/questions/3598664/creating-a-shell-script-to-run-java-program?rq=1
+
+# prepare variables
+TFileName="histos.root";
+
+# start root
+root {TBrowser browser;}
+# open file
+#{TFile f($TFileName);TBrowser browser;}
