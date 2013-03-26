@@ -8,6 +8,7 @@ pythıa kod : olay içindeki kaon+/- bul. Bunların p, pt, eta(pseudo rapidity),
 #include "TFile.h"
 #include "TH1F.h"
 #include "TF1.h"
+#include "TTree.h"
 #include "Pythia.h"
 // Include Pythia headers.
 using namespace Pythia8; // Let Pythia8:: be implicit.
@@ -85,7 +86,7 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < pythia.event.size(); ++i) {
             if (pythia.event[i].id() == kaonID || pythia.event[i].id() == -1 * kaonID) {
                 pAbs = pythia.event[i].pAbs();
-                pT(pythia.event[i].pT());
+                pT=(pythia.event[i].pT());
                 eta = (pythia.event[i].eta());
                 phi = (pythia.event[i].phi());
                 t1.Fill();

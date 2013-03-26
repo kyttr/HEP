@@ -4,7 +4,8 @@
 
 # prepare variables
 #macroName="kaon+-p-pT-eta-phi";
-macroName="kaon+-p-pT-eta-phiv2";
+#macroName="kaon+-p-pT-eta-phiv2";
+macroName="kaon+-p-pT-eta-phivTree";
 #macroName="altgraphv2";
 outExecutableName=$macroName;
 outLogName=$macroName".out";
