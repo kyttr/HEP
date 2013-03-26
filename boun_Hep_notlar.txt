@@ -1,2 +1,2 @@
 1. passing arguments to "shell script" file
-2. exclude "executable" files from commits
+2. exclude "executable" files from commits. They are large.
