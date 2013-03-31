@@ -4,7 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>/home/kaya/Documents/particle-physics-kaya/bounHEP/exercise1.h</itemPath>
+      <itemPath>exercise1.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -13,11 +13,12 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>/home/kaya/Documents/particle-physics-kaya/bounHEP/altgraph.C</itemPath>
-      <itemPath>/home/kaya/Documents/particle-physics-kaya/bounHEP/altgraphv2.C</itemPath>
-      <itemPath>/home/kaya/Documents/particle-physics-kaya/bounHEP/exercise1_4_boun_HEP.C</itemPath>
-      <itemPath>/home/kaya/Documents/particle-physics-kaya/bounHEP/kaon+-p-pT-eta-phi.cc</itemPath>
+      <itemPath>altgraph.C</itemPath>
+      <itemPath>altgraphv2.C</itemPath>
+      <itemPath>exercise1_4_boun_HEP.C</itemPath>
+      <itemPath>kaon+-p-pT-eta-phi.cc</itemPath>
       <itemPath>kaon+-p-pT-eta-phiv2.cc</itemPath>
+      <itemPath>kaon+-p-pT-eta-phivTree.cc</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -30,10 +31,6 @@
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>Makefile</itemPath>
     </logicalFolder>
-    <itemPath>/home/kaya/Documents/particle-physics-kaya/bounHEP/boun_Hep_notlar.txt</itemPath>
-    <itemPath>/home/kaya/Documents/particle-physics-kaya/bounHEP/main_compileFiles.cpp</itemPath>
-    <itemPath>/home/kaya/Documents/particle-physics-kaya/bounHEP/man_g++.txt</itemPath>
-    <itemPath>/home/kaya/Documents/particle-physics-kaya/bounHEP/scriptCompileAndRun</itemPath>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
