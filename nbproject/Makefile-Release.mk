@@ -35,6 +35,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/altgraphv2.o \
+	${OBJECTDIR}/main_compileFiles.o \
+	${OBJECTDIR}/e6_rootMacro1.o \
 	${OBJECTDIR}/altgraph.o \
 	${OBJECTDIR}/kaon+-p-pT-eta-phiv2.o \
 	${OBJECTDIR}/kaon+-p-pT-eta-phi.o \
@@ -70,6 +72,16 @@ ${OBJECTDIR}/altgraphv2.o: altgraphv2.C
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/altgraphv2.o altgraphv2.C
+
+${OBJECTDIR}/main_compileFiles.o: main_compileFiles.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/main_compileFiles.o main_compileFiles.cpp
+
+${OBJECTDIR}/e6_rootMacro1.o: e6_rootMacro1.C 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/e6_rootMacro1.o e6_rootMacro1.C
 
 ${OBJECTDIR}/altgraph.o: altgraph.C 
 	${MKDIR} -p ${OBJECTDIR}
