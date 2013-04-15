@@ -16,6 +16,8 @@
 
 //#include <root/TObjArray.h>
 #include <math.h>
+//#include <cmath>
+#include <stdlib.h>
 //#include <root/TH1.h>
 //#include <root/TFile.h>
 
@@ -49,16 +51,25 @@ void e6_rootMacro1(const char *inputFile) {
     Double_t max2ndPT = 0; // 2nd highest PT
     Double_t currentPT = 0; // initially currentPT>maxPT so that first particle in the loop will have max. PT
 
+    Double_t maxEta = -1;
+    Double_t currentEta = 0;
+    Double_t maxPhi = -1;
+    Double_t currentPhi = 0;
+
     // Get pointers to branches used in this analysis
     TClonesArray *branchElectron = treeReader->UseBranch("Electron");
     TClonesArray *branchMuon = treeReader->UseBranch("Muon");
     TClonesArray *branchJet = treeReader->UseBranch("Jet");
 
     // Book histograms
-    TH1 *histMaxPT_electron = new TH1F("MaxPT_electron", "maximum of electron P_{T}", 100, 0.0, 1400.0);
-    TH1 *histMaxPT_muon = new TH1F("MaxPT_muon", "maximum of muon P_{T}", 100, 0.0, 1400.0);
-    TH1 *histMaxPT_jet = new TH1F("MaxPT_jet", "maximum of jet P_{T}", 100, 0.0, 1400.0);
-    TH1 *hist2ndMaxPT_jet = new TH1F("2ndMaxPT_jet", "2nd highest of jet P_{T}", 100, 0.0, 1400.0);
+    Double_t histMaxPT_upper=600000.0;
+    Double_t histMaxPT_jet_upper=1000000.0;
+    TH1 *histMaxPT_electron = new TH1F("MaxPT_electron", "maximum of electron P_{T}", 100, 0.0, histMaxPT_upper);
+    TH1 *histMaxEta_electron = new TH1F("MaxPT_Eta", "maximum of electron abs(Eta)", 100, 0.0, 4);
+    TH1 *histMaxPhi_electron = new TH1F("MaxPT_Phi", "maximum of electron abs(Phi)", 100, 0.0, 4);
+    TH1 *histMaxPT_muon = new TH1F("MaxPT_muon", "maximum of muon P_{T}", 100, 0.0, histMaxPT_upper);
+    TH1 *histMaxPT_jet = new TH1F("MaxPT_jet", "maximum of jet P_{T}", 100, 0.0, histMaxPT_jet_upper);
+    TH1 *hist2ndMaxPT_jet = new TH1F("Max2ndPT_jet", "2nd highest of jet P_{T}", 100, 0.0, histMaxPT_jet_upper);
 
     Electron *electron;
     Muon *muon;
@@ -75,16 +86,32 @@ void e6_rootMacro1(const char *inputFile) {
 
         maxPT = -1;
         currentPT = 0;
+        maxEta = -1;
+        currentEta = 0;
+        maxPhi = -1;
+        currentPhi = 0;
         // loop over electrons in the event
         for (int i = 0; i < numElectrons; i++) {
             electron = (Electron *) branchElectron->At(i);
             currentPT = electron->PT;
+            // http://www.cplusplus.com/reference/cmath/fabs/
+            currentEta = fabs(electron->Eta);
+            currentPhi = fabs(electron->Phi);
+
 
             if (maxPT < currentPT) {
                 maxPT = currentPT;
             }
+            if (maxEta < currentEta) {
+                maxEta = currentEta;
+            }
+            if (maxPhi < currentPhi) {
+                maxPhi = currentPhi;
+            }
         }
         histMaxPT_electron->Fill(maxPT);
+        histMaxEta_electron->Fill(maxEta);
+        histMaxPhi_electron->Fill(maxPhi);
 
         maxPT = -1;
         currentPT = 0;
