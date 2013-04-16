@@ -28,6 +28,9 @@
 //#include <root/TH1.h>
 //#include <cmath>
 #include <stdlib.h>
+//#include <root/TTree.h>
+//#include <root/TObjArray.h>
+//#include <root/TTree.h>
 //#include <root/Rtypes.h>
 //#include <root/TH1.h>
 //#include <root/TFile.h>
@@ -47,7 +50,7 @@ void e6_rootMacro1(const char *inputFile) {
 
     // Create object of class ExRootTreeReader
     //ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
-    ExRootTreeReader *treeReader = new ExRootTreeReader(chain);          // adopted from Example3.C of Delphes
+    ExRootTreeReader *treeReader = new ExRootTreeReader(chain); // adopted from Example3.C of Delphes
     Long64_t numberOfEntries = treeReader->GetEntries();
 
 
@@ -58,6 +61,7 @@ void e6_rootMacro1(const char *inputFile) {
     TFile f(histoFile_char, "recreate");
 
     // number of particles in an event
+    Long64_t numParticles = -1;
     Long64_t numElectrons = -1;
     Long64_t numMuons = -1;
     Long64_t numJets = -1;
@@ -96,18 +100,44 @@ void e6_rootMacro1(const char *inputFile) {
     TH1 *histMass_electron = new TH1F("Mass_electron", "mass of electron (e+e-)", 100, 0.0, histMassElectron_upper);
     TH1 *histMass_muon = new TH1F("Mass_muon", "mass of muon (mu+mu-)", 100, 0.0, histMassMuon_upper);
     // Z bozonunu gorelim.
-    
+    // I will use a tree to study Z boson.
+    TTree t_Zboson("Z", "ein Baum über Z Boson");
+
+    int Zboson_id = 23;
+    Double_t ch_Z, mass_Z, E_Z, px_Z, py_Z, pz_Z, pt_Z, eta_Z, phi_Z, rapidity_Z, stat_Z, pid_Z;
+
+    t_Zboson.Branch("Z.charge", &ch_Z, "ch_Z/D");
+    t_Zboson.Branch("Z.mass", &mass_Z, "mass_Z/D");
+    t_Zboson.Branch("Z.energy", &E_Z, "E_Z/D");
+    t_Zboson.Branch("Z.Px", &px_Z, "px_Z/D");
+    t_Zboson.Branch("Z.Py", &py_Z, "py_Z/D");
+    t_Zboson.Branch("Z.Pz", &pz_Z, "pz_Z/D");
+    t_Zboson.Branch("Z.PT", &pt_Z, "pt_Z/D");
+    t_Zboson.Branch("Z.Eta", &eta_Z, "eta_Z/D");
+    t_Zboson.Branch("Z.Phi", &phi_Z, "phi_Z/D");
+    t_Zboson.Branch("Z.Rapidity", &rapidity_Z, "rapidity_Z/D");
+    t_Zboson.Branch("Z.status", &stat_Z, "stat_Z/D");
+    t_Zboson.Branch("Z.PID", &pid_Z, "pid_Z/D");
+
+    // 2) Z bozonu ile olaydaki en yuksek pt'li jeti birlestirip invariant mass histogramina bakalim.
+     TTree t_Other("Other", "ein Baum über die anderen Sachen");   
+     Double_t mass_Jet_AND_Z;
+     Double_t massJet_with_maxPT = -1;
+     // isim aralarında "boşluk, +, (, ), ]" vs. gibi karakterler kabul edilmiyor ==> totalMass_of_Z_AND_Jet_with_max_PT
+     t_Other.Branch("totalMass_of_Z_AND_Jet_with_max_PT", &mass_Jet_AND_Z, "mass_Jet_AND_Z/D");
 
     GenParticle *particle;
     Electron *electron;
     Muon *muon;
     Jet *jet;
 
+    Int_t tmp = 0;
     // Loop over all events
     for (Int_t entry = 0; entry < numberOfEntries; ++entry) {
         // Load selected branches with data from specified event
         treeReader->ReadEntry(entry);
 
+        numParticles = branchParticle->GetEntries();
         numElectrons = branchElectron->GetEntries();
         numMuons = branchMuon->GetEntries();
         numJets = branchJet->GetEntries();
@@ -167,16 +197,45 @@ void e6_rootMacro1(const char *inputFile) {
         for (int i = 0; i < numJets; i++) {
             jet = (Jet *) branchJet->At(i);
             currentPT = jet->PT;
+            currentMass = jet->Mass;
 
             if (maxPT < currentPT) {
                 max2ndPT = maxPT; // the current maximum becomes the new 2nd maximum.
                 maxPT = currentPT;
+                massJet_with_maxPT=currentMass;
             } else if (max2ndPT < currentPT) {
                 max2ndPT = currentPT;
             }
         }
         histMaxPT_jet->Fill(maxPT);
         hist2ndMaxPT_jet->Fill(max2ndPT);
+
+
+        // loop over all particles in the event
+        for (int i = 0; i < numParticles; i++) {
+            particle = (GenParticle*) branchParticle->At(i);
+            tmp = particle->PID;
+            //  Z bozonunu gorelim.
+            if (abs(tmp) == Zboson_id) {
+                ch_Z = particle->Charge;
+                mass_Z = particle->Mass;
+                E_Z = particle->E;
+                px_Z = particle->Px;
+                py_Z = particle->Py;
+                pz_Z = particle->Pz;
+                pt_Z = particle->PT;
+                eta_Z = particle->Eta;
+                phi_Z = particle->Phi;
+                rapidity_Z = particle->Rapidity;
+                stat_Z = particle->Status;
+                pid_Z = particle->PID;
+                t_Zboson.Fill();
+
+                // 2) Z bozonu ile olaydaki en yuksek pt'li jeti birlestirip invariant mass histogramina bakalim.
+                mass_Jet_AND_Z=massJet_with_maxPT+mass_Z;
+                t_Other.Fill();
+            }
+        }
 
         //cout << numJets << endl;
     }
