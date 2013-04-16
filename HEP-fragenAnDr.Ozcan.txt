@@ -63,4 +63,4 @@ Main:numberOfEvents = 200          ! number of events to generate
 
 
 - root, delphes : Elektron derken "Electron" dalındaki nesneler mi, yoksa "Particle" dalında olup PID'si 11 olan parçacıklar mı? Aralarındaki fark nedir?
-- root, TTree : "e6_rootMacro1.C" ve "e6_rootMacro1vTree.C" dosylarının ürettiği histogramlar farklı oluyor, bu "binning" ile mi ilgili.
+- root, TTree : "e6_rootMacro1.C" ve "e6_rootMacro1vTree.C" dosylarının ürettiği histogramlar farklı oluyor, bu "binning" ile mi ilgili?
