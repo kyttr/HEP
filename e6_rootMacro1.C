@@ -168,7 +168,7 @@ void e6_rootMacro1(const char *inputFile) {
             if (maxPhi < currentPhi) {
                 maxPhi = currentPhi;
             }
-            histMass_muon->Fill(currentMass);
+            histMass_electron->Fill(currentMass);
         }
         histMaxPT_electron->Fill(maxPT);
         histMaxEta_electron->Fill(maxEta);
