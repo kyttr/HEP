@@ -120,11 +120,11 @@ void e6_rootMacro1(const char *inputFile) {
     t_Zboson.Branch("Z.PID", &pid_Z, "pid_Z/D");
 
     // 2) Z bozonu ile olaydaki en yuksek pt'li jeti birlestirip invariant mass histogramina bakalim.
-     TTree t_Other("Other", "ein Baum über die anderen Sachen");   
-     Double_t mass_Jet_AND_Z;
-     Double_t massJet_with_maxPT = -1;
-     // isim aralarında "boşluk, +, (, ), ]" vs. gibi karakterler kabul edilmiyor ==> totalMass_of_Z_AND_Jet_with_max_PT
-     t_Other.Branch("totalMass_of_Z_AND_Jet_with_max_PT", &mass_Jet_AND_Z, "mass_Jet_AND_Z/D");
+    TTree t_Other("Other", "ein Baum über die anderen Sachen");
+    Double_t mass_Jet_AND_Z;
+    Double_t massJet_with_maxPT = -1;
+    // isim aralarında "boşluk, +, (, ), ]" vs. gibi karakterler kabul edilmiyor ==> totalMass_of_Z_AND_Jet_with_max_PT
+    t_Other.Branch("totalMass_of_Z_AND_Jet_with_max_PT", &mass_Jet_AND_Z, "mass_Jet_AND_Z/D");
 
     GenParticle *particle;
     Electron *electron;
@@ -155,8 +155,11 @@ void e6_rootMacro1(const char *inputFile) {
             particle = (GenParticle*) electron->Particle.GetObject();
             currentMass = particle->Mass;
             // http://www.cplusplus.com/reference/cmath/fabs/
-            currentEta = fabs(electron->Eta);
-            currentPhi = fabs(electron->Phi);
+            //            currentEta = fabs(electron->Eta);
+            //            currentPhi = fabs(electron->Phi);
+            // not necessary to take absolute val.
+            currentEta = electron->Eta;
+            currentPhi = electron->Phi;
 
 
             if (maxPT < currentPT) {
@@ -202,7 +205,7 @@ void e6_rootMacro1(const char *inputFile) {
             if (maxPT < currentPT) {
                 max2ndPT = maxPT; // the current maximum becomes the new 2nd maximum.
                 maxPT = currentPT;
-                massJet_with_maxPT=currentMass;
+                massJet_with_maxPT = currentMass;
             } else if (max2ndPT < currentPT) {
                 max2ndPT = currentPT;
             }
@@ -232,7 +235,7 @@ void e6_rootMacro1(const char *inputFile) {
                 t_Zboson.Fill();
 
                 // 2) Z bozonu ile olaydaki en yuksek pt'li jeti birlestirip invariant mass histogramina bakalim.
-                mass_Jet_AND_Z=massJet_with_maxPT+mass_Z;
+                mass_Jet_AND_Z = massJet_with_maxPT + mass_Z;
                 t_Other.Fill();
             }
         }
