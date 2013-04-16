@@ -60,3 +60,6 @@ Main:numberOfEvents = 200          ! number of events to generate
  Erkcan Özcan on 16.04.2013 :  
         1) e+e- ve mu+mu- invariant mass histogramlarini ekleyelim, Z bozonunu gorelim.
         2) Z bozonu ile olaydaki en yuksek pt'li jeti birlestirip invariant mass histogramina bakalim.
+
+
+- root, delphes : Elektron derken "Electron" dalındaki nesneler mi, yoksa "Particle" dalında olup PID'si 11 olan parçacıklar mı? Aralarındaki fark nedir?
