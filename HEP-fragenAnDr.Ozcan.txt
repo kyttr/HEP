@@ -1,0 +1,62 @@
+- comphep : what does "ZERO:zero contribution" of symbolic calculation mean?
+- comphep : after renaming "results" to "results-my", new files do not go to "results-my", but to "results".
+- comphep : What is diagram contribution to the squared matrix element?
+- comphep : "display distributions" : 1'den fazla "subprocess"i bir arada inceleme
+- comphep : "numerical session" : nCall değeri neye göre değiştiriliyor
+- comphep : "list of struct. fncs." : PDF:cteq6m(proton) ... bunlar nedir?
+- comphep : "model e6" : D-quark (protondaki değil) nedir?
+- comphep : "model e6" : neden u-quark'ın kütlesi 0?
+- comphep : "model e6" : neden elektronun kütlesi 0?
+
+- comphep : "numerical session" : generateEvents : expected efficieny ne demek?
+- results : events_N.txt dosyalarının içeriği ne anlatıyor?
+
+deriving quantum cross-section
+classical c-s to quantum
+intro2 c-s
+phys442 deneyi okuyabilirsin.
+LHC'deki total interacton c-s
+
+pythıa kod : olay içindeki kaon+/- bul. Bunların p, pt, eta(pseudo rapidity), phi histogramları çıkar.
+
+histos --> root dosyası, no print
+phi histo --> pol0 fit yap.
+butun histos --> tree kaydet.
+
+dedektör parçacıkları nasısl değiştiriyor --> delphes --> google and install 
+
+kendi D quarkları üret. bunlar --> pythia. sonra--> delphes
+delphes'e 
+
+cpyth : "cross-section"a göre subprocess karıştırma
+pp-->Hjzj (Pythia "de","De" parçacıklarını tanımıyor)
+
+p = u,d,U,D,s,c,S,C,G
+
+2.4.2013/Salı
+- cpyth   : programını kuramadım. Doğru versiyonu bulamadım.
+- pythia  : Delphes bağlantısı için hangi dosyalar üretilmeli,gerekli?
+- root    : hemen her şeyi barındıran bir ".root" dosyası üreten kod örneği. Ör:"delphes_output.root", "pgs_events_Q1.root"
+
+! 1) Settings that will be used in a main program.
+Main:numberOfEvents = 200          ! number of events to generate
+# Bu nokta comment-out gerekebilir.
+	--> main42kayasv2.cmnd dosyasında bu satırı "comment-out" ettim.
+
+1.pythia'da yalnızca z->e-e+ ve z->mu-mu+ kanallarını aktifleştir, diğerlerini kapat.
+2.Delphes'te hepMC dosyasını ATLAS'tan geçir.
+3.".root" dosyası --> MakeClass
+	in each "event" : 
+	maxPT(e) --> histogram (eta,phi,PT)
+	maxPT(mu) --> histogram
+	maxPT(jet) --> histogram
+	2. maxPT(jet)  (ikinci en çok PT)--> histogram
+
+	--> yukarıdaki 3 adımdan yalnızca 2. yi yaptım.
+	~> yukarıdaki 3 adımdan tamamlananlar : 1,2
+	~> yukarıdaki 3 adımdan tamamlananlar : 1,2,3
+
+
+ Erkcan Özcan on 16.04.2013 :  
+        1) e+e- ve mu+mu- invariant mass histogramlarini ekleyelim, Z bozonunu gorelim.
+        2) Z bozonu ile olaydaki en yuksek pt'li jeti birlestirip invariant mass histogramina bakalim.
