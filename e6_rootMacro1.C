@@ -84,7 +84,7 @@ void e6_rootMacro1(const char *inputFile) {
     TClonesArray *branchJet = treeReader->UseBranch("Jet");
 
     // Book histograms
-    Double_t histMaxPT_upper = 600000.0;
+    Double_t histMaxPT_upper = 700000.0;
     Double_t histMaxPT_jet_upper = 1000000.0;
     TH1 *histMaxPT_electron = new TH1F("MaxPT_electron", "maximum of electron P_{T}", 100, 0.0, histMaxPT_upper);
     TH1 *histMaxEta_electron = new TH1F("MaxPT_Eta", "maximum of electron abs(Eta)", 100, 0.0, 4);
@@ -194,7 +194,7 @@ void e6_rootMacro1(const char *inputFile) {
         histMaxPT_muon->Fill(maxPT);
 
         maxPT = -1;
-        max2ndPT = 0;
+        max2ndPT = -1;
         currentPT = 0;
         // loop over jets in the event
         for (int i = 0; i < numJets; i++) {

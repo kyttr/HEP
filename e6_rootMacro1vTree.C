@@ -31,6 +31,7 @@
 //#include <root/TH1.h>
 //#include <cmath>
 #include <stdlib.h>
+//#include <root/Rtypes.h>
 //#include <root/TTree.h>
 //#include <root/TTree.h>
 //#include <root/TObjArray.h>
@@ -195,6 +196,7 @@ void e6_rootMacro1vTree(const char *inputFile) {
     Muon *muon;
     Jet *jet;
 
+    Bool_t isParticleFoundInThatEvent = false;
     Int_t tmp = 0;
     // Loop over all events
     for (Int_t entry = 0; entry < numberOfEntries; ++entry) {
@@ -208,8 +210,11 @@ void e6_rootMacro1vTree(const char *inputFile) {
 
         maxPT = -1;
         currentPT = 0;
+        isParticleFoundInThatEvent=false;
         // loop over electrons in the event
         for (int i = 0; i < numElectrons; i++) {
+            isParticleFoundInThatEvent = true;
+
             electron = (Electron *) branchElectron->At(i);
 
             particle = (GenParticle*) electron->Particle.GetObject();
@@ -227,12 +232,16 @@ void e6_rootMacro1vTree(const char *inputFile) {
                 phi_e = electron->Phi;
             }
         }
-        t_electron_with_max_PT.Fill();
+        if (isParticleFoundInThatEvent) {
+            t_electron_with_max_PT.Fill();
+        }
 
         maxPT = -1;
         currentPT = 0;
+        isParticleFoundInThatEvent = false;
         // loop over muons in the event
         for (int i = 0; i < numMuons; i++) {
+            isParticleFoundInThatEvent = true;
             muon = (Muon *) branchMuon->At(i);
 
             particle = (GenParticle*) muon->Particle.GetObject();
@@ -250,13 +259,18 @@ void e6_rootMacro1vTree(const char *inputFile) {
                 phi_muon = muon->Phi;
             }
         }
-        t_muon_with_max_PT.Fill();
+        if (isParticleFoundInThatEvent) {
+            t_muon_with_max_PT.Fill();
+        }
 
         maxPT = -1;
         max2ndPT = 0;
         currentPT = 0;
+        isParticleFoundInThatEvent = false;
         // loop over jets in the event
         for (int i = 0; i < numJets; i++) {
+            isParticleFoundInThatEvent = true;
+
             jet = (Jet *) branchJet->At(i);
             currentPT = jet->PT;
             currentMass = jet->Mass;
@@ -289,8 +303,10 @@ void e6_rootMacro1vTree(const char *inputFile) {
                 mass_jet2nd = jet->Mass;
             }
         }
-        t_jet_with_max_PT.Fill();
-        t_jet_with_2ndmax_PT.Fill();
+        if (isParticleFoundInThatEvent) {
+            t_jet_with_max_PT.Fill();
+            t_jet_with_2ndmax_PT.Fill();
+        }
 
 
         // loop over all particles in the event
