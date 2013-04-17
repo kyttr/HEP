@@ -91,3 +91,8 @@ Main:numberOfEvents = 200          ! number of events to generate
     deltaMass = abs (de.Mass - De.Mass) hesapla. "deltaMass" minimize eden kombinasyonu bul.
 
 As far as I understood : reconstruction = particle1.LorentzVector + particle2.LorentzVector
+
+".root" dosyası --> MakeClass , ne demek olduğunu eski dosyalara bakarak hatırladım : /pgsROOTexercise-kaya/instructions.txt
+    root -l pgs_events_Q1.root
+    .ls
+    LHCO->MakeClass("exercise1");

@@ -47,6 +47,9 @@ Y 	particle vertex position (y component) 	hepevt.vhep[number][1]
 Z 	particle vertex position (z component) 	hepevt.vhep[number][2]
  */
 
+/*
+ http://www.cplusplus.com/doc/tutorial/pointers/
+ */
 void initializeTTree4GenParticle(TTree* t, Double_t* adresler, const char* branchNamePrefix) {
 
     // Elements of "genParticle_Fields" will be used as suffix for branch names
@@ -77,6 +80,9 @@ void initializeTTree4GenParticle(TTree* t, Double_t* adresler, const char* branc
     }
 }
 
+/*
+ http://www.cplusplus.com/doc/tutorial/pointers/
+ */
 void initializeTTree4GenParticle(TTree &t, Double_t* adresler, const char* branchNamePrefix) {
 
 // Elements of "genParticle_Fields" will be used as suffix for branch names
@@ -114,6 +120,8 @@ class GenParticle;      // if this does not exist, ~> Warning: Unknown type 'Gen
  * Values are taken from the GenParticle "particle". Branches of "t" are filled with values of the fields of "particle".
  * 
  * "adresler" must be the same addresses that were used during the initialization of the "TTree" object.
+ * 
+ *  http://www.cplusplus.com/doc/tutorial/pointers/
  */
 void fillTTree4GenParticle(TTree* t, Double_t* adresler, GenParticle* particle) {
     
