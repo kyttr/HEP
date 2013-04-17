@@ -89,3 +89,5 @@ Main:numberOfEvents = 200          ! number of events to generate
     5.2. H + jet2 --> de ,  Z + jet1 --> De
         (jet1 = PT'si en yüksek olan jet , jet2 = PT'si 2. en yüksek olan jet)
     deltaMass = abs (de.Mass - De.Mass) hesapla. "deltaMass" minimize eden kombinasyonu bul.
+
+As far as I understood : reconstruction = particle1.LorentzVector + particle2.LorentzVector
