@@ -92,7 +92,11 @@ Main:numberOfEvents = 200          ! number of events to generate
 
 As far as I understood : reconstruction = particle1.LorentzVector + particle2.LorentzVector
 
-".root" dosyası --> MakeClass , ne demek olduğunu eski dosyalara bakarak hatırladım : /pgsROOTexercise-kaya/instructions.txt
+".root" dosyası --> MakeClass , ne demek olduğunu eski dosyalara bakarak hatırladım
     root -l pgs_events_Q1.root
     .ls
     LHCO->MakeClass("exercise1");
+
+ref :
+http://root.cern.ch/download/doc/ROOTUsersGuideHTML/ch12s21.html
+/pgsROOTexercise-kaya/instructions.txt
