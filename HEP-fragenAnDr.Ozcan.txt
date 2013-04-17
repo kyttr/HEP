@@ -72,7 +72,7 @@ Main:numberOfEvents = 200          ! number of events to generate
         de      De 
          |      |
         / \    / \
-       H  j    Z  j         bu jetlere "prompt jet" diyeceğiz.
+       H  j    Z  j         bu seviyedeki jetlere "prompt jet" diyeceğiz.
        |
       / \
       j  j
