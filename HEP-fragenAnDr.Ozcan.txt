@@ -43,6 +43,7 @@ Main:numberOfEvents = 200          ! number of events to generate
 # Bu nokta comment-out gerekebilir.
 	--> main42kayasv2.cmnd dosyasında bu satırı "comment-out" ettim.
 
+03.04.2013/Çrş
 1.pythia'da yalnızca z->e-e+ ve z->mu-mu+ kanallarını aktifleştir, diğerlerini kapat.
 2.Delphes'te hepMC dosyasını ATLAS'tan geçir.
 3.".root" dosyası --> MakeClass
@@ -64,3 +65,27 @@ Main:numberOfEvents = 200          ! number of events to generate
 
 - root, delphes : Elektron derken "Electron" dalındaki nesneler mi, yoksa "Particle" dalında olup PID'si 11 olan parçacıklar mı? Aralarındaki fark nedir?
 - root, TTree : "e6_rootMacro1.C" ve "e6_rootMacro1vTree.C" dosylarının ürettiği histogramlar farklı oluyor, bu "binning" ile mi ilgili?
+
+17.04.2013/Çrş
+1. "Particle" dalında PID=Higgs olan parçacıkları bul. 85<mass<105 olan jetleri bul. Bu Higgs'ler ile jetler arasındaki "deltaR" bul. deltaR=sqrt(deltaEta^2+deltaPhi^2) gibi bir şey.
+
+        de      De 
+         |      |
+        / \    / \
+       H  j    Z  j         bu jetlere "prompt jet" diyeceğiz.
+       |
+      / \
+      j  j
+
+2. Z bozonunu "e-e+" ve "mu-mu+" çiftleri ile yeniden yarat (reconstruct Z boson). (Şu anda yalnızca z->e-e+ ve z->mu-mu+ kanalları aktif.)
+3. De'yi "Z bozonu+jet" ikilisi ile yeniden yarat (reconstruct De).
+    3.1 jet = PT'si en yüksek olan jet
+    3.2 jet = PT'si 2. en yüksek olan jet
+4. Higgs bozonunu "jet3+jet4" ikilisi ile yeniden yarat (reconstruct Higgs boson).
+    jet3 =  PT'si 3. en yüksek olan jet
+    jet4 =  PT'si 4. en yüksek olan jet
+5. de'yi "H+jet" ile De'yi "Z+jet" ile yeniden yarat.
+    5.1. H + jet1 --> de ,  Z + jet2 --> De
+    5.2. H + jet2 --> de ,  Z + jet1 --> De
+        (jet1 = PT'si en yüksek olan jet , jet2 = PT'si 2. en yüksek olan jet)
+    deltaMass = abs (de.Mass - De.Mass) hesapla. "deltaMass" minimize eden kombinasyonu bul.

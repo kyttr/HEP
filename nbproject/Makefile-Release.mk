@@ -38,6 +38,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/main_compileFiles.o \
 	${OBJECTDIR}/e6_rootMacro1.o \
 	${OBJECTDIR}/altgraph.o \
+	${OBJECTDIR}/e6_rootMacro1vTree.o \
 	${OBJECTDIR}/kaon+-p-pT-eta-phiv2.o \
 	${OBJECTDIR}/kaon+-p-pT-eta-phi.o \
 	${OBJECTDIR}/exercise1_4_boun_HEP.o \
@@ -87,6 +88,11 @@ ${OBJECTDIR}/altgraph.o: altgraph.C
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/altgraph.o altgraph.C
+
+${OBJECTDIR}/e6_rootMacro1vTree.o: e6_rootMacro1vTree.C 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/e6_rootMacro1vTree.o e6_rootMacro1vTree.C
 
 ${OBJECTDIR}/kaon+-p-pT-eta-phiv2.o: kaon+-p-pT-eta-phiv2.cc 
 	${MKDIR} -p ${OBJECTDIR}

@@ -16,6 +16,7 @@
       <itemPath>altgraph.C</itemPath>
       <itemPath>altgraphv2.C</itemPath>
       <itemPath>e6_rootMacro1.C</itemPath>
+      <itemPath>e6_rootMacro1vTree.C</itemPath>
       <itemPath>exercise1_4_boun_HEP.C</itemPath>
       <itemPath>kaon+-p-pT-eta-phi.cc</itemPath>
       <itemPath>kaon+-p-pT-eta-phiv2.cc</itemPath>
@@ -32,6 +33,7 @@
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>Makefile</itemPath>
     </logicalFolder>
+    <itemPath>HEP-fragenAnDr.Ozcan.txt</itemPath>
     <itemPath>boun_Hep_notlar.txt</itemPath>
     <itemPath>main_compileFiles.cpp</itemPath>
     <itemPath>scriptCompileAndRun</itemPath>
