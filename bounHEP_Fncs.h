@@ -9,6 +9,7 @@
 #define	BOUNHEP_FNCS_H
 
 #include <string>
+#include "e6_Class.h"
 
 using namespace std;
 
@@ -22,6 +23,39 @@ extern "C" {
 
 static const int numOfFields_GenParticle = 20;
 
+/*
+ * TEMPLATE for the method "Loop()"
+ * 
+    if (t.fChain == 0) return;
+
+    Long64_t nentries = t.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = t.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = t.fChain->GetEntry(jentry);
+        nbytes += nb;
+        // if (Cut(ientry) < 0) continue;
+        cout << t.Electron_size << endl;
+    }
+ */
+
+void loop_HiggsMass(e6_Class &t) {
+    if (t.fChain == 0) return;
+
+    Long64_t nentries = t.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = t.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = t.fChain->GetEntry(jentry);
+        nbytes += nb;
+        // if (Cut(ientry) < 0) continue;
+        cout << t.Electron_size << endl;
+    }
+}
 /*
  * Delphes-3.0.5/doc/RootTreeDescription.html
  GenParticle
@@ -85,7 +119,7 @@ void initializeTTree4GenParticle(TTree* t, Double_t* adresler, const char* branc
  */
 void initializeTTree4GenParticle(TTree &t, Double_t* adresler, const char* branchNamePrefix) {
 
-// Elements of "genParticle_Fields" will be used as suffix for branch names
+    // Elements of "genParticle_Fields" will be used as suffix for branch names
     // Length of "genParticle_Fields" is 20. So the "adresler" must be of length 20. The user should have allocated "adresler" with length 20 before calling this function.
     // http://stackoverflow.com/questions/3814804/initializing-a-static-const-char-array
     const char* genParticle_Fields[] = {"PID", "Status", "M1", "M2", "D1", "D2", "Charge", "Mass", "E", "Px", "Py", "Pz", "PT", "Eta", "Phi", "Rapidity", "T", "X", "Y", "Z"};
@@ -113,7 +147,7 @@ void initializeTTree4GenParticle(TTree &t, Double_t* adresler, const char* branc
     }
 }
 
-class GenParticle;      // if this does not exist, ~> Warning: Unknown type 'GenParticle' in function argument handled as int
+class GenParticle; // if this does not exist, ~> Warning: Unknown type 'GenParticle' in function argument handled as int
 
 /*
  * fills branches of the given TTree "t". "t" is a TTree that contains all the fields of type "GenParticle".
@@ -124,7 +158,7 @@ class GenParticle;      // if this does not exist, ~> Warning: Unknown type 'Gen
  *  http://www.cplusplus.com/doc/tutorial/pointers/
  */
 void fillTTree4GenParticle(TTree* t, Double_t* adresler, GenParticle* particle) {
-    
+
     adresler[0] = particle->PID;
     adresler[1] = particle->Status;
     adresler[2] = particle->M1;
@@ -145,7 +179,7 @@ void fillTTree4GenParticle(TTree* t, Double_t* adresler, GenParticle* particle) 
     adresler[17] = particle->X;
     adresler[18] = particle->Y;
     adresler[19] = particle->Z;
-    
+
     t->Fill();
     //delete t;
 }
@@ -156,9 +190,8 @@ void fillTTree4GenParticle(TTree* t, Double_t* adresler, GenParticle* particle) 
  * This function may look dummy. The reason why I wrote this function is to minimize lots of if checks in the main code, hence to reduce crowd in the main code. Say, im main program I have 4 different particles whose trees I want to fill. Without this function I would have to write 4 different "if" scopes which makes the main code crowded.
  */
 void fillTTree4GenParticle(TTree* t, Double_t* adresler, GenParticle* particle, int pid) {
-    if(pid==particle->PID)
-    {
-        fillTTree4GenParticle(t,adresler,particle);
+    if (pid == particle->PID) {
+        fillTTree4GenParticle(t, adresler, particle);
     }
 }
 
