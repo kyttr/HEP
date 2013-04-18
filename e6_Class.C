@@ -4,6 +4,23 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 
+/*
+ * Kaya Tatar
+ * 
+ * how to run :
+ * root -l .x e6_Class.C   // works thanks to "__CINT__"
+ */
+#ifdef __CINT__
+
+int e6_Class() {
+    TFile *f = new TFile("main42hepMC_e6_by_delphes.root");
+    TTree *tree = (TTree*) gDirectory->Get("Delphes");
+    e6_Class t(tree);
+    t.Loop();
+    return 0;
+}
+#endif
+
 void e6_Class::Loop()
 {
 //   In a ROOT session, you can do:
@@ -41,3 +58,23 @@ void e6_Class::Loop()
       // if (Cut(ientry) < 0) continue;
    }
 }
+
+/*
+ * added the following scope to be able to compile this file like c++ file. 
+ * Compilation command :
+ *  g++ `root-config --cflags --glibs` e6_Class.C -o e6_Class.out
+ * 
+ * But compiling gives lots of errors due to header file "e6_Class.h"
+ * 
+ * ref :
+ * altgraph.C
+ */
+#if !defined(__CINT__) || defined(__MAKECINT__)
+
+int main() {
+    //e6_Class::Loop();
+    e6_Class t;
+    t.Loop();
+    return 0;
+}
+#endif
