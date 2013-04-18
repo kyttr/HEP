@@ -43,14 +43,16 @@ static const int numOfFields_GenParticle = 20;
 void loop_HiggsMass(e6_Class &t) {
     if (t.fChain == 0) return;
 
+    /*
     string histoFile_str = "e6_loop_HiggsMass.root";
     // TFile constructor accepts type "const char*"
     const char* histoFile_char = histoFile_str.c_str();
     // overwrite existing ".root" file
     TFile f(histoFile_char, "recreate");
+    */
     
     // create object on stack
-    TH1 histMass_Higgs("Mass_Higgs", "mass of Higgs", 100, 0.0, 200);
+    TH1F histMass_Higgs("Mass_Higgs", "mass of Higgs", 100, 0.0, 200);
     // create object on heap
     //TH1F *histMass_Higgs=new TH1F("Mass_Higgs", "mass of Higgs", 100, 0.0, 200);
     int i=0;
@@ -77,8 +79,10 @@ void loop_HiggsMass(e6_Class &t) {
         }
     }
     histMass_Higgs.Draw();
+    //histMass_Higgs.Print("png");
     //histMass_Higgs->Draw();
-    f.Write();
+    
+    //f.Write();
 }
 /*
  * Delphes-3.0.5/doc/RootTreeDescription.html
