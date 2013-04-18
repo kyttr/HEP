@@ -1,18 +1,25 @@
+/*
+ * I will have different tasks running on the same ".root" file. If I have all of the jobs in the same single file, then the code will get messy. On the other hand, all these tasks will need the same class made by the same ".root" file. I want to have different ROOT macros for different tasks. But all these different macros will have to kind of implement the same class. So, the difference between those files come from the way they implement the methods of this class. For this case, the only method that is implemented differently is "Loop()".
+ * 
+ * In short, for different tasks I will have different ROOT macros that require the class made by the ".root" file of interest. Each ROOT macro will implement this class' "Loop()" method in its own way.
+ */
+/*
+ * plots histogram of the Higgs Mass
+ */
 #define e6_v3_Class_cxx
 #include "e6_v3_Class.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 
-/*
- * 
+/* 
  * how to run :
- * root -l .x e6_v3_Class.C   // works thanks to "__CINT__"
+ * root -l .x e6_v3_HiggsMass.C   // works thanks to "__CINT__"
  */
 
 #ifdef __CINT__
 
-int e6_v3_Class() {
+int e6_v3_HiggsMass() {
     TFile *f = new TFile("main42hepMC_E6_v3_by_delphes.root");
     TTree *tree = (TTree*) gDirectory->Get("Delphes");
     e6_v3_Class t(tree);
@@ -23,7 +30,7 @@ int e6_v3_Class() {
 
 void e6_v3_Class::Loop() {
     //   In a ROOT session, you can do:
-    //      Root > .L e6_v3_Class.C
+    //      Root > .L e6_v3_HiggsMass.C
     //      Root > e6_v3_Class t
     //      Root > t.GetEntry(12); // Fill t data members with entry number 12
     //      Root > t.Show();       // Show values of entry 12
@@ -63,9 +70,9 @@ void e6_v3_Class::Loop() {
 /*
  * added the following scope to be able to compile this file like c++ file. 
  * Compilation command :
- *  g++ `root-config --cflags --glibs` e6_v3_Class.C -o e6_v3_Class.out
+ *  g++ `root-config --cflags --glibs` e6_v3_HiggsMass.C -o e6_v3_HiggsMass.out
  * 
- * But compiling gives lots of errors due to header file "e6_v3_Class.h"
+ * But compiling gives lots of errors due to header file "e6_v3_HiggsMass.h"
  * 
  * ref :
  * altgraph.C
