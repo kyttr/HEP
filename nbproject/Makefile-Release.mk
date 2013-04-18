@@ -34,8 +34,11 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/e6_myClass.o \
+	${OBJECTDIR}/e6_Class.o \
 	${OBJECTDIR}/altgraphv2.o \
 	${OBJECTDIR}/main_compileFiles.o \
+	${OBJECTDIR}/e6_v3_Class.o \
 	${OBJECTDIR}/e6_rootMacro1.o \
 	${OBJECTDIR}/altgraph.o \
 	${OBJECTDIR}/e6_rootMacro1vTree.o \
@@ -69,6 +72,16 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/bounhep: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/bounhep ${OBJECTFILES} ${LDLIBSOPTIONS} 
 
+${OBJECTDIR}/e6_myClass.o: e6_myClass.C 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/e6_myClass.o e6_myClass.C
+
+${OBJECTDIR}/e6_Class.o: e6_Class.C 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/e6_Class.o e6_Class.C
+
 ${OBJECTDIR}/altgraphv2.o: altgraphv2.C 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
@@ -78,6 +91,11 @@ ${OBJECTDIR}/main_compileFiles.o: main_compileFiles.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/main_compileFiles.o main_compileFiles.cpp
+
+${OBJECTDIR}/e6_v3_Class.o: e6_v3_Class.C 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/e6_v3_Class.o e6_v3_Class.C
 
 ${OBJECTDIR}/e6_rootMacro1.o: e6_rootMacro1.C 
 	${MKDIR} -p ${OBJECTDIR}

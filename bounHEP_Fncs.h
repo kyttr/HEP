@@ -44,21 +44,23 @@ void loop_HiggsMass(e6_Class &t) {
     if (t.fChain == 0) return;
 
     /*
+     * no need for ".root" file for this small task
+     * 
     string histoFile_str = "e6_loop_HiggsMass.root";
     // TFile constructor accepts type "const char*"
     const char* histoFile_char = histoFile_str.c_str();
     // overwrite existing ".root" file
     TFile f(histoFile_char, "recreate");
-    */
-    
+     */
+
     // create object on stack
     TH1F histMass_Higgs("Mass_Higgs", "mass of Higgs", 100, 0.0, 200);
     // create object on heap
-    //TH1F *histMass_Higgs=new TH1F("Mass_Higgs", "mass of Higgs", 100, 0.0, 200);
-    int i=0;
-    int h_ID=25;
-    
-    
+//    TH1F *histMass_Higgs = new TH1F("Mass_Higgs", "mass of Higgs", 100, 0.0, 200);
+    int i = 0;
+    int h_ID = 25;
+
+
     Long64_t nentries = t.fChain->GetEntriesFast();
 
     Long64_t nbytes = 0, nb = 0;
@@ -68,20 +70,22 @@ void loop_HiggsMass(e6_Class &t) {
         nb = t.fChain->GetEntry(jentry);
         nbytes += nb;
         // if (Cut(ientry) < 0) continue;
-        
-        for(i=0;i<t.Particle_size;i++)
-        {
-            if(t.Particle_PID[i]==h_ID)
-            {
+
+        for (i = 0; i < t.Particle_size; i++) {
+            if (t.Particle_PID[i] == h_ID) {
                 histMass_Higgs.Fill(t.Particle_Mass[i]);
-                //histMass_Higgs->Fill(t.Particle_Mass[i]);
+//                histMass_Higgs->Fill(t.Particle_Mass[i]);
             }
         }
     }
-    histMass_Higgs.Draw();
-    //histMass_Higgs.Print("png");
-    //histMass_Higgs->Draw();
-    
+//    histMass_Higgs.Draw(); // does not work, generates empty canvas
+//    histMass_Higgs.DrawClone(); // does not work, generates empty canvas
+    histMass_Higgs.DrawCopy(); // works
+
+//    histMass_Higgs->Draw();  // does not work, generates empty canvas   
+//    histMass_Higgs->DrawClone(); // does not work, generates empty canvas
+//    histMass_Higgs->DrawCopy(); //works
+
     //f.Write();
 }
 /*

@@ -100,3 +100,10 @@ As far as I understood : reconstruction = particle1.LorentzVector + particle2.Lo
 ref :
 http://root.cern.ch/download/doc/ROOTUsersGuideHTML/ch12s21.html
 /pgsROOTexercise-kaya/instructions.txt
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//    histMass_Higgs->Draw();  // does not work, generates empty canvas   
+//    histMass_Higgs->DrawClone(); // does not work, generates empty canvas
+//    histMass_Higgs->DrawCopy(); //works
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
