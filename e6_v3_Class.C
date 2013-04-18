@@ -4,6 +4,19 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 
+/*
+ * 
+ * how to run :
+ * root -l .x e6_v3_Class.C   // works thanks to "__CINT__"
+ */
+
+#ifdef __CINT__
+int e6_v3_Class() {
+  TFile *f = new TFile("main42hepMC_E6_v3_by_delphes.root");
+  TTree *tree = (TTree*)gDirectory->Get("Delphes");
+  e6_v3_Class t(tree); t.Loop(); return 0; }
+#endif
+
 void e6_v3_Class::Loop()
 {
 //   In a ROOT session, you can do:
@@ -39,5 +52,6 @@ void e6_v3_Class::Loop()
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
+      cout<<Electron_size<<endl;
    }
 }
