@@ -11,7 +11,6 @@
  */
 
 #ifdef __CINT__
-
 int e6_v3_Class() {
     TFile *f = new TFile("main42hepMC_E6_v3_by_delphes.root");
     TTree *tree = (TTree*) gDirectory->Get("Delphes");

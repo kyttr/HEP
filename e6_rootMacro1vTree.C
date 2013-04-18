@@ -26,14 +26,9 @@
  * root -l examples/e6_rootMacro1.C\(\"delphes_output.root\"\)
  */
 
-//#include <root/TObjArray.h>
 #include <math.h>
-//#include <root/TH1.h>
 //#include <cmath>
 #include <stdlib.h>
-//#include <root/Rtypes.h>
-//#include <root/TTree.h>
-//#include <root/TTree.h>
 //#include <root/TObjArray.h>
 //#include <root/TTree.h>
 //#include <root/Rtypes.h>
@@ -345,7 +340,7 @@ void e6_rootMacro1vTree(const char *inputFile) {
     histMaxPT_jet->Draw();
     hist2ndMaxPT_jet->Draw();
      */
-
+    
     f.Write();
 
     delete treeReader;
