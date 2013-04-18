@@ -4,6 +4,10 @@
  * In short, for different tasks I will have different ROOT macros that require the class made by the ".root" file of interest. Each ROOT macro will implement this class' "Loop()" method in its own way.
  */
 
+/* 
+ * removed "e6_Class::Loop()", I noticed I can call my tasks within "#ifdef __CINT__" scope, no need for calling "e6_Class::Loop()"
+ */
+
 /*
  * plots histogram of the Higgs Mass
  */
@@ -26,7 +30,7 @@ int e6_myClass() {
     TTree *tree = (TTree*) gDirectory->Get("Delphes");
     e6_Class t(tree);
     //t.Loop();
-    loop_HiggsMass(t);          // can call the task from here, no need for calling "e6_Class::Loop()"
+    loop_HiggsMass(t);    // can call the task from here, no need for calling "e6_Class::Loop()"
     return 0;
 }
 #endif
