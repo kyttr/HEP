@@ -16,12 +16,12 @@
 
 /* 
  * how to run :
- * root -l .x e6_HiggsMass.C   // works thanks to "__CINT__"
+ * root -l .x e6_myClass.C   // works thanks to "__CINT__"
  */
 
 #ifdef __CINT__
 
-int e6_HiggsMass() {
+int e6_myClass() {
     TFile *f = new TFile("main42hepMC_e6_by_delphes.root");
     TTree *tree = (TTree*) gDirectory->Get("Delphes");
     e6_Class t(tree);
@@ -34,9 +34,9 @@ int e6_HiggsMass() {
 /*
  * added the following scope to be able to compile this file like c++ file. 
  * Compilation command :
- *  g++ `root-config --cflags --glibs` e6_HiggsMass.C -o e6_HiggsMass.out
+ *  g++ `root-config --cflags --glibs` e6_myClass.C -o e6_myClass.out
  * 
- * But compiling gives lots of errors due to header file "e6_HiggsMass.h"
+ * But compiling gives lots of errors due to header file "e6_myClass.h"
  * 
  * ref :
  * altgraph.C
