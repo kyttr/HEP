@@ -7,32 +7,32 @@
 /*
  * plots histogram of the Higgs Mass
  */
-#define e6_v3_Class_cxx
-#include "e6_v3_Class.h"
+#define e6_Class_cxx
+#include "e6_Class.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 
 /* 
  * how to run :
- * root -l .x e6_v3_HiggsMass.C   // works thanks to "__CINT__"
+ * root -l .x e6_HiggsMass.C   // works thanks to "__CINT__"
  */
 
 #ifdef __CINT__
 
-int e6_v3_HiggsMass() {
-    TFile *f = new TFile("main42hepMC_E6_v3_by_delphes.root");
+int e6_HiggsMass() {
+    TFile *f = new TFile("main42hepMC_e6_by_delphes.root");
     TTree *tree = (TTree*) gDirectory->Get("Delphes");
-    e6_v3_Class t(tree);
+    e6_Class t(tree);
     t.Loop();
     return 0;
 }
 #endif
 
-void e6_v3_Class::Loop() {
+void e6_Class::Loop() {
     //   In a ROOT session, you can do:
-    //      Root > .L e6_v3_HiggsMass.C
-    //      Root > e6_v3_Class t
+    //      Root > .L e6_HiggsMass.C
+    //      Root > e6_Class t
     //      Root > t.GetEntry(12); // Fill t data members with entry number 12
     //      Root > t.Show();       // Show values of entry 12
     //      Root > t.Show(16);     // Read and show values of entry 16
@@ -71,9 +71,9 @@ void e6_v3_Class::Loop() {
 /*
  * added the following scope to be able to compile this file like c++ file. 
  * Compilation command :
- *  g++ `root-config --cflags --glibs` e6_v3_HiggsMass.C -o e6_v3_HiggsMass.out
+ *  g++ `root-config --cflags --glibs` e6_HiggsMass.C -o e6_HiggsMass.out
  * 
- * But compiling gives lots of errors due to header file "e6_v3_HiggsMass.h"
+ * But compiling gives lots of errors due to header file "e6_HiggsMass.h"
  * 
  * ref :
  * altgraph.C
@@ -81,8 +81,8 @@ void e6_v3_Class::Loop() {
 #if !defined(__CINT__) || defined(__MAKECINT__)
 
 int main() {
-    //e6_v3_Class::Loop();
-    e6_v3_Class t;
+    //e6_Class::Loop();
+    e6_Class t;
     t.Loop();
     return 0;
 }
