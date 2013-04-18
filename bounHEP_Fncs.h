@@ -56,7 +56,7 @@ void loop_HiggsMass(e6_Class &t) {
     // create object on stack
     TH1F histMass_Higgs("Mass_Higgs", "mass of Higgs", 100, 0.0, 200);
     // create object on heap
-//    TH1F *histMass_Higgs = new TH1F("Mass_Higgs", "mass of Higgs", 100, 0.0, 200);
+    //    TH1F *histMass_Higgs = new TH1F("Mass_Higgs", "mass of Higgs", 100, 0.0, 200);
     int i = 0;
     int h_ID = 25;
 
@@ -74,17 +74,17 @@ void loop_HiggsMass(e6_Class &t) {
         for (i = 0; i < t.Particle_size; i++) {
             if (t.Particle_PID[i] == h_ID) {
                 histMass_Higgs.Fill(t.Particle_Mass[i]);
-//                histMass_Higgs->Fill(t.Particle_Mass[i]);
+                //                histMass_Higgs->Fill(t.Particle_Mass[i]);
             }
         }
     }
-//    histMass_Higgs.Draw(); // does not work, generates empty canvas
-//    histMass_Higgs.DrawClone(); // does not work, generates empty canvas
+    //    histMass_Higgs.Draw(); // does not work, generates empty canvas
+    //    histMass_Higgs.DrawClone(); // does not work, generates empty canvas
     histMass_Higgs.DrawCopy(); // works
 
-//    histMass_Higgs->Draw();  // does not work, generates empty canvas   
-//    histMass_Higgs->DrawClone(); // does not work, generates empty canvas
-//    histMass_Higgs->DrawCopy(); //works
+    //    histMass_Higgs->Draw();  // does not work, generates empty canvas   
+    //    histMass_Higgs->DrawClone(); // does not work, generates empty canvas
+    //    histMass_Higgs->DrawCopy(); //works
 
     //f.Write();
 }
