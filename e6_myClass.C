@@ -31,8 +31,21 @@ int e6_myClass() {
     e6_Class t(tree);
     //t.Loop();
     //loop_HiggsMass(t);    // can call the task from here, no need for calling "e6_Class::Loop()"
+
+
+    /*
+    // reconstruct Z boson
+    string histoFile_str = "loop_Reconstruct_Z.root";
+    const char* histoFile_char = histoFile_str.c_str();
+    // overwrite existing ".root" file
+    TFile f(histoFile_char, "recreate");
     loop_Reconstruct_Z_from_ee(t);
     loop_Reconstruct_Z_from_mumu(t);
+    f.Write();
+     */
+    
+    loop_Reconstruct_Z(t);
+
     return 0;
 }
 #endif

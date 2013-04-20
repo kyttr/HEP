@@ -24,7 +24,6 @@ extern "C" {
 static const int numOfFields_GenParticle = 20;
 static const int numOfFields_TLorentzVector = 32;
 
-
 /*
  * TEMPLATE for the method "Loop()"
  * 
@@ -92,6 +91,95 @@ void loop_HiggsMass(e6_Class &e6) {
 }
 
 /*
+ * reconstruct Z boson both from e-e+ and mu-mu+
+ * and save the reconstructed Z boson to a tree.
+ * I consider events with exactly 2 electrons or events with exactly 2 muons
+ */
+void loop_Reconstruct_Z(e6_Class &e6) {
+    if (e6.fChain == 0) return;
+
+    /*
+     * no need for ".root" file for this small task
+     */
+    string histoFile_str = "loop_Reconstruct_Z.root";
+    // TFile constructor accepts type "const char*"
+    const char* histoFile_char = histoFile_str.c_str();
+    // overwrite existing ".root" file
+    TFile f(histoFile_char, "recreate");
+
+    // reconstruction of Z such that e-e+ -> Z
+    TTree *t_RecoZ_ee = new TTree("RecoZ-from-ee", "e-e+ -> Z");
+    Double_t fields_t_RecoZ_ee[numOfFields_TLorentzVector];
+    const char* prefix_t_RecoZ_ee = "z"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4TLorentzVector(t_RecoZ_ee, fields_t_RecoZ_ee, prefix_t_RecoZ_ee);
+
+
+    // reconstruction of Z such that mu-mu+ -> Z
+    TTree *t_RecoZ_mumu = new TTree("RecoZ-from-mumu", "mu-mu+ -> Z");
+    Double_t fields_t_RecoZ_mumu[numOfFields_TLorentzVector];
+    const char* prefix_t_RecoZ_mumu = "z"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4TLorentzVector(t_RecoZ_mumu, fields_t_RecoZ_mumu, prefix_t_RecoZ_mumu);
+
+    // both reconstructions
+    // reconstruction of Z such that mu-mu+ -> Z or e-e+ -> Z
+    TTree *t_RecoZ = new TTree("RecoZ", "mu-mu+ -> Z");
+    Double_t fields_t_RecoZ[numOfFields_TLorentzVector];
+    const char* prefix_t_RecoZ = "z"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4TLorentzVector(t_RecoZ, fields_t_RecoZ, prefix_t_RecoZ);
+
+    Double_t electron_mass = 0.0005; // mass in GeV
+    int electron_size = 2; // number of electrons we want to observe in the event
+
+    TLorentzVector el1, el2;
+    TLorentzVector reconstructed_Z_ee;
+
+    Double_t mu_mass = 0.10566; // mass in GeV
+    int mu_size = 2; // number of muons we want to observe in the event
+
+    TLorentzVector mu1, mu2;
+    TLorentzVector reconstructed_Z_mumu;
+
+    Long64_t nentries = e6.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = e6.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = e6.fChain->GetEntry(jentry);
+        nbytes += nb;
+        // if (Cut(ientry) < 0) continue;
+        if (electron_size == e6.Electron_size) {
+
+            el1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], electron_mass);
+            el2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], electron_mass);
+
+            reconstructed_Z_ee = el1 + el2;
+            fillTTree4LorentzVector(t_RecoZ_ee, fields_t_RecoZ_ee, reconstructed_Z_ee);
+            fillTTree4LorentzVector(t_RecoZ, fields_t_RecoZ, reconstructed_Z_ee);
+        }
+        if (mu_size == e6.Muon_size) {
+
+            mu1.SetPtEtaPhiM(e6.Muon_PT[0], e6.Muon_Eta[0], e6.Muon_Phi[0], mu_mass);
+            mu2.SetPtEtaPhiM(e6.Muon_PT[1], e6.Muon_Eta[1], e6.Muon_Phi[1], mu_mass);
+
+            reconstructed_Z_mumu = mu1 + mu2;
+            fillTTree4LorentzVector(t_RecoZ_mumu, fields_t_RecoZ_mumu, reconstructed_Z_mumu);
+            fillTTree4LorentzVector(t_RecoZ, fields_t_RecoZ, reconstructed_Z_mumu);
+        }
+    }
+    //    histMass_RecoZ.Draw(); // does not work, generates empty canvas
+    //    histMass_RecoZ.DrawClone(); // does not work, generates empty canvas
+    //histMass_RecoZ.DrawCopy(); // works
+
+    //t_RecoZ.Draw();
+    //t_RecoZ.DrawClone();
+    //t_RecoZ.StartViewer();
+    //t_RecoZ_ee.Draw("z.M");
+
+    f.Write();
+}
+
+/*
  * reconstruct Z boson from e-e+ and save the reconstructed Z boson to a tree.
  * I consider events with exactly 2 electrons
  */
@@ -118,7 +206,7 @@ void loop_Reconstruct_Z_from_ee(e6_Class &e6) {
 
     int i = 0;
     //    int electron_ID = 11;
-    Double_t electron_mass=0.0005;      // mass in GeV
+    Double_t electron_mass = 0.0005; // mass in GeV
     int electron_size = 2; // number of electrons we want to observe in the event
 
     TLorentzVector el1, el2;
@@ -139,7 +227,7 @@ void loop_Reconstruct_Z_from_ee(e6_Class &e6) {
             el2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], electron_mass);
 
             reconstructed_Z = el1 + el2;
-            fillTTree4LorentzVector(t_RecoZ,fields_t_RecoZ,reconstructed_Z);
+            fillTTree4LorentzVector(t_RecoZ, fields_t_RecoZ, reconstructed_Z);
         }
     }
     //    histMass_RecoZ.Draw(); // does not work, generates empty canvas
@@ -151,7 +239,7 @@ void loop_Reconstruct_Z_from_ee(e6_Class &e6) {
     //t_RecoZ.StartViewer();
     t_RecoZ.Draw("z.M");
 
-    f.Write();    
+    f.Write();
 }
 
 /*
@@ -180,7 +268,7 @@ void loop_Reconstruct_Z_from_mumu(e6_Class &e6) {
     //TTree t_RecoZ("RecoZ", "e+e- -> Z");
 
     int i = 0;
-    Double_t mu_mass=0.10566;      // mass in GeV
+    Double_t mu_mass = 0.10566; // mass in GeV
     int mu_size = 2; // number of muons we want to observe in the event
 
     TLorentzVector mu1, mu2;
@@ -201,7 +289,7 @@ void loop_Reconstruct_Z_from_mumu(e6_Class &e6) {
             mu2.SetPtEtaPhiM(e6.Muon_PT[1], e6.Muon_Eta[1], e6.Muon_Phi[1], mu_mass);
 
             reconstructed_Z = mu1 + mu2;
-            fillTTree4LorentzVector(t_RecoZ,fields_t_RecoZ,reconstructed_Z);
+            fillTTree4LorentzVector(t_RecoZ, fields_t_RecoZ, reconstructed_Z);
         }
     }
     //    histMass_RecoZ.Draw(); // does not work, generates empty canvas
@@ -213,10 +301,8 @@ void loop_Reconstruct_Z_from_mumu(e6_Class &e6) {
     //t_RecoZ.StartViewer();
     t_RecoZ.Draw("z.M");
 
-    f.Write();    
+    f.Write();
 }
-
-
 
 void initializeTTree4TLorentzVector(TTree* t, Double_t* adresler, const char* branchNamePrefix) {
 
