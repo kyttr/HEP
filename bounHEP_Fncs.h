@@ -40,8 +40,8 @@ static const int numOfFields_GenParticle = 20;
         cout << t.Electron_size << endl;
     }
  */
-void loop_HiggsMass(e6_Class &t) {
-    if (t.fChain == 0) return;
+void loop_HiggsMass(e6_Class &e6) {
+    if (e6.fChain == 0) return;
 
     /*
      * no need for ".root" file for this small task
@@ -61,19 +61,19 @@ void loop_HiggsMass(e6_Class &t) {
     int h_ID = 25;
 
 
-    Long64_t nentries = t.fChain->GetEntriesFast();
+    Long64_t nentries = e6.fChain->GetEntriesFast();
 
     Long64_t nbytes = 0, nb = 0;
     for (Long64_t jentry = 0; jentry < nentries; jentry++) {
-        Long64_t ientry = t.LoadTree(jentry);
+        Long64_t ientry = e6.LoadTree(jentry);
         if (ientry < 0) break;
-        nb = t.fChain->GetEntry(jentry);
+        nb = e6.fChain->GetEntry(jentry);
         nbytes += nb;
         // if (Cut(ientry) < 0) continue;
 
-        for (i = 0; i < t.Particle_size; i++) {
-            if (t.Particle_PID[i] == h_ID) {
-                histMass_Higgs.Fill(t.Particle_Mass[i]);
+        for (i = 0; i < e6.Particle_size; i++) {
+            if (e6.Particle_PID[i] == h_ID) {
+                histMass_Higgs.Fill(e6.Particle_Mass[i]);
                 //                histMass_Higgs->Fill(t.Particle_Mass[i]);
             }
         }
@@ -88,6 +88,70 @@ void loop_HiggsMass(e6_Class &t) {
 
     //f.Write();
 }
+
+void loop_Reconstruct_Z_from_ee(e6_Class &e6) {
+    if (e6.fChain == 0) return;
+
+    /*
+     * no need for ".root" file for this small task
+     * 
+    string histoFile_str = "e6_loop_HiggsMass.root";
+    // TFile constructor accepts type "const char*"
+    const char* histoFile_char = histoFile_str.c_str();
+    // overwrite existing ".root" file
+    TFile f(histoFile_char, "recreate");
+     */
+
+    // create object on stack
+    //TH1F histMass_RecoZ("Mass_RecoZ", "mass of recontructed Z", 100, 0.0, 200000);
+    TTree t_RecoZ("RecoZ","e+e- -> Z");
+    
+    Double_t RecoZ_mass;
+    const char* leaf1="Z.mass";
+    t_RecoZ.Branch(leaf1,&RecoZ_mass,"RecoZ_mass/D");
+
+    int i = 0;
+//    int electron_ID = 11;
+    int electron_size = 2; // number of electrons we want to observe in the event
+
+    TLorentzVector el1, el2;
+    TLorentzVector reconstructed_Z ;
+    
+      
+    Long64_t nentries = e6.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = e6.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = e6.fChain->GetEntry(jentry);
+        nbytes += nb;
+        // if (Cut(ientry) < 0) continue;
+        if (electron_size == e6.Electron_size) {
+            
+            el1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], 0.0005);
+            el2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], 0.0005);
+            
+            reconstructed_Z= el1+el2;
+            RecoZ_mass=reconstructed_Z.M();
+            t_RecoZ.Fill();
+            //histMass_RecoZ.Fill(RecoZ_mass);
+            
+    //        cout << RecoZ_mass << endl;
+        }
+    }
+    //    histMass_RecoZ.Draw(); // does not work, generates empty canvas
+    //    histMass_RecoZ.DrawClone(); // does not work, generates empty canvas
+    //histMass_RecoZ.DrawCopy(); // works
+    
+    //t_RecoZ.Draw();
+    //t_RecoZ.DrawClone();
+    //t_RecoZ.StartViewer();
+    t_RecoZ.Draw(leaf1);
+
+    //f.Write();    
+}
+
 /*
  * Delphes-3.0.5/doc/RootTreeDescription.html
  GenParticle
