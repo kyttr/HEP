@@ -26,7 +26,7 @@
 #ifdef __CINT__
 
 int e6_myClass() {
-    TFile *f = new TFile("main42hepMC_e6_by_delphes.root");
+    //TFile *f = new TFile("main42hepMC_E6_v4_by_delphes.root");
     TTree *tree = (TTree*) gDirectory->Get("Delphes");
     e6_Class t(tree);
     //t.Loop();

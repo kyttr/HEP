@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu Apr 18 18:04:00 2013 by ROOT version 5.34/00
+// Sat Apr 20 21:42:01 2013 by ROOT version 5.34/00
 // from TTree Delphes/Analysis tree
-// found on file: main42hepMC_E6_v3_by_delphes.root
+// found on file: main42hepMC_E6_v4_by_delphes.root
 //////////////////////////////////////////////////////////
 
 #ifndef e6_Class_h
@@ -18,13 +18,13 @@
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 const Int_t kMaxEvent = 1;
-const Int_t kMaxParticle = 3289;
-const Int_t kMaxTrack = 278;
-const Int_t kMaxTower = 605;
+const Int_t kMaxParticle = 3751;
+const Int_t kMaxTrack = 261;
+const Int_t kMaxTower = 661;
 const Int_t kMaxEFlowTrack = 244;
-const Int_t kMaxEFlowTower = 456;
-const Int_t kMaxEFlowMuon = 5;
-const Int_t kMaxJet = 67;
+const Int_t kMaxEFlowTower = 492;
+const Int_t kMaxEFlowMuon = 6;
+const Int_t kMaxJet = 68;
 const Int_t kMaxElectron = 3;
 const Int_t kMaxPhoton = 9;
 const Int_t kMaxMuon = 3;
@@ -397,9 +397,9 @@ e6_Class::e6_Class(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("main42hepMC_E6_v3_by_delphes.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("main42hepMC_E6_v4_by_delphes.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("main42hepMC_E6_v3_by_delphes.root");
+         f = new TFile("main42hepMC_E6_v4_by_delphes.root");
       }
       f->GetObject("Delphes",tree);
 
