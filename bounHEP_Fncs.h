@@ -91,6 +91,10 @@ void loop_HiggsMass(e6_Class &e6) {
     //f.Write();
 }
 
+/*
+ * reconstruct Z boson from e-e+ and save the reconstructed Z boson to a tree.
+ * I consider events with exactly 2 electrons
+ */
 void loop_Reconstruct_Z_from_ee(e6_Class &e6) {
     if (e6.fChain == 0) return;
 
@@ -103,7 +107,7 @@ void loop_Reconstruct_Z_from_ee(e6_Class &e6) {
     // overwrite existing ".root" file
     TFile f(histoFile_char, "recreate");
 
-    TTree *t_RecoZ = new TTree("RecoZ", "e+e- -> Z");
+    TTree *t_RecoZ = new TTree("RecoZ", "e-e+ -> Z");
     Double_t fields_t_RecoZ[numOfFields_TLorentzVector];
     const char* prefix_t_RecoZ = "z"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4TLorentzVector(t_RecoZ, fields_t_RecoZ, prefix_t_RecoZ);
@@ -114,6 +118,7 @@ void loop_Reconstruct_Z_from_ee(e6_Class &e6) {
 
     int i = 0;
     //    int electron_ID = 11;
+    Double_t electron_mass=0.0005;      // mass in GeV
     int electron_size = 2; // number of electrons we want to observe in the event
 
     TLorentzVector el1, el2;
@@ -130,8 +135,8 @@ void loop_Reconstruct_Z_from_ee(e6_Class &e6) {
         // if (Cut(ientry) < 0) continue;
         if (electron_size == e6.Electron_size) {
 
-            el1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], 0.0005);
-            el2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], 0.0005);
+            el1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], electron_mass);
+            el2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], electron_mass);
 
             reconstructed_Z = el1 + el2;
             fillTTree4LorentzVector(t_RecoZ,fields_t_RecoZ,reconstructed_Z);
@@ -148,6 +153,70 @@ void loop_Reconstruct_Z_from_ee(e6_Class &e6) {
 
     f.Write();    
 }
+
+/*
+ * reconstruct Z boson from mu-mu+ and save the reconstructed Z boson to a tree.
+ * I consider events with exactly 2 muons
+ */
+void loop_Reconstruct_Z_from_mumu(e6_Class &e6) {
+    if (e6.fChain == 0) return;
+
+    /*
+     * no need for ".root" file for this small task
+     */
+    string histoFile_str = "loop_Reconstruct_Z_from_mumu.root";
+    // TFile constructor accepts type "const char*"
+    const char* histoFile_char = histoFile_str.c_str();
+    // overwrite existing ".root" file
+    TFile f(histoFile_char, "recreate");
+
+    TTree *t_RecoZ = new TTree("RecoZ", "mu-mu+ -> Z");
+    Double_t fields_t_RecoZ[numOfFields_TLorentzVector];
+    const char* prefix_t_RecoZ = "z"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4TLorentzVector(t_RecoZ, fields_t_RecoZ, prefix_t_RecoZ);
+
+    // create object on stack
+    //TH1F histMass_RecoZ("Mass_RecoZ", "mass of recontructed Z", 100, 0.0, 200000);
+    //TTree t_RecoZ("RecoZ", "e+e- -> Z");
+
+    int i = 0;
+    Double_t mu_mass=0.10566;      // mass in GeV
+    int mu_size = 2; // number of muons we want to observe in the event
+
+    TLorentzVector mu1, mu2;
+    TLorentzVector reconstructed_Z;
+
+    Long64_t nentries = e6.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = e6.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = e6.fChain->GetEntry(jentry);
+        nbytes += nb;
+        // if (Cut(ientry) < 0) continue;
+        if (mu_size == e6.Muon_size) {
+
+            mu1.SetPtEtaPhiM(e6.Muon_PT[0], e6.Muon_Eta[0], e6.Muon_Phi[0], mu_mass);
+            mu2.SetPtEtaPhiM(e6.Muon_PT[1], e6.Muon_Eta[1], e6.Muon_Phi[1], mu_mass);
+
+            reconstructed_Z = mu1 + mu2;
+            fillTTree4LorentzVector(t_RecoZ,fields_t_RecoZ,reconstructed_Z);
+        }
+    }
+    //    histMass_RecoZ.Draw(); // does not work, generates empty canvas
+    //    histMass_RecoZ.DrawClone(); // does not work, generates empty canvas
+    //histMass_RecoZ.DrawCopy(); // works
+
+    //t_RecoZ.Draw();
+    //t_RecoZ.DrawClone();
+    //t_RecoZ.StartViewer();
+    t_RecoZ.Draw("z.M");
+
+    f.Write();    
+}
+
+
 
 void initializeTTree4TLorentzVector(TTree* t, Double_t* adresler, const char* branchNamePrefix) {
 

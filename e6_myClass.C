@@ -32,6 +32,7 @@ int e6_myClass() {
     //t.Loop();
     //loop_HiggsMass(t);    // can call the task from here, no need for calling "e6_Class::Loop()"
     loop_Reconstruct_Z_from_ee(t);
+    loop_Reconstruct_Z_from_mumu(t);
     return 0;
 }
 #endif
