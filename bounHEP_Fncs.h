@@ -22,6 +22,8 @@ extern "C" {
 #endif
 
 static const int numOfFields_GenParticle = 20;
+static const int numOfFields_TLorentzVector = 32;
+
 
 /*
  * TEMPLATE for the method "Loop()"
@@ -94,30 +96,29 @@ void loop_Reconstruct_Z_from_ee(e6_Class &e6) {
 
     /*
      * no need for ".root" file for this small task
-     * 
-    string histoFile_str = "e6_loop_HiggsMass.root";
+     */
+    string histoFile_str = "loop_Reconstruct_Z_from_ee.root";
     // TFile constructor accepts type "const char*"
     const char* histoFile_char = histoFile_str.c_str();
     // overwrite existing ".root" file
     TFile f(histoFile_char, "recreate");
-     */
+
+    TTree *t_RecoZ = new TTree("RecoZ", "e+e- -> Z");
+    Double_t fields_t_RecoZ[numOfFields_TLorentzVector];
+    const char* prefix_t_RecoZ = "z"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4TLorentzVector(t_RecoZ, fields_t_RecoZ, prefix_t_RecoZ);
 
     // create object on stack
     //TH1F histMass_RecoZ("Mass_RecoZ", "mass of recontructed Z", 100, 0.0, 200000);
-    TTree t_RecoZ("RecoZ","e+e- -> Z");
-    
-    Double_t RecoZ_mass;
-    const char* leaf1="Z.mass";
-    t_RecoZ.Branch(leaf1,&RecoZ_mass,"RecoZ_mass/D");
+    //TTree t_RecoZ("RecoZ", "e+e- -> Z");
 
     int i = 0;
-//    int electron_ID = 11;
+    //    int electron_ID = 11;
     int electron_size = 2; // number of electrons we want to observe in the event
 
     TLorentzVector el1, el2;
-    TLorentzVector reconstructed_Z ;
-    
-      
+    TLorentzVector reconstructed_Z;
+
     Long64_t nentries = e6.fChain->GetEntriesFast();
 
     Long64_t nbytes = 0, nb = 0;
@@ -128,28 +129,102 @@ void loop_Reconstruct_Z_from_ee(e6_Class &e6) {
         nbytes += nb;
         // if (Cut(ientry) < 0) continue;
         if (electron_size == e6.Electron_size) {
-            
+
             el1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], 0.0005);
             el2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], 0.0005);
-            
-            reconstructed_Z= el1+el2;
-            RecoZ_mass=reconstructed_Z.M();
-            t_RecoZ.Fill();
-            //histMass_RecoZ.Fill(RecoZ_mass);
-            
-    //        cout << RecoZ_mass << endl;
+
+            reconstructed_Z = el1 + el2;
+            fillTTree4LorentzVector(t_RecoZ,fields_t_RecoZ,reconstructed_Z);
         }
     }
     //    histMass_RecoZ.Draw(); // does not work, generates empty canvas
     //    histMass_RecoZ.DrawClone(); // does not work, generates empty canvas
     //histMass_RecoZ.DrawCopy(); // works
-    
+
     //t_RecoZ.Draw();
     //t_RecoZ.DrawClone();
     //t_RecoZ.StartViewer();
-    t_RecoZ.Draw(leaf1);
+    t_RecoZ.Draw("z.M");
 
-    //f.Write();    
+    f.Write();    
+}
+
+void initializeTTree4TLorentzVector(TTree* t, Double_t* adresler, const char* branchNamePrefix) {
+
+    // Elements of "lorentzVector_Fields" will be used as suffix for branch names
+    // Length of "lorentzVector_Fields" is 32. So the "adresler" must be of length 32. The user should have allocated "adresler" with length 32 before calling this function.
+    // http://stackoverflow.com/questions/3814804/initializing-a-static-const-char-array
+    const char* lorentzVector_Fields[] = {"Beta", "CosTheta", "E", "Energy", "Et", "Et2", "Eta", "Gamma", "M", "M2", "Mag", "Mag2", "Minus", "Mt", "Mt2", "P", "Perp", "Perp2", "Phi", "Plus", "PseudoRapidity", "Pt", "Px", "Py", "Pz", "Rapidity", "Rho", "T", "Theta", "X", "Y", "Z"};
+
+    // http://stackoverflow.com/questions/4108313/how-do-i-find-the-length-of-an-array
+    int len_Fields = (sizeof (lorentzVector_Fields) / sizeof (*lorentzVector_Fields)); // =32
+
+    const char* branchName;
+    string branchName_str;
+    const char* leafList;
+    string leafList_str;
+
+    for (int i = 0; i < len_Fields; i++) {
+        // + does not work for "const char*"
+        //branchName_str = branchNamePrefix + "." + genParticle_Fields[i];      
+        branchName_str = string(branchNamePrefix) + "." + string(lorentzVector_Fields[i]);
+        branchName = branchName_str.c_str();
+
+        // + does not work for "const char*"
+        //leafList_str = genParticle_Fields[i] + "/D";
+        leafList_str = string(lorentzVector_Fields[i]) + "/D";
+        leafList = leafList_str.c_str();
+
+        // http://root.cern.ch/root/html/TTree.html#TTree:Branch
+        t->Branch(branchName, &adresler[i], leafList);
+    }
+}
+
+/*
+ * fills branches of the given TTree "t". "t" is a TTree that contains all the fields of type "TLorentzVector".
+ * Values are taken from the TLorentzVector "vec". Branches of "t" are filled with values of the fields of "vec".
+ * 
+ * "adresler" must be the same addresses that were used during the initialization of the "TTree" object.
+ * 
+ *  http://www.cplusplus.com/doc/tutorial/pointers/
+ */
+void fillTTree4LorentzVector(TTree* t, Double_t* adresler, TLorentzVector &vec) {
+
+    adresler[0] = vec.Beta();
+    adresler[1] = vec.CosTheta();
+    adresler[2] = vec.E();
+    adresler[3] = vec.Energy();
+    adresler[4] = vec.Et();
+    adresler[5] = vec.Et2();
+    adresler[6] = vec.Eta();
+    adresler[7] = vec.Gamma();
+    adresler[8] = vec.M();
+    adresler[9] = vec.M2();
+    adresler[10] = vec.Mag();
+    adresler[11] = vec.Mag2();
+    adresler[12] = vec.Minus();
+    adresler[13] = vec.Mt();
+    adresler[14] = vec.Mt2();
+    adresler[15] = vec.P();
+    adresler[16] = vec.Perp();
+    adresler[17] = vec.Perp2();
+    adresler[18] = vec.Phi();
+    adresler[19] = vec.Plus();
+    adresler[20] = vec.PseudoRapidity();
+    adresler[21] = vec.Pt();
+    adresler[22] = vec.Px();
+    adresler[23] = vec.Py();
+    adresler[24] = vec.Pz();
+    adresler[25] = vec.Rapidity();
+    adresler[26] = vec.Rho();
+    adresler[27] = vec.T();
+    adresler[28] = vec.Theta();
+    adresler[29] = vec.X();
+    adresler[30] = vec.Y();
+    adresler[31] = vec.Z();
+
+    t->Fill();
+    //delete t;
 }
 
 /*

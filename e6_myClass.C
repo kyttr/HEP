@@ -30,7 +30,7 @@ int e6_myClass() {
     TTree *tree = (TTree*) gDirectory->Get("Delphes");
     e6_Class t(tree);
     //t.Loop();
-    loop_HiggsMass(t);    // can call the task from here, no need for calling "e6_Class::Loop()"
+    //loop_HiggsMass(t);    // can call the task from here, no need for calling "e6_Class::Loop()"
     loop_Reconstruct_Z_from_ee(t);
     return 0;
 }
