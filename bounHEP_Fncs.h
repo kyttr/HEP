@@ -10,6 +10,7 @@
 
 #include <string>
 #include "e6_Class.h"
+#include "e6_v3_Class.h"
 
 using namespace std;
 
@@ -23,6 +24,7 @@ extern "C" {
 
 static const int numOfFields_GenParticle = 20;
 static const int numOfFields_TLorentzVector = 32;
+static const int numOfFields_Particle = 32;
 
 /*
  * TEMPLATE for the method "Loop()"
@@ -249,9 +251,6 @@ void loop_Reconstruct_Z_from_ee(e6_Class &e6) {
 void loop_Reconstruct_Z_from_mumu(e6_Class &e6) {
     if (e6.fChain == 0) return;
 
-    /*
-     * no need for ".root" file for this small task
-     */
     string histoFile_str = "loop_Reconstruct_Z_from_mumu.root";
     // TFile constructor accepts type "const char*"
     const char* histoFile_char = histoFile_str.c_str();
@@ -302,6 +301,143 @@ void loop_Reconstruct_Z_from_mumu(e6_Class &e6) {
     t_RecoZ.Draw("z.M");
 
     f.Write();
+}
+
+/*
+ * loop over particles (I guess these are generated particles) and store their fields to a "TTree"
+ * particles considered:
+ *      electron
+ *      muon
+ *      Higgs
+ */
+void loop_Particle(e6_Class &e6) {
+    if (e6.fChain == 0) return;
+
+    string histoFile_str = "loop_Particle.root";
+    // TFile constructor accepts type "const char*"
+    const char* histoFile_char = histoFile_str.c_str();
+    // overwrite existing ".root" file
+    TFile f(histoFile_char, "recreate");
+
+    TTree *t_e = new TTree("electron", "generated electrons");
+    Double_t fields_t_e[numOfFields_Particle];
+    const char* prefix_t_e = "e"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4Particle(t_e, fields_t_e, prefix_t_e);
+
+    TTree *t_mu = new TTree("muon", "generated muons");
+    Double_t fields_t_mu[numOfFields_Particle];
+    const char* prefix_t_mu = "mu"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4Particle(t_mu, fields_t_mu, prefix_t_mu);
+
+    TTree *t_h = new TTree("higgs", "generated higgs bosons");
+    Double_t fields_t_h[numOfFields_Particle];
+    const char* prefix_t_h = "h"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4Particle(t_h, fields_t_h, prefix_t_h);
+
+    int i = 0;
+    int electron_ID = 11;
+    int muon_ID = 13;
+    int h_ID = 25;      // pid of Higgs boson
+
+    Long64_t nentries = e6.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = e6.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = e6.fChain->GetEntry(jentry);
+        nbytes += nb;
+        // if (Cut(ientry) < 0) continue;
+
+        for (i = 0; i < kMaxParticle; i++) {
+            fillTTree4Particle(t_e, fields_t_e, e6, i, electron_ID);
+            fillTTree4Particle(t_mu, fields_t_mu, e6, i, muon_ID);
+            fillTTree4Particle(t_h, fields_t_h, e6, i, h_ID);
+        }
+
+    }
+
+    f.Write();
+}
+
+void initializeTTree4Particle(TTree* t, Double_t* adresler, const char* branchNamePrefix) {
+
+    // Elements of "lorentzVector_Fields" will be used as suffix for branch names
+    // Length of "lorentzVector_Fields" is 23. So the "adresler" must be of length 23. The user should have allocated "adresler" with length 23 before calling this function.
+    // http://stackoverflow.com/questions/3814804/initializing-a-static-const-char-array
+    const char* particle_Fields[] = {"fUniqueID", "fBits", "PID", "Status", "IsPU", "M1", "M2", "D1", "D2", "Charge", "Mass", "E", "Px", "Py", "Pz", "PT", "Eta", "Phi", "Rapidity", "T", "X", "Y", "Z"};
+
+    // http://stackoverflow.com/questions/4108313/how-do-i-find-the-length-of-an-array
+    int len_Fields = (sizeof (particle_Fields) / sizeof (*particle_Fields)); // =23
+
+    const char* branchName;
+    string branchName_str;
+    const char* leafList;
+    string leafList_str;
+
+    for (int i = 0; i < len_Fields; i++) {
+        // + does not work for "const char*"
+        //branchName_str = branchNamePrefix + "." + genParticle_Fields[i];      
+        branchName_str = string(branchNamePrefix) + "." + string(particle_Fields[i]);
+        branchName = branchName_str.c_str();
+
+        // + does not work for "const char*"
+        //leafList_str = genParticle_Fields[i] + "/D";
+        leafList_str = string(particle_Fields[i]) + "/D";
+        leafList = leafList_str.c_str();
+
+        // http://root.cern.ch/root/html/TTree.html#TTree:Branch
+        t->Branch(branchName, &adresler[i], leafList);
+    }
+}
+
+/*
+ * fills branches of the given TTree "t". "t" is a TTree that contains all the fields of type "e6_Class.Particle_ ...".
+ * Values are taken from the e6_Class "e6". Branches of "t" are filled with values like e6.Particle_PT[i], where "i" is the index of the particle in a particular event.
+ * 
+ * "adresler" must be the same addresses that were used during the initialization of the "TTree" object.
+ * 
+ *  http://www.cplusplus.com/doc/tutorial/pointers/
+ */
+void fillTTree4Particle(TTree* t, Double_t* adresler, e6_Class &e6, int indexOfParticle) {
+
+    adresler[0] = e6.Particle_fUniqueID[indexOfParticle];
+    adresler[1] = e6.Particle_fBits[indexOfParticle];
+    adresler[2] = e6.Particle_PID[indexOfParticle];
+    adresler[3] = e6.Particle_Status[indexOfParticle];
+    adresler[4] = e6.Particle_IsPU[indexOfParticle];
+    adresler[5] = e6.Particle_M1[indexOfParticle];
+    adresler[6] = e6.Particle_M2[indexOfParticle];
+    adresler[7] = e6.Particle_D1[indexOfParticle];
+    adresler[8] = e6.Particle_D2[indexOfParticle];
+    adresler[9] = e6.Particle_Charge[indexOfParticle];
+    adresler[10] = e6.Particle_Mass[indexOfParticle];
+    adresler[11] = e6.Particle_E[indexOfParticle];
+    adresler[12] = e6.Particle_Px[indexOfParticle];
+    adresler[13] = e6.Particle_Py[indexOfParticle];
+    adresler[14] = e6.Particle_Pz[indexOfParticle];
+    adresler[15] = e6.Particle_PT[indexOfParticle];
+    adresler[16] = e6.Particle_Eta[indexOfParticle];
+    adresler[17] = e6.Particle_Phi[indexOfParticle];
+    adresler[18] = e6.Particle_Rapidity[indexOfParticle];
+    adresler[19] = e6.Particle_T[indexOfParticle];
+    adresler[20] = e6.Particle_X[indexOfParticle];
+    adresler[21] = e6.Particle_Y[indexOfParticle];
+    adresler[22] = e6.Particle_Z[indexOfParticle];
+
+    t->Fill();
+    //delete t;
+}
+
+/*
+ * fills branches of the given TTree "t", if the PID of "particle" is equal to "pid".
+ * 
+ * This function may look dummy. The reason why I wrote this function is to minimize lots of if checks in the main code, hence to reduce crowd in the main code. Say, im main program I have 4 different particles whose trees I want to fill. Without this function I would have to write 4 different "if" scopes which makes the main code crowded.
+ */
+void fillTTree4Particle(TTree* t, Double_t* adresler, e6_Class &e6, int indexOfParticle, int pid) {
+    if (pid == abs(e6.Particle_PID[indexOfParticle])) {
+        fillTTree4Particle(t, adresler, e6, indexOfParticle);
+    }
 }
 
 void initializeTTree4TLorentzVector(TTree* t, Double_t* adresler, const char* branchNamePrefix) {
@@ -516,7 +652,7 @@ void fillTTree4GenParticle(TTree* t, Double_t* adresler, GenParticle* particle) 
  * This function may look dummy. The reason why I wrote this function is to minimize lots of if checks in the main code, hence to reduce crowd in the main code. Say, im main program I have 4 different particles whose trees I want to fill. Without this function I would have to write 4 different "if" scopes which makes the main code crowded.
  */
 void fillTTree4GenParticle(TTree* t, Double_t* adresler, GenParticle* particle, int pid) {
-    if (pid == particle->PID) {
+    if (pid == abs(particle->PID)) {
         fillTTree4GenParticle(t, adresler, particle);
     }
 }
