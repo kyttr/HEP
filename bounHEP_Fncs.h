@@ -309,6 +309,7 @@ void loop_Reconstruct_Z_from_mumu(e6_Class &e6) {
  *      electron
  *      muon
  *      Higgs
+ *      Z
  */
 void loop_Particle(e6_Class &e6) {
     if (e6.fChain == 0) return;
@@ -333,11 +334,17 @@ void loop_Particle(e6_Class &e6) {
     Double_t fields_t_h[numOfFields_Particle];
     const char* prefix_t_h = "h"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4Particle(t_h, fields_t_h, prefix_t_h);
+    
+    TTree *t_Z = new TTree("Z", "generated Z bosons");
+    Double_t fields_t_Z[numOfFields_Particle];
+    const char* prefix_t_Z = "z"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4Particle(t_Z, fields_t_Z, prefix_t_Z);
 
     int i = 0;
     int electron_ID = 11;
     int muon_ID = 13;
     int h_ID = 25;      // pid of Higgs boson
+    int Z_ID = 23;      // pid of Z boson
 
     Long64_t nentries = e6.fChain->GetEntriesFast();
 
@@ -353,6 +360,7 @@ void loop_Particle(e6_Class &e6) {
             fillTTree4Particle(t_e, fields_t_e, e6, i, electron_ID);
             fillTTree4Particle(t_mu, fields_t_mu, e6, i, muon_ID);
             fillTTree4Particle(t_h, fields_t_h, e6, i, h_ID);
+            fillTTree4Particle(t_Z, fields_t_Z, e6, i, Z_ID);
         }
 
     }
