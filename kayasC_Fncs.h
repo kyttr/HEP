@@ -35,11 +35,14 @@ extern "C" {
  * returned array is  {2,1,0,4,3}
  * 
  * for the moment this method uses an inefficient sorting algorithm, namely "insertion sort"
+ * 
+ * EDIT : do not sort "arr", it looks like after the execution of the method I want to have unsorted version of "arr"
  */
 int* sortIndices(double *arr, int len) {
     //int *sortIndices(void *arr, int len) {
     int i;
     int* indices = new int[len];
+    double* arr_yedek = new double[len];
     /*
      * DOES NOT WORK, if want to return "int*"
     //int *indices;
@@ -47,8 +50,10 @@ int* sortIndices(double *arr, int len) {
      */
 
     // assign initial values for indices
-    for (i = 0; i < len; i++)
+    for (i = 0; i < len; i++) {
         indices[i] = i;
+        arr_yedek[i] = arr[i];
+    }
 
     // insertion sort
     // arrange indices array in parallel with sorting
@@ -56,15 +61,15 @@ int* sortIndices(double *arr, int len) {
     int current2; // corresponding index of "current" in "indices"
     int pos; //position
     for (i = 1; i < len; i++) {
-        current = arr[i];
+        current = arr_yedek[i];
         current2 = indices[i];
         pos = i - 1;
-        while (pos >= 0 && current < arr[pos]) {
-            arr[pos + 1] = arr[pos];
+        while (pos >= 0 && current < arr_yedek[pos]) {
+            arr_yedek[pos + 1] = arr_yedek[pos];
             indices[pos + 1] = indices[pos]; // arrange values in "indices" accordingly
             pos--;
         }
-        arr[pos + 1] = current;
+        arr_yedek[pos + 1] = current;
         indices[pos + 1] = current2;
     }
 
@@ -77,11 +82,14 @@ int* sortIndices(double *arr, int len) {
  * returned array is  {2,1,0,4,3}
  * 
  * for the moment this method uses an inefficient sorting algorithm, namely "insertion sort"
+ * 
+ * EDIT : do not sort "arr", it looks like after the execution of the method I want to have unsorted version of "arr"
  */
 int* sortIndices(float *arr, int len) {
     //int *sortIndices(void *arr, int len) {
     int i;
     int* indices = new int[len];
+    float* arr_yedek = new float[len];
     /*
      * DOES NOT WORK, if want to return "int*"
     //int *indices;
@@ -89,8 +97,10 @@ int* sortIndices(float *arr, int len) {
      */
 
     // assign initial values for indices
-    for (i = 0; i < len; i++)
+    for (i = 0; i < len; i++) {
         indices[i] = i;
+        arr_yedek[i] = arr[i];
+    }
 
     // insertion sort
     // arrange indices array in parallel with sorting
@@ -98,15 +108,15 @@ int* sortIndices(float *arr, int len) {
     int current2; // corresponding index of "current" in "indices"
     int pos; //position
     for (i = 1; i < len; i++) {
-        current = arr[i];
+        current = arr_yedek[i];
         current2 = indices[i];
         pos = i - 1;
-        while (pos >= 0 && current < arr[pos]) {
-            arr[pos + 1] = arr[pos];
+        while (pos >= 0 && current < arr_yedek[pos]) {
+            arr_yedek[pos + 1] = arr_yedek[pos];
             indices[pos + 1] = indices[pos]; // arrange values in "indices" accordingly
             pos--;
         }
-        arr[pos + 1] = current;
+        arr_yedek[pos + 1] = current;
         indices[pos + 1] = current2;
     }
 
@@ -118,15 +128,13 @@ int* sortIndices(float *arr, int len) {
  * sortIndices() : in increasing order
  * sortIndices()_Descending : in decreasing order
  */
-int* sortIndices_Descending(double* arr, int len)
-{
-    int* indices=sortIndices(arr,len);
+int* sortIndices_Descending(double* arr, int len) {
+    int* indices = sortIndices(arr, len);
     int i, tmp;
-    for (i=0;i<len/2;i++)
-    {
-        tmp=indices[i];
-        indices[i]=indices[len-i-1];
-        indices[len-i-1]=tmp;
+    for (i = 0; i < len / 2; i++) {
+        tmp = indices[i];
+        indices[i] = indices[len - i - 1];
+        indices[len - i - 1] = tmp;
     }
     return indices;
 }
@@ -136,15 +144,13 @@ int* sortIndices_Descending(double* arr, int len)
  * sortIndices() : in increasing order
  * sortIndices()_Descending : in decreasing order
  */
-int* sortIndices_Descending(float* arr, int len)
-{
-    int* indices=sortIndices(arr,len);
+int* sortIndices_Descending(float* arr, int len) {
+    int* indices = sortIndices(arr, len);
     int i, tmp;
-    for (i=0;i<len/2;i++)
-    {
-        tmp=indices[i];
-        indices[i]=indices[len-i-1];
-        indices[len-i-1]=tmp;
+    for (i = 0; i < len / 2; i++) {
+        tmp = indices[i];
+        indices[i] = indices[len - i - 1];
+        indices[len - i - 1] = tmp;
     }
     return indices;
 }
