@@ -131,6 +131,24 @@ int* sortIndices_Descending(double* arr, int len)
     return indices;
 }
 
+/*
+ * sort indices from max to min.
+ * sortIndices() : in increasing order
+ * sortIndices()_Descending : in decreasing order
+ */
+int* sortIndices_Descending(float* arr, int len)
+{
+    int* indices=sortIndices(arr,len);
+    int i, tmp;
+    for (i=0;i<len/2;i++)
+    {
+        tmp=indices[i];
+        indices[i]=indices[len-i-1];
+        indices[len-i-1]=tmp;
+    }
+    return indices;
+}
+
 /* 
  * sort "arr" and return an integer array which does not contain the elements of "arr", but the indices of the elements of "arr" which reflects the sorting. 
  * Ex : arr={33,22,11,55,44}    corresponds to array of indices : {0,1,2,3,4}
