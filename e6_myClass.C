@@ -14,6 +14,7 @@
 #define e6_Class_cxx
 #include "e6_Class.h"
 #include "bounHEP_Fncs.h"
+#include "kayasC_Fncs.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -45,7 +46,27 @@ int e6_myClass() {
      */
 
     //loop_Reconstruct_Z(t);
-    loop_Particle(t);
+    //loop_Particle(t);
+
+    double myints[] = {32, 71, 12, 45, 26, 80, 53, 33};
+    //float myints[] = {32, 71, 12, 45, 26, 80, 53, 33};
+    for (i = 0; i < 8; i++) {
+        cout << myints[i] << endl;
+    }
+
+    int *ptr1;
+    //int ptr1[];
+    //ptr1 = sortIndices(myints, 8);
+    int len=(sizeof (myints) / sizeof (*myints));
+    cout<<len<<" asd\n";
+    //ptr1 = sortIndices(myints,len);
+    ptr1 = sortIndices_Descending(myints,len);
+    //ptr1 = sortIndices(myints);
+    int i;
+    for (i = 0; i < 8; i++) {
+        cout << ptr1[i] << endl;
+    }
+
 
     return 0;
 }
@@ -64,9 +85,11 @@ int e6_myClass() {
 #if !defined(__CINT__) || defined(__MAKECINT__)
 
 int main() {
+
     //e6_Class::Loop();
     e6_Class t;
     t.Loop();
+
     return 0;
 }
 #endif
