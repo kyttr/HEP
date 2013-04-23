@@ -11,6 +11,7 @@
 #include <string>
 #include "e6_Class.h"
 #include "e6_v3_Class.h"
+#include "kayasC_Fncs.h"
 
 using namespace std;
 
@@ -334,7 +335,7 @@ void loop_Particle(e6_Class &e6) {
     Double_t fields_t_h[numOfFields_Particle];
     const char* prefix_t_h = "h"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4Particle(t_h, fields_t_h, prefix_t_h);
-    
+
     TTree *t_Z = new TTree("Z", "generated Z bosons");
     Double_t fields_t_Z[numOfFields_Particle];
     const char* prefix_t_Z = "z"; // must start with lowercase letter, dont know the stupid reason for that
@@ -343,8 +344,8 @@ void loop_Particle(e6_Class &e6) {
     int i = 0;
     int electron_ID = 11;
     int muon_ID = 13;
-    int h_ID = 25;      // pid of Higgs boson
-    int Z_ID = 23;      // pid of Z boson
+    int h_ID = 25; // pid of Higgs boson
+    int Z_ID = 23; // pid of Z boson
 
     Long64_t nentries = e6.fChain->GetEntriesFast();
 
@@ -366,6 +367,41 @@ void loop_Particle(e6_Class &e6) {
     }
 
     f.Write();
+}
+
+/*
+ * sorts the jets in an event according to their PT's.
+ */
+void loop_maxJetPT(e6_Class &e6) {
+    if (e6.fChain == 0) return;
+
+    int i;
+    int* sorted_indices;
+    int len;
+    Long64_t nentries = e6.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = e6.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = e6.fChain->GetEntry(jentry);
+        nbytes += nb;
+        // if (Cut(ientry) < 0) continue;
+        //len = (sizeof (e6.Jet_PT) / sizeof (e6.Jet_PT[0]));
+        len=kMaxJet;
+        cout << "LEN : " << len << "\n";
+        cout << "JET.PT : ";
+        for (i = 0; i < len; i++) {
+            cout << e6.Jet_PT[i] << " , ";
+        }
+        cout << "\n";
+        sorted_indices = sortIndices(e6.Jet_PT, len);
+        cout << "ind : ";
+        for (i = 0; i < len; i++) {
+            cout << sorted_indices[i] << " , ";
+        }
+        cout << "\n";
+    }
 }
 
 void initializeTTree4Particle(TTree* t, Double_t* adresler, const char* branchNamePrefix) {

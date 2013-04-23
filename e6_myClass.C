@@ -47,26 +47,8 @@ int e6_myClass() {
 
     //loop_Reconstruct_Z(t);
     //loop_Particle(t);
-
-    double myints[] = {32, 71, 12, 45, 26, 80, 53, 33};
-    //float myints[] = {32, 71, 12, 45, 26, 80, 53, 33};
-    for (i = 0; i < 8; i++) {
-        cout << myints[i] << endl;
-    }
-
-    int *ptr1;
-    //int ptr1[];
-    //ptr1 = sortIndices(myints, 8);
-    int len=(sizeof (myints) / sizeof (*myints));
-    cout<<len<<" asd\n";
-    //ptr1 = sortIndices(myints,len);
-    ptr1 = sortIndices_Descending(myints,len);
-    //ptr1 = sortIndices(myints);
-    int i;
-    for (i = 0; i < 8; i++) {
-        cout << ptr1[i] << endl;
-    }
-
+    
+    loop_maxJetPT(t);
 
     return 0;
 }
