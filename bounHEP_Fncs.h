@@ -318,13 +318,13 @@ void loop_Reconstruct_De(e6_Class &e6) {
     TFile f(histoFile_char, "recreate");
     //TDirectory* dir1=f.mkdir("asdasd");       // ".root" dosyasında dizin oluşturma
 
-    TTree *t_RecoDe1 = new TTree("RecoDe1", "Z jet1 -> De");
+    TTree *t_RecoDe1 = new TTree("RecoDe1", "Z + jet1 -> De");
     //t_RecoDe1->SetDirectory(dir1);    // ".root" dosyasında dizin oluşturma
     Double_t fields_t_RecoDe1[numOfFields_TLorentzVector];
     const char* prefix_t_RecoDe1 = "De1"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4TLorentzVector(t_RecoDe1, fields_t_RecoDe1, prefix_t_RecoDe1);
 
-    TTree *t_RecoDe2 = new TTree("RecoDe2", "Z jet2 -> De");
+    TTree *t_RecoDe2 = new TTree("RecoDe2", "Z + jet2 -> De");
     Double_t fields_t_RecoDe2[numOfFields_TLorentzVector];
     const char* prefix_t_RecoDe2 = "De"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4TLorentzVector(t_RecoDe2, fields_t_RecoDe2, prefix_t_RecoDe2);
@@ -399,6 +399,75 @@ void loop_Reconstruct_De(e6_Class &e6) {
             fillTTree4LorentzVector(t_RecoDe1, fields_t_RecoDe1, reconstructed_De1);
             fillTTree4LorentzVector(t_RecoDe2, fields_t_RecoDe2, reconstructed_De2);
         }
+    }
+    //    histMass_RecoZ.Draw(); // does not work, generates empty canvas
+    //    histMass_RecoZ.DrawClone(); // does not work, generates empty canvas
+    //histMass_RecoZ.DrawCopy(); // works
+
+    f.Write();
+}
+
+/*  
+ * 4. Higgs bozonunu "jet3+jet4" ikilisi ile yeniden yarat (reconstruct Higgs boson).
+ *  jet3 =  PT'si 3. en yüksek olan jet
+ *  jet4 =  PT'si 4. en yüksek olan jet
+ */
+void loop_Reconstruct_Higgs(e6_Class &e6) {
+
+    string histoFile_str = "loop_Reconstruct_Higgs.root";
+    // TFile constructor accepts type "const char*"
+    const char* histoFile_char = histoFile_str.c_str();
+    // overwrite existing ".root" file
+    TFile f(histoFile_char, "recreate");
+    //TDirectory* dir1=f.mkdir("asdasd");       // ".root" dosyasında dizin oluşturma
+
+    TTree *t_RecoH = new TTree("RecoHiggs", "jet3 + jet4 -> H");
+    //t_RecoDe1->SetDirectory(dir1);    // ".root" dosyasında dizin oluşturma
+    Double_t fields_t_RecoH[numOfFields_TLorentzVector];
+    const char* prefix_t_RecoH = "h"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4TLorentzVector(t_RecoH, fields_t_RecoH, prefix_t_RecoH);
+
+    // create object on stack
+    //TH1F histMass_RecoZ("Mass_RecoZ", "mass of recontructed Z", 100, 0.0, 200000);
+    //TTree t_RecoZ("RecoZ", "e+e- -> Z");
+
+    int jet_size = 4; // min number of jets we want to observe in the event
+
+    TLorentzVector jet3, jet4;
+    TLorentzVector reconstructed_H;
+
+    int* indices_JetPT_descending;
+    // indices of the "Jet" sorted such that 
+    // indices_JetPT_descending[0] matches the jet with max. PT
+    // indices_JetPT_descending[len-1] matches the jet with min. PT
+    int index_3rdMaxPT;
+    int index_4thMaxPT;
+
+    Long64_t nentries = e6.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = e6.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = e6.fChain->GetEntry(jentry);
+        nbytes += nb;
+
+        // if (Cut(ientry) < 0) continue;
+        if (e6.Jet_size >= jet_size) {
+
+            indices_JetPT_descending = sortIndices_Descending(e6.Jet_PT, e6.Jet_size);
+            index_3rdMaxPT = indices_JetPT_descending[2];
+            index_4thMaxPT = indices_JetPT_descending[3];
+
+            jet3.SetPtEtaPhiM(e6.Jet_PT[index_3rdMaxPT], e6.Jet_Eta[index_3rdMaxPT], e6.Jet_Phi[index_3rdMaxPT], e6.Jet_Mass[index_3rdMaxPT]);
+            jet4.SetPtEtaPhiM(e6.Jet_PT[index_4thMaxPT], e6.Jet_Eta[index_4thMaxPT], e6.Jet_Phi[index_4thMaxPT], e6.Jet_Mass[index_4thMaxPT]);
+            
+            reconstructed_H=jet3+jet4;
+            
+            fillTTree4LorentzVector(t_RecoH, fields_t_RecoH, reconstructed_H);
+           
+        }
+
     }
     //    histMass_RecoZ.Draw(); // does not work, generates empty canvas
     //    histMass_RecoZ.DrawClone(); // does not work, generates empty canvas
