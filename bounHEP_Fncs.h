@@ -23,13 +23,36 @@ extern "C" {
 }
 #endif
 
+void loop_HiggsMass(e6_Class &e6);
+void loop_Reconstruct_Z(e6_Class &e6);
+void loop_Reconstruct_Z_from_ee(e6_Class &e6);
+void loop_Reconstruct_Z_from_mumu(e6_Class &e6);
+void loop_Reconstruct_De(e6_Class &e6);
+void loop_Reconstruct_de(e6_Class &e6);
+void loop_Reconstruct_Higgs(e6_Class &e6);
+void loop_Particle(e6_Class &e6);
+void loop_maxJetPT(e6_Class &e6);
+
+class GenParticle; // if this does not exist, ~> Warning: Unknown type 'GenParticle' in function argument handled as int
+
+void initializeTTree4Particle(TTree* t, Double_t* adresler, const char* branchNamePrefix);
+void fillTTree4Particle(TTree* t, Double_t* adresler, e6_Class &e6, int indexOfParticle);
+void fillTTree4Particle(TTree* t, Double_t* adresler, e6_Class &e6, int indexOfParticle, int pid);
+void initializeTTree4TLorentzVector(TTree* t, Double_t* adresler, const char* branchNamePrefix);
+void fillTTree4LorentzVector(TTree* t, Double_t* adresler, TLorentzVector &vec);
+void initializeTTree(TTree* t, Double_t* adresler, int len_Fields, const char* branchNamePrefix, const char* fields[]);
+void initializeTTree4GenParticle(TTree* t, Double_t* adresler, const char* branchNamePrefix);
+void initializeTTree4GenParticle(TTree &t, Double_t* adresler, const char* branchNamePrefix);
+void fillTTree4GenParticle(TTree* t, Double_t* adresler, GenParticle* particle);
+void fillTTree4GenParticle(TTree* t, Double_t* adresler, GenParticle* particle, int pid);
+
 static const int numOfFields_GenParticle = 20;
 static const int numOfFields_TLorentzVector = 32;
 static const int numOfFields_Particle = 32;
-static const char* loop_Reconstruct_de_outputName="loop_Reconstruct_de.root"; // output file name of the function loop_Reconstruct_de()
-static const char* loop_Reconstruct_De_outputName="loop_Reconstruct_De.root"; // output file name of the function loop_Reconstruct_De()
-static const char* loop_Reconstruct_Higgs_outputName="loop_Reconstruct_Higgs.root"; // output file name of the function loop_Reconstruct_Higgs()
-static const char* loop_Reconstruct_Z_outputName="loop_Reconstruct_Z.root"; // output file name of the function loop_Reconstruct_Z()
+static const char* loop_Reconstruct_de_outputName = "loop_Reconstruct_de.root"; // output file name of the function loop_Reconstruct_de()
+static const char* loop_Reconstruct_De_outputName = "loop_Reconstruct_De.root"; // output file name of the function loop_Reconstruct_De()
+static const char* loop_Reconstruct_Higgs_outputName = "loop_Reconstruct_Higgs.root"; // output file name of the function loop_Reconstruct_Higgs()
+static const char* loop_Reconstruct_Z_outputName = "loop_Reconstruct_Z.root"; // output file name of the function loop_Reconstruct_Z()
 
 /*
  * TEMPLATE for the method "Loop()"
@@ -962,8 +985,6 @@ void initializeTTree4GenParticle(TTree &t, Double_t* adresler, const char* branc
     }
      */
 }
-
-class GenParticle; // if this does not exist, ~> Warning: Unknown type 'GenParticle' in function argument handled as int
 
 /*
  * fills branches of the given TTree "t". "t" is a TTree that contains all the fields of type "GenParticle".
