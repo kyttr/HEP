@@ -326,7 +326,7 @@ void loop_Reconstruct_De(e6_Class &e6) {
 
     TTree *t_RecoDe2 = new TTree("RecoDe2", "Z + jet2 -> De");
     Double_t fields_t_RecoDe2[numOfFields_TLorentzVector];
-    const char* prefix_t_RecoDe2 = "De"; // must start with lowercase letter, dont know the stupid reason for that
+    const char* prefix_t_RecoDe2 = "De2"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4TLorentzVector(t_RecoDe2, fields_t_RecoDe2, prefix_t_RecoDe2);
 
     // create object on stack
@@ -407,6 +407,93 @@ void loop_Reconstruct_De(e6_Class &e6) {
     f.Write();
 }
 
+/*
+ * de'yi "H+jet" ile yeniden yarat.
+ *  5.1. H + jet1 --> de
+ *  5.2. H + jet2 --> de
+ *      (jet1 = PT'si en yüksek olan jet , jet2 = PT'si 2. en yüksek olan jet)
+ */
+void loop_Reconstruct_de(e6_Class &e6) {
+
+    string histoFile_str = "loop_Reconstruct_de.root";
+    // TFile constructor accepts type "const char*"
+    const char* histoFile_char = histoFile_str.c_str();
+    // overwrite existing ".root" file
+    TFile f(histoFile_char, "recreate");
+    //TDirectory* dir1=f.mkdir("asdasd");       // ".root" dosyasında dizin oluşturma
+
+    TTree *t_Reco_de1 = new TTree("Recode1", "H + jet1 -> de");
+    //t_RecoDe1->SetDirectory(dir1);    // ".root" dosyasında dizin oluşturma
+    Double_t fields_t_Reco_de1[numOfFields_TLorentzVector];
+    const char* prefix_t_Reco_de1 = "de1"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4TLorentzVector(t_Reco_de1, fields_t_Reco_de1, prefix_t_Reco_de1);
+
+    TTree *t_Reco_de2 = new TTree("Recode2", "H + jet2 -> de");
+    Double_t fields_t_Reco_de2[numOfFields_TLorentzVector];
+    const char* prefix_t_Reco_de2 = "de2"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4TLorentzVector(t_Reco_de2, fields_t_Reco_de2, prefix_t_Reco_de2);
+
+    // create object on stack
+    //TH1F histMass_RecoZ("Mass_RecoZ", "mass of recontructed Z", 100, 0.0, 200000);
+    //TTree t_RecoZ("RecoZ", "e+e- -> Z");
+
+    int jet_size = 4; // min number of jets we want to observe in the event
+
+    TLorentzVector jet3, jet4;
+    TLorentzVector reconstructed_H;
+
+    TLorentzVector jet1, jet2;
+    TLorentzVector reconstructed_de1, reconstructed_de2;
+
+    int* indices_JetPT_descending;
+    // indices of the "Jet" sorted such that 
+    // indices_JetPT_descending[0] matches the jet with max. PT
+    // indices_JetPT_descending[len-1] matches the jet with min. PT
+    int index_MaxPT;
+    int index_2ndMaxPT;
+    int index_3rdMaxPT;
+    int index_4thMaxPT;
+
+    Long64_t nentries = e6.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = e6.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = e6.fChain->GetEntry(jentry);
+        nbytes += nb;
+
+        // if (Cut(ientry) < 0) continue;
+        if (e6.Jet_size >= jet_size) {
+
+            indices_JetPT_descending = sortIndices_Descending(e6.Jet_PT, e6.Jet_size);
+
+            index_3rdMaxPT = indices_JetPT_descending[2];
+            index_4thMaxPT = indices_JetPT_descending[3];
+            jet3.SetPtEtaPhiM(e6.Jet_PT[index_3rdMaxPT], e6.Jet_Eta[index_3rdMaxPT], e6.Jet_Phi[index_3rdMaxPT], e6.Jet_Mass[index_3rdMaxPT]);
+            jet4.SetPtEtaPhiM(e6.Jet_PT[index_4thMaxPT], e6.Jet_Eta[index_4thMaxPT], e6.Jet_Phi[index_4thMaxPT], e6.Jet_Mass[index_4thMaxPT]);
+
+            reconstructed_H = jet3 + jet4;
+
+            index_MaxPT = indices_JetPT_descending[0];
+            index_2ndMaxPT = indices_JetPT_descending[1];
+            jet1.SetPtEtaPhiM(e6.Jet_PT[index_MaxPT], e6.Jet_Eta[index_MaxPT], e6.Jet_Phi[index_MaxPT], e6.Jet_Mass[index_MaxPT]);
+            jet2.SetPtEtaPhiM(e6.Jet_PT[index_2ndMaxPT], e6.Jet_Eta[index_2ndMaxPT], e6.Jet_Phi[index_2ndMaxPT], e6.Jet_Mass[index_2ndMaxPT]);
+
+            reconstructed_de1 = reconstructed_H + jet1;
+            reconstructed_de2 = reconstructed_H + jet2;
+
+            fillTTree4LorentzVector(t_Reco_de1, fields_t_Reco_de1, reconstructed_de1);
+            fillTTree4LorentzVector(t_Reco_de2, fields_t_Reco_de2, reconstructed_de2);
+        }
+    }
+    //    histMass_RecoZ.Draw(); // does not work, generates empty canvas
+    //    histMass_RecoZ.DrawClone(); // does not work, generates empty canvas
+    //histMass_RecoZ.DrawCopy(); // works
+
+    f.Write();
+}
+
 /*  
  * 4. Higgs bozonunu "jet3+jet4" ikilisi ile yeniden yarat (reconstruct Higgs boson).
  *  jet3 =  PT'si 3. en yüksek olan jet
@@ -461,11 +548,11 @@ void loop_Reconstruct_Higgs(e6_Class &e6) {
 
             jet3.SetPtEtaPhiM(e6.Jet_PT[index_3rdMaxPT], e6.Jet_Eta[index_3rdMaxPT], e6.Jet_Phi[index_3rdMaxPT], e6.Jet_Mass[index_3rdMaxPT]);
             jet4.SetPtEtaPhiM(e6.Jet_PT[index_4thMaxPT], e6.Jet_Eta[index_4thMaxPT], e6.Jet_Phi[index_4thMaxPT], e6.Jet_Mass[index_4thMaxPT]);
-            
-            reconstructed_H=jet3+jet4;
-            
+
+            reconstructed_H = jet3 + jet4;
+
             fillTTree4LorentzVector(t_RecoH, fields_t_RecoH, reconstructed_H);
-           
+
         }
 
     }
