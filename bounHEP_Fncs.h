@@ -317,8 +317,7 @@ void loop_Reconstruct_Z(e6_Class &e6) {
                 reconstructed_Z_ee = el1 + el2;
                 fillTTree4LorentzVector(t_RecoZ_ee, fields_t_RecoZ_ee, reconstructed_Z_ee);
                 fillTTree4LorentzVector(t_RecoZ, fields_t_RecoZ, reconstructed_Z_ee);
-            }
-            if (mu_size == e6.Muon_size) {
+            } else if (mu_size == e6.Muon_size) {
 
                 mu1.SetPtEtaPhiM(e6.Muon_PT[0], e6.Muon_Eta[0], e6.Muon_Phi[0], mu_mass);
                 mu2.SetPtEtaPhiM(e6.Muon_PT[1], e6.Muon_Eta[1], e6.Muon_Phi[1], mu_mass);
@@ -554,7 +553,7 @@ void loop_Reconstruct_De(e6_Class &e6) {
                 fillTTree4LorentzVector(t_RecoDe1, fields_t_RecoDe1, reconstructed_De1);
                 fillTTree4LorentzVector(t_RecoDe2, fields_t_RecoDe2, reconstructed_De2);
             }
-            if (mu_size == e6.Muon_size) {
+            else  if (mu_size == e6.Muon_size) {
 
                 mu1.SetPtEtaPhiM(e6.Muon_PT[0], e6.Muon_Eta[0], e6.Muon_Phi[0], mu_mass);
                 mu2.SetPtEtaPhiM(e6.Muon_PT[1], e6.Muon_Eta[1], e6.Muon_Phi[1], mu_mass);
@@ -777,6 +776,8 @@ void loop_deltaMass_of_deDe() {
     t_de2->SetBranchAddress(addr_mass_de2.c_str(), &mass_de2);
     t_De1->SetBranchAddress(addr_mass_De1.c_str(), &mass_De1);
     t_De2->SetBranchAddress(addr_mass_De2.c_str(), &mass_De2);
+
+
 }
 
 /*
