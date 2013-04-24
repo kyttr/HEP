@@ -12,7 +12,6 @@
 #include "e6_Class.h"
 #include "e6_v3_Class.h"
 #include "kayasC_Fncs.h"
-#include "exercise1.h"
 
 using namespace std;
 
