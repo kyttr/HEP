@@ -12,6 +12,7 @@
 #include "e6_Class.h"
 #include "e6_v3_Class.h"
 #include "kayasC_Fncs.h"
+#include "exercise1.h"
 
 using namespace std;
 
@@ -363,7 +364,7 @@ void loop_Reconstruct_De(e6_Class &e6) {
         nb = e6.fChain->GetEntry(jentry);
         nbytes += nb;
 
-        indices_JetPT_descending = sortIndices_Descending(e6.Jet_PT, kMaxJet);
+        indices_JetPT_descending = sortIndices_Descending(e6.Jet_PT, e6.Jet_size);
         index_MaxPT = indices_JetPT_descending[0];
         index_2ndMaxPT = indices_JetPT_descending[1];
 
@@ -491,7 +492,8 @@ void loop_maxJetPT(e6_Class &e6) {
 
         //DRAFT for the method
         //len = (sizeof (e6.Jet_PT) / sizeof (e6.Jet_PT[0]));
-        len=kMaxJet;
+        //len=kMaxJet;
+        len=e6.Jet_size;
         cout << "LEN : " << len << "\n";
         cout << "JET.PT : ";
         for (i = 0; i < len; i++) {
