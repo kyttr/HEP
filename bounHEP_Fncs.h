@@ -53,6 +53,7 @@ static const char* loop_Reconstruct_de_outputName = "loop_Reconstruct_de.root"; 
 static const char* loop_Reconstruct_De_outputName = "loop_Reconstruct_De.root"; // output file name of the function loop_Reconstruct_De()
 static const char* loop_Reconstruct_Higgs_outputName = "loop_Reconstruct_Higgs.root"; // output file name of the function loop_Reconstruct_Higgs()
 static const char* loop_Reconstruct_Z_outputName = "loop_Reconstruct_Z.root"; // output file name of the function loop_Reconstruct_Z()
+static const char* loop_deltaMass_of_deDe_outputName = "loop_deltaMass_of_deDe.root"; // output file name of the function loop_deltaMass_of_deDe()
 
 static const char* t_Reco_de1_Name = "Recode1"; // for "loop_Reconstruct_de()"
 static const char* t_Reco_de2_Name = "Recode2"; // for "loop_Reconstruct_de()"
@@ -552,8 +553,7 @@ void loop_Reconstruct_De(e6_Class &e6) {
 
                 fillTTree4LorentzVector(t_RecoDe1, fields_t_RecoDe1, reconstructed_De1);
                 fillTTree4LorentzVector(t_RecoDe2, fields_t_RecoDe2, reconstructed_De2);
-            }
-            else  if (mu_size == e6.Muon_size) {
+            } else if (mu_size == e6.Muon_size) {
 
                 mu1.SetPtEtaPhiM(e6.Muon_PT[0], e6.Muon_Eta[0], e6.Muon_Phi[0], mu_mass);
                 mu2.SetPtEtaPhiM(e6.Muon_PT[1], e6.Muon_Eta[1], e6.Muon_Phi[1], mu_mass);
@@ -765,11 +765,11 @@ void loop_deltaMass_of_deDe() {
     TTree *t_De1 = (TTree*) f_De->Get(t_Reco_De1_Name);
     TTree *t_De2 = (TTree*) f_De->Get(t_Reco_De2_Name);
 
-    Float_t mass_de1, mass_de2, mass_De1, mass_De2;
-    string addr_mass_de1 = prefix_t_Reco_de1 + ".M";
-    string addr_mass_de2 = prefix_t_Reco_de2 + ".M";
-    string addr_mass_De1 = prefix_t_RecoDe1 + ".M";
-    string addr_mass_De2 = prefix_t_RecoDe2 + ".M";
+    Double_t mass_de1, mass_de2, mass_De1, mass_De2;
+    string addr_mass_de1 = string(prefix_t_Reco_de1) + ".M";
+    string addr_mass_de2 = string(prefix_t_Reco_de2) + ".M";
+    string addr_mass_De1 = string(prefix_t_RecoDe1) + ".M";
+    string addr_mass_De2 = string(prefix_t_RecoDe2) + ".M";
 
     //  root.cern.ch/root/html/TTree.html#TTree:SetBranchAddress@1
     t_de1->SetBranchAddress(addr_mass_de1.c_str(), &mass_de1);
@@ -777,7 +777,32 @@ void loop_deltaMass_of_deDe() {
     t_De1->SetBranchAddress(addr_mass_De1.c_str(), &mass_De1);
     t_De2->SetBranchAddress(addr_mass_De2.c_str(), &mass_De2);
 
+    TFile f(loop_deltaMass_of_deDe_outputName, "recreate");
+    TTree *t = new TTree("deltaMass", "difference of masses of de and De");
+    double delta_j1_j2; // difference of masses if : H + jet1 --> de and Z + jet2 --> De
+    double delta_j2_j1; // difference of masses if : H + jet2 --> de and Z + jet1 --> De
+    //t->Branch("H+jet1_and_Z+jet2",&delta_j1_j2,"delta_jet1_jet2/D");
+    //t->Branch("H+jet2_and_Z+jet1",&delta_j2_j1,"delta_jet2_jet1/D");
+    t->Branch("j1j2",&delta_j1_j2,"delta_jet1_jet2/D");
+    t->Branch("j2j1",&delta_j2_j1,"delta_jet2_jet1/D");
 
+    //read all entries
+    Int_t nentries = (Int_t) t_de1->GetEntries();
+    for (Int_t i = 0; i < nentries; i++) {
+
+        // I assume all 4 "TTree" have same number of entries, actually the condition that I imposed made them have same num. of entries.
+        t_de1->GetEntry(i);
+        t_de2->GetEntry(i);
+        t_De1->GetEntry(i);
+        t_De2->GetEntry(i);
+        
+        delta_j1_j2=abs(mass_de1-mass_De2);
+        delta_j2_j1=abs(mass_de2-mass_De1);
+        
+        t->Fill();
+    }
+    
+    f.Write();
 }
 
 /*
