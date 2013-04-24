@@ -26,6 +26,10 @@ extern "C" {
 static const int numOfFields_GenParticle = 20;
 static const int numOfFields_TLorentzVector = 32;
 static const int numOfFields_Particle = 32;
+static const char* loop_Reconstruct_de_outputName="loop_Reconstruct_de.root"; // output file name of the function loop_Reconstruct_de()
+static const char* loop_Reconstruct_De_outputName="loop_Reconstruct_De.root"; // output file name of the function loop_Reconstruct_De()
+static const char* loop_Reconstruct_Higgs_outputName="loop_Reconstruct_Higgs.root"; // output file name of the function loop_Reconstruct_Higgs()
+static const char* loop_Reconstruct_Z_outputName="loop_Reconstruct_Z.root"; // output file name of the function loop_Reconstruct_Z()
 
 /*
  * TEMPLATE for the method "Loop()"
@@ -104,7 +108,7 @@ void loop_Reconstruct_Z(e6_Class &e6) {
     /*
      * no need for ".root" file for this small task
      */
-    string histoFile_str = "loop_Reconstruct_Z.root";
+    string histoFile_str = loop_Reconstruct_Z_outputName;
     // TFile constructor accepts type "const char*"
     const char* histoFile_char = histoFile_str.c_str();
     // overwrite existing ".root" file
@@ -311,7 +315,7 @@ void loop_Reconstruct_Z_from_mumu(e6_Class &e6) {
  */
 void loop_Reconstruct_De(e6_Class &e6) {
 
-    string histoFile_str = "loop_Reconstruct_De.root";
+    string histoFile_str = loop_Reconstruct_De_outputName;
     // TFile constructor accepts type "const char*"
     const char* histoFile_char = histoFile_str.c_str();
     // overwrite existing ".root" file
@@ -415,7 +419,7 @@ void loop_Reconstruct_De(e6_Class &e6) {
  */
 void loop_Reconstruct_de(e6_Class &e6) {
 
-    string histoFile_str = "loop_Reconstruct_de.root";
+    string histoFile_str = loop_Reconstruct_de_outputName;
     // TFile constructor accepts type "const char*"
     const char* histoFile_char = histoFile_str.c_str();
     // overwrite existing ".root" file
@@ -501,7 +505,7 @@ void loop_Reconstruct_de(e6_Class &e6) {
  */
 void loop_Reconstruct_Higgs(e6_Class &e6) {
 
-    string histoFile_str = "loop_Reconstruct_Higgs.root";
+    string histoFile_str = loop_Reconstruct_Higgs_outputName;
     // TFile constructor accepts type "const char*"
     const char* histoFile_char = histoFile_str.c_str();
     // overwrite existing ".root" file
