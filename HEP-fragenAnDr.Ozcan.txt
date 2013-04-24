@@ -81,9 +81,11 @@ Main:numberOfEvents = 200          ! number of events to generate
 3. De'yi "Z bozonu+jet" ikilisi ile yeniden yarat (reconstruct De).
     3.1 jet = PT'si en yüksek olan jet
     3.2 jet = PT'si 2. en yüksek olan jet
+        --> EDIT : şu anda her olaydan Z bozonu yaratmıyorum. Bir olayda Higgs yaratabiliyorsam, o zaman o olayda  Z bozonu yaratıyorum.
 4. Higgs bozonunu "jet3+jet4" ikilisi ile yeniden yarat (reconstruct Higgs boson).
     jet3 =  PT'si 3. en yüksek olan jet
     jet4 =  PT'si 4. en yüksek olan jet
+        --> EDIT : şu anda her olaydan Higgs yaratmıyorum. Bir olayda Z bozonu yaratabiliyorsam, o zaman o olayda Higgs yaratıyorum.
 5. de'yi "H+jet" ile De'yi "Z+jet" ile yeniden yarat.
     5.1. H + jet1 --> de ,  Z + jet2 --> De
     5.2. H + jet2 --> de ,  Z + jet1 --> De
