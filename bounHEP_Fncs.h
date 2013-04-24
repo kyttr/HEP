@@ -304,6 +304,107 @@ void loop_Reconstruct_Z_from_mumu(e6_Class &e6) {
     f.Write();
 }
 
+/*  
+ * De'yi "Z bozonu+jet" ikilisi ile yeniden yarat (reconstruct De).
+ *    1. jet = PT'si en yüksek olan jet
+ *    2. jet = PT'si 2. en yüksek olan jet
+ */
+void loop_Reconstruct_De(e6_Class &e6) {
+
+    string histoFile_str = "loop_Reconstruct_De.root";
+    // TFile constructor accepts type "const char*"
+    const char* histoFile_char = histoFile_str.c_str();
+    // overwrite existing ".root" file
+    TFile f(histoFile_char, "recreate");
+
+    TTree *t_RecoDe1 = new TTree("RecoDe1", "Z jet1 -> De");
+    Double_t fields_t_RecoDe1[numOfFields_TLorentzVector];
+    const char* prefix_t_RecoDe1 = "De1"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4TLorentzVector(t_RecoDe1, fields_t_RecoDe1, prefix_t_RecoDe1);
+
+    TTree *t_RecoDe2 = new TTree("RecoDe2", "Z jet2 -> De");
+    Double_t fields_t_RecoDe2[numOfFields_TLorentzVector];
+    const char* prefix_t_RecoDe2 = "De"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4TLorentzVector(t_RecoDe2, fields_t_RecoDe2, prefix_t_RecoDe2);
+
+    // create object on stack
+    //TH1F histMass_RecoZ("Mass_RecoZ", "mass of recontructed Z", 100, 0.0, 200000);
+    //TTree t_RecoZ("RecoZ", "e+e- -> Z");
+
+    int i = 0;
+    Double_t electron_mass = 0.0005; // mass in GeV
+    int electron_size = 2; // number of electrons we want to observe in the event
+
+    TLorentzVector el1, el2;
+
+    Double_t mu_mass = 0.10566; // mass in GeV
+    int mu_size = 2; // number of muons we want to observe in the event
+
+    TLorentzVector mu1, mu2;
+
+
+    TLorentzVector reconstructed_Z;
+    TLorentzVector jet1, jet2;
+    TLorentzVector reconstructed_De1, reconstructed_De2;
+
+    int* indices_JetPT_descending;
+    // indices of the "Jet" sorted such that 
+    // indices_JetPT_descending[0] matches the jet with max. PT
+    // indices_JetPT_descending[len-1] matches the jet with min. PT
+    int index_MaxPT;
+    int index_2ndMaxPT;
+
+    Long64_t nentries = e6.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = e6.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = e6.fChain->GetEntry(jentry);
+        nbytes += nb;
+
+        indices_JetPT_descending = sortIndices_Descending(e6.Jet_PT, kMaxJet);
+        index_MaxPT = indices_JetPT_descending[0];
+        index_2ndMaxPT = indices_JetPT_descending[1];
+
+        jet1.SetPtEtaPhiM(e6.Jet_PT[index_MaxPT], e6.Jet_Eta[index_MaxPT], e6.Jet_Phi[index_MaxPT], e6.Jet_Mass[index_MaxPT]);
+        jet2.SetPtEtaPhiM(e6.Jet_PT[index_2ndMaxPT], e6.Jet_Eta[index_2ndMaxPT], e6.Jet_Phi[index_2ndMaxPT], e6.Jet_Mass[index_2ndMaxPT]);
+
+        // if (Cut(ientry) < 0) continue;
+        if (electron_size == e6.Electron_size) {
+
+            el1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], electron_mass);
+            el2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], electron_mass);
+
+            reconstructed_Z = el1 + el2;
+
+            reconstructed_De1 = reconstructed_Z + jet1;
+            reconstructed_De2 = reconstructed_Z + jet2;
+
+            fillTTree4LorentzVector(t_RecoDe1, fields_t_RecoDe1, reconstructed_De1);
+            fillTTree4LorentzVector(t_RecoDe2, fields_t_RecoDe2, reconstructed_De2);
+        }
+        if (mu_size == e6.Muon_size) {
+
+            mu1.SetPtEtaPhiM(e6.Muon_PT[0], e6.Muon_Eta[0], e6.Muon_Phi[0], mu_mass);
+            mu2.SetPtEtaPhiM(e6.Muon_PT[1], e6.Muon_Eta[1], e6.Muon_Phi[1], mu_mass);
+
+            reconstructed_Z = mu1 + mu2;
+
+            reconstructed_De1 = reconstructed_Z + jet1;
+            reconstructed_De2 = reconstructed_Z + jet2;
+
+            fillTTree4LorentzVector(t_RecoDe1, fields_t_RecoDe1, reconstructed_De1);
+            fillTTree4LorentzVector(t_RecoDe2, fields_t_RecoDe2, reconstructed_De2);            
+        }
+    }
+    //    histMass_RecoZ.Draw(); // does not work, generates empty canvas
+    //    histMass_RecoZ.DrawClone(); // does not work, generates empty canvas
+    //histMass_RecoZ.DrawCopy(); // works
+
+    f.Write();
+}
+
 /*
  * loop over particles (I guess these are generated particles) and store their fields to a "TTree"
  * particles considered:
@@ -387,6 +488,8 @@ void loop_maxJetPT(e6_Class &e6) {
         nb = e6.fChain->GetEntry(jentry);
         nbytes += nb;
         // if (Cut(ientry) < 0) continue;
+
+        //DRAFT for the method
         //len = (sizeof (e6.Jet_PT) / sizeof (e6.Jet_PT[0]));
         len=kMaxJet;
         cout << "LEN : " << len << "\n";
@@ -401,6 +504,12 @@ void loop_maxJetPT(e6_Class &e6) {
             cout << sorted_indices[i] << " , ";
         }
         cout << "\n";
+//                cout << "JET.PT : ";
+//        for (i = 0; i < len; i++) {
+//            cout << e6.Jet_PT[i] << " , ";
+//        }
+//        cout << "\n";
+        cout<<"--------------------------------\n";
     }
 }
 
