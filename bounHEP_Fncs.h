@@ -54,6 +54,10 @@ static const char* loop_Reconstruct_De_outputName = "loop_Reconstruct_De.root"; 
 static const char* loop_Reconstruct_Higgs_outputName = "loop_Reconstruct_Higgs.root"; // output file name of the function loop_Reconstruct_Higgs()
 static const char* loop_Reconstruct_Z_outputName = "loop_Reconstruct_Z.root"; // output file name of the function loop_Reconstruct_Z()
 
+static const char* t_Reco_de1_Name="Recode1";
+static const char* t_Reco_de2_Name="Recode2";
+static const char* t_Reco_De1_Name="RecoDe1";
+static const char* t_Reco_De2_Name="RecoDe2";
 
 /*
  * loop over particles (I guess these are generated particles) and store their fields to a "TTree"
@@ -455,13 +459,15 @@ void loop_Reconstruct_De(e6_Class &e6) {
     TFile f(histoFile_char, "recreate");
     //TDirectory* dir1=f.mkdir("asdasd");       // ".root" dosyasında dizin oluşturma
 
-    TTree *t_RecoDe1 = new TTree("RecoDe1", "Z + jet1 -> De");
+    //TTree *t_RecoDe1 = new TTree("RecoDe1", "Z + jet1 -> De");
+    TTree *t_RecoDe1 = new TTree(t_Reco_De1_Name, "Z + jet1 -> De");
     //t_RecoDe1->SetDirectory(dir1);    // ".root" dosyasında dizin oluşturma
     Double_t fields_t_RecoDe1[numOfFields_TLorentzVector];
     const char* prefix_t_RecoDe1 = "De1"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4TLorentzVector(t_RecoDe1, fields_t_RecoDe1, prefix_t_RecoDe1);
 
-    TTree *t_RecoDe2 = new TTree("RecoDe2", "Z + jet2 -> De");
+    //TTree *t_RecoDe2 = new TTree("RecoDe2", "Z + jet2 -> De");
+    TTree *t_RecoDe2 = new TTree(t_Reco_De2_Name, "Z + jet2 -> De");
     Double_t fields_t_RecoDe2[numOfFields_TLorentzVector];
     const char* prefix_t_RecoDe2 = "De2"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4TLorentzVector(t_RecoDe2, fields_t_RecoDe2, prefix_t_RecoDe2);
@@ -559,13 +565,15 @@ void loop_Reconstruct_de(e6_Class &e6) {
     TFile f(histoFile_char, "recreate");
     //TDirectory* dir1=f.mkdir("asdasd");       // ".root" dosyasında dizin oluşturma
 
-    TTree *t_Reco_de1 = new TTree("Recode1", "H + jet1 -> de");
+    //TTree *t_Reco_de1 = new TTree("Recode1", "H + jet1 -> de");
+    TTree *t_Reco_de1 = new TTree(t_Reco_de1_Name, "H + jet1 -> de");
     //t_RecoDe1->SetDirectory(dir1);    // ".root" dosyasında dizin oluşturma
     Double_t fields_t_Reco_de1[numOfFields_TLorentzVector];
     const char* prefix_t_Reco_de1 = "de1"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4TLorentzVector(t_Reco_de1, fields_t_Reco_de1, prefix_t_Reco_de1);
 
-    TTree *t_Reco_de2 = new TTree("Recode2", "H + jet2 -> de");
+    //TTree *t_Reco_de2 = new TTree("Recode2", "H + jet2 -> de");
+    TTree *t_Reco_de2 = new TTree(t_Reco_de2_Name, "H + jet2 -> de");
     Double_t fields_t_Reco_de2[numOfFields_TLorentzVector];
     const char* prefix_t_Reco_de2 = "de2"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4TLorentzVector(t_Reco_de2, fields_t_Reco_de2, prefix_t_Reco_de2);
@@ -698,6 +706,20 @@ void loop_Reconstruct_Higgs(e6_Class &e6) {
     //histMass_RecoZ.DrawCopy(); // works
 
     f.Write();
+}
+
+void loop_deltaMass_of_deDe()
+{
+    //const char* reconstructed_de_file=loop_Reconstruct_de_outputName;
+    //const char* reconstructed_De_file=loop_Reconstruct_De_outputName;
+    
+    // files where data for reconstructed de and De are.
+    TFile* f_de=new TFile(loop_Reconstruct_de_outputName);
+    TFile* f_De=new TFile(loop_Reconstruct_De_outputName);
+    
+    // /root.cern.ch/root/html/TDirectoryFile.html#TDirectoryFile:Get
+    TTree *t_de1 = (TTree*)f_de->Get("");
+    
 }
 
 /*
