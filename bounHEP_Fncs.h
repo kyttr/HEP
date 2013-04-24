@@ -395,7 +395,7 @@ void loop_Reconstruct_De(e6_Class &e6) {
             reconstructed_De2 = reconstructed_Z + jet2;
 
             fillTTree4LorentzVector(t_RecoDe1, fields_t_RecoDe1, reconstructed_De1);
-            fillTTree4LorentzVector(t_RecoDe2, fields_t_RecoDe2, reconstructed_De2);            
+            fillTTree4LorentzVector(t_RecoDe2, fields_t_RecoDe2, reconstructed_De2);
         }
     }
     //    histMass_RecoZ.Draw(); // does not work, generates empty canvas
@@ -492,7 +492,7 @@ void loop_maxJetPT(e6_Class &e6) {
         //DRAFT for the method
         //len = (sizeof (e6.Jet_PT) / sizeof (e6.Jet_PT[0]));
         //len=kMaxJet;
-        len=e6.Jet_size;
+        len = e6.Jet_size;
         cout << "LEN : " << len << "\n";
         cout << "JET.PT : ";
         for (i = 0; i < len; i++) {
@@ -505,12 +505,12 @@ void loop_maxJetPT(e6_Class &e6) {
             cout << sorted_indices[i] << " , ";
         }
         cout << "\n";
-//                cout << "JET.PT : ";
-//        for (i = 0; i < len; i++) {
-//            cout << e6.Jet_PT[i] << " , ";
-//        }
-//        cout << "\n";
-        cout<<"--------------------------------\n";
+        //                cout << "JET.PT : ";
+        //        for (i = 0; i < len; i++) {
+        //            cout << e6.Jet_PT[i] << " , ";
+        //        }
+        //        cout << "\n";
+        cout << "--------------------------------\n";
     }
 }
 
@@ -696,6 +696,30 @@ X 	particle vertex position (x component) 	hepevt.vhep[number][0]
 Y 	particle vertex position (y component) 	hepevt.vhep[number][1]
 Z 	particle vertex position (z component) 	hepevt.vhep[number][2]
  */
+
+/*
+ * in "initializeTTree4Something()" methods, a big piece of code was redundant. I implemented that piece of code in another method to eliminate redundancy of code. From now on, "initializeTTree4Something()" will call this method instead of executing redundant code.
+ */
+void initializeTTree(TTree* t, Double_t* adresler, int len_Fields, const char* branchNamePrefix, const char* fields[]) {
+    const char* branchName;
+    string branchName_str;
+    const char* leafList;
+    string leafList_str;
+    for (int i = 0; i < len_Fields; i++) {
+        // + does not work for "const char*"
+        //branchName_str = branchNamePrefix + "." + genParticle_Fields[i];      
+        branchName_str = string(branchNamePrefix) + "." + string(fields[i]);
+        branchName = branchName_str.c_str();
+
+        // + does not work for "const char*"
+        //leafList_str = genParticle_Fields[i] + "/D";
+        leafList_str = string(fields[i]) + "/D";
+        leafList = leafList_str.c_str();
+
+        // http://root.cern.ch/root/html/TTree.html#TTree:Branch
+        t->Branch(branchName, &adresler[i], leafList);
+    }
+}
 
 /*
  http://www.cplusplus.com/doc/tutorial/pointers/
