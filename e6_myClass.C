@@ -47,11 +47,12 @@ int e6_myClass() {
 
     //loop_Reconstruct_Z(t);
     //loop_Particle(t);
-    
     //loop_maxJetPT(t);
-    loop_Reconstruct_De(t);
+
+    loop_Reconstruct_Z(t);
     loop_Reconstruct_Higgs(t);
     loop_Reconstruct_de(t);
+    loop_Reconstruct_De(t);
 
     return 0;
 }
