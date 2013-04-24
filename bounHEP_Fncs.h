@@ -54,6 +54,116 @@ static const char* loop_Reconstruct_De_outputName = "loop_Reconstruct_De.root"; 
 static const char* loop_Reconstruct_Higgs_outputName = "loop_Reconstruct_Higgs.root"; // output file name of the function loop_Reconstruct_Higgs()
 static const char* loop_Reconstruct_Z_outputName = "loop_Reconstruct_Z.root"; // output file name of the function loop_Reconstruct_Z()
 
+
+/*
+ * loop over particles (I guess these are generated particles) and store their fields to a "TTree"
+ * particles considered:
+ *      electron
+ *      muon
+ *      Higgs
+ *      Z
+ */
+void loop_Particle(e6_Class &e6) {
+    if (e6.fChain == 0) return;
+
+    string histoFile_str = "loop_Particle.root";
+    // TFile constructor accepts type "const char*"
+    const char* histoFile_char = histoFile_str.c_str();
+    // overwrite existing ".root" file
+    TFile f(histoFile_char, "recreate");
+
+    TTree *t_e = new TTree("electron", "generated electrons");
+    Double_t fields_t_e[numOfFields_Particle];
+    const char* prefix_t_e = "e"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4Particle(t_e, fields_t_e, prefix_t_e);
+
+    TTree *t_mu = new TTree("muon", "generated muons");
+    Double_t fields_t_mu[numOfFields_Particle];
+    const char* prefix_t_mu = "mu"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4Particle(t_mu, fields_t_mu, prefix_t_mu);
+
+    TTree *t_h = new TTree("higgs", "generated higgs bosons");
+    Double_t fields_t_h[numOfFields_Particle];
+    const char* prefix_t_h = "h"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4Particle(t_h, fields_t_h, prefix_t_h);
+
+    TTree *t_Z = new TTree("Z", "generated Z bosons");
+    Double_t fields_t_Z[numOfFields_Particle];
+    const char* prefix_t_Z = "z"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4Particle(t_Z, fields_t_Z, prefix_t_Z);
+
+    int i = 0;
+    int electron_ID = 11;
+    int muon_ID = 13;
+    int h_ID = 25; // pid of Higgs boson
+    int Z_ID = 23; // pid of Z boson
+
+    Long64_t nentries = e6.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = e6.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = e6.fChain->GetEntry(jentry);
+        nbytes += nb;
+        // if (Cut(ientry) < 0) continue;
+
+        for (i = 0; i < kMaxParticle; i++) {
+            fillTTree4Particle(t_e, fields_t_e, e6, i, electron_ID);
+            fillTTree4Particle(t_mu, fields_t_mu, e6, i, muon_ID);
+            fillTTree4Particle(t_h, fields_t_h, e6, i, h_ID);
+            fillTTree4Particle(t_Z, fields_t_Z, e6, i, Z_ID);
+        }
+
+    }
+
+    f.Write();
+}
+
+/*
+ * sorts the jets in an event according to their PT's.
+ */
+void loop_maxJetPT(e6_Class &e6) {
+    if (e6.fChain == 0) return;
+
+    int i;
+    int* sorted_indices;
+    int len;
+    Long64_t nentries = e6.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = e6.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = e6.fChain->GetEntry(jentry);
+        nbytes += nb;
+        // if (Cut(ientry) < 0) continue;
+
+        //DRAFT for the method
+        //len = (sizeof (e6.Jet_PT) / sizeof (e6.Jet_PT[0]));
+        //len=kMaxJet;
+        len = e6.Jet_size;
+        cout << "LEN : " << len << "\n";
+        cout << "JET.PT : ";
+        for (i = 0; i < len; i++) {
+            cout << e6.Jet_PT[i] << " , ";
+        }
+        cout << "\n";
+        sorted_indices = sortIndices(e6.Jet_PT, len);
+        cout << "ind : ";
+        for (i = 0; i < len; i++) {
+            cout << sorted_indices[i] << " , ";
+        }
+        cout << "\n";
+        //                cout << "JET.PT : ";
+        //        for (i = 0; i < len; i++) {
+        //            cout << e6.Jet_PT[i] << " , ";
+        //        }
+        //        cout << "\n";
+        cout << "--------------------------------\n";
+    }
+}
+
 /*
  * TEMPLATE for the method "Loop()"
  * 
@@ -591,111 +701,51 @@ void loop_Reconstruct_Higgs(e6_Class &e6) {
 }
 
 /*
- * loop over particles (I guess these are generated particles) and store their fields to a "TTree"
- * particles considered:
- *      electron
- *      muon
- *      Higgs
- *      Z
+ * Delphes-3.0.5/doc/RootTreeDescription.html
+ GenParticle
+PID 	particle HEP ID number 	hepevt.idhep[number]
+Status 	particle status 	hepevt.isthep[number]
+M1 	particle 1st mother 	hepevt.jmohep[number][0] - 1
+M2 	particle 2nd mother 	hepevt.jmohep[number][1] - 1
+D1 	particle 1st daughter 	hepevt.jdahep[number][0] - 1
+D2 	particle last daughter 	hepevt.jdahep[number][1] - 1
+Charge 	particle charge 	
+Mass 	particle mass 	
+E 	particle energy 	hepevt.phep[number][3]
+Px 	particle momentum vector (x component) 	hepevt.phep[number][0]
+Py 	particle momentum vector (y component) 	hepevt.phep[number][1]
+Pz 	particle momentum vector (z component) 	hepevt.phep[number][2]
+PT 	particle transverse momentum 	
+Eta 	particle pseudorapidity 	
+Phi 	particle azimuthal angle 	
+Rapidity 	particle rapidity 	
+T 	particle vertex position (t component) 	hepevt.vhep[number][3]
+X 	particle vertex position (x component) 	hepevt.vhep[number][0]
+Y 	particle vertex position (y component) 	hepevt.vhep[number][1]
+Z 	particle vertex position (z component) 	hepevt.vhep[number][2]
  */
-void loop_Particle(e6_Class &e6) {
-    if (e6.fChain == 0) return;
-
-    string histoFile_str = "loop_Particle.root";
-    // TFile constructor accepts type "const char*"
-    const char* histoFile_char = histoFile_str.c_str();
-    // overwrite existing ".root" file
-    TFile f(histoFile_char, "recreate");
-
-    TTree *t_e = new TTree("electron", "generated electrons");
-    Double_t fields_t_e[numOfFields_Particle];
-    const char* prefix_t_e = "e"; // must start with lowercase letter, dont know the stupid reason for that
-    initializeTTree4Particle(t_e, fields_t_e, prefix_t_e);
-
-    TTree *t_mu = new TTree("muon", "generated muons");
-    Double_t fields_t_mu[numOfFields_Particle];
-    const char* prefix_t_mu = "mu"; // must start with lowercase letter, dont know the stupid reason for that
-    initializeTTree4Particle(t_mu, fields_t_mu, prefix_t_mu);
-
-    TTree *t_h = new TTree("higgs", "generated higgs bosons");
-    Double_t fields_t_h[numOfFields_Particle];
-    const char* prefix_t_h = "h"; // must start with lowercase letter, dont know the stupid reason for that
-    initializeTTree4Particle(t_h, fields_t_h, prefix_t_h);
-
-    TTree *t_Z = new TTree("Z", "generated Z bosons");
-    Double_t fields_t_Z[numOfFields_Particle];
-    const char* prefix_t_Z = "z"; // must start with lowercase letter, dont know the stupid reason for that
-    initializeTTree4Particle(t_Z, fields_t_Z, prefix_t_Z);
-
-    int i = 0;
-    int electron_ID = 11;
-    int muon_ID = 13;
-    int h_ID = 25; // pid of Higgs boson
-    int Z_ID = 23; // pid of Z boson
-
-    Long64_t nentries = e6.fChain->GetEntriesFast();
-
-    Long64_t nbytes = 0, nb = 0;
-    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
-        Long64_t ientry = e6.LoadTree(jentry);
-        if (ientry < 0) break;
-        nb = e6.fChain->GetEntry(jentry);
-        nbytes += nb;
-        // if (Cut(ientry) < 0) continue;
-
-        for (i = 0; i < kMaxParticle; i++) {
-            fillTTree4Particle(t_e, fields_t_e, e6, i, electron_ID);
-            fillTTree4Particle(t_mu, fields_t_mu, e6, i, muon_ID);
-            fillTTree4Particle(t_h, fields_t_h, e6, i, h_ID);
-            fillTTree4Particle(t_Z, fields_t_Z, e6, i, Z_ID);
-        }
-
-    }
-
-    f.Write();
-}
 
 /*
- * sorts the jets in an event according to their PT's.
+ * in "initializeTTree4Something()" methods, a big piece of code was redundant. I implemented that piece of code in another method to eliminate redundancy of code. From now on, "initializeTTree4Something()" will call this method instead of executing redundant code.
  */
-void loop_maxJetPT(e6_Class &e6) {
-    if (e6.fChain == 0) return;
+void initializeTTree(TTree* t, Double_t* adresler, int len_Fields, const char* branchNamePrefix, const char* fields[]) {
+    const char* branchName;
+    string branchName_str;
+    const char* leafList;
+    string leafList_str;
+    for (int i = 0; i < len_Fields; i++) {
+        // + does not work for "const char*"
+        //branchName_str = branchNamePrefix + "." + genParticle_Fields[i];      
+        branchName_str = string(branchNamePrefix) + "." + string(fields[i]);
+        branchName = branchName_str.c_str();
 
-    int i;
-    int* sorted_indices;
-    int len;
-    Long64_t nentries = e6.fChain->GetEntriesFast();
+        // + does not work for "const char*"
+        //leafList_str = genParticle_Fields[i] + "/D";
+        leafList_str = string(fields[i]) + "/D";
+        leafList = leafList_str.c_str();
 
-    Long64_t nbytes = 0, nb = 0;
-    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
-        Long64_t ientry = e6.LoadTree(jentry);
-        if (ientry < 0) break;
-        nb = e6.fChain->GetEntry(jentry);
-        nbytes += nb;
-        // if (Cut(ientry) < 0) continue;
-
-        //DRAFT for the method
-        //len = (sizeof (e6.Jet_PT) / sizeof (e6.Jet_PT[0]));
-        //len=kMaxJet;
-        len = e6.Jet_size;
-        cout << "LEN : " << len << "\n";
-        cout << "JET.PT : ";
-        for (i = 0; i < len; i++) {
-            cout << e6.Jet_PT[i] << " , ";
-        }
-        cout << "\n";
-        sorted_indices = sortIndices(e6.Jet_PT, len);
-        cout << "ind : ";
-        for (i = 0; i < len; i++) {
-            cout << sorted_indices[i] << " , ";
-        }
-        cout << "\n";
-        //                cout << "JET.PT : ";
-        //        for (i = 0; i < len; i++) {
-        //            cout << e6.Jet_PT[i] << " , ";
-        //        }
-        //        cout << "\n";
-        cout << "--------------------------------\n";
+        // http://root.cern.ch/root/html/TTree.html#TTree:Branch
+        t->Branch(branchName, &adresler[i], leafList);
     }
 }
 
@@ -863,55 +913,6 @@ void fillTTree4LorentzVector(TTree* t, Double_t* adresler, TLorentzVector &vec) 
 
     t->Fill();
     //delete t;
-}
-
-/*
- * Delphes-3.0.5/doc/RootTreeDescription.html
- GenParticle
-PID 	particle HEP ID number 	hepevt.idhep[number]
-Status 	particle status 	hepevt.isthep[number]
-M1 	particle 1st mother 	hepevt.jmohep[number][0] - 1
-M2 	particle 2nd mother 	hepevt.jmohep[number][1] - 1
-D1 	particle 1st daughter 	hepevt.jdahep[number][0] - 1
-D2 	particle last daughter 	hepevt.jdahep[number][1] - 1
-Charge 	particle charge 	
-Mass 	particle mass 	
-E 	particle energy 	hepevt.phep[number][3]
-Px 	particle momentum vector (x component) 	hepevt.phep[number][0]
-Py 	particle momentum vector (y component) 	hepevt.phep[number][1]
-Pz 	particle momentum vector (z component) 	hepevt.phep[number][2]
-PT 	particle transverse momentum 	
-Eta 	particle pseudorapidity 	
-Phi 	particle azimuthal angle 	
-Rapidity 	particle rapidity 	
-T 	particle vertex position (t component) 	hepevt.vhep[number][3]
-X 	particle vertex position (x component) 	hepevt.vhep[number][0]
-Y 	particle vertex position (y component) 	hepevt.vhep[number][1]
-Z 	particle vertex position (z component) 	hepevt.vhep[number][2]
- */
-
-/*
- * in "initializeTTree4Something()" methods, a big piece of code was redundant. I implemented that piece of code in another method to eliminate redundancy of code. From now on, "initializeTTree4Something()" will call this method instead of executing redundant code.
- */
-void initializeTTree(TTree* t, Double_t* adresler, int len_Fields, const char* branchNamePrefix, const char* fields[]) {
-    const char* branchName;
-    string branchName_str;
-    const char* leafList;
-    string leafList_str;
-    for (int i = 0; i < len_Fields; i++) {
-        // + does not work for "const char*"
-        //branchName_str = branchNamePrefix + "." + genParticle_Fields[i];      
-        branchName_str = string(branchNamePrefix) + "." + string(fields[i]);
-        branchName = branchName_str.c_str();
-
-        // + does not work for "const char*"
-        //leafList_str = genParticle_Fields[i] + "/D";
-        leafList_str = string(fields[i]) + "/D";
-        leafList = leafList_str.c_str();
-
-        // http://root.cern.ch/root/html/TTree.html#TTree:Branch
-        t->Branch(branchName, &adresler[i], leafList);
-    }
 }
 
 /*
