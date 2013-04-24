@@ -514,55 +514,6 @@ void loop_maxJetPT(e6_Class &e6) {
     }
 }
 
-/*
- * Delphes-3.0.5/doc/RootTreeDescription.html
- GenParticle
-PID 	particle HEP ID number 	hepevt.idhep[number]
-Status 	particle status 	hepevt.isthep[number]
-M1 	particle 1st mother 	hepevt.jmohep[number][0] - 1
-M2 	particle 2nd mother 	hepevt.jmohep[number][1] - 1
-D1 	particle 1st daughter 	hepevt.jdahep[number][0] - 1
-D2 	particle last daughter 	hepevt.jdahep[number][1] - 1
-Charge 	particle charge 	
-Mass 	particle mass 	
-E 	particle energy 	hepevt.phep[number][3]
-Px 	particle momentum vector (x component) 	hepevt.phep[number][0]
-Py 	particle momentum vector (y component) 	hepevt.phep[number][1]
-Pz 	particle momentum vector (z component) 	hepevt.phep[number][2]
-PT 	particle transverse momentum 	
-Eta 	particle pseudorapidity 	
-Phi 	particle azimuthal angle 	
-Rapidity 	particle rapidity 	
-T 	particle vertex position (t component) 	hepevt.vhep[number][3]
-X 	particle vertex position (x component) 	hepevt.vhep[number][0]
-Y 	particle vertex position (y component) 	hepevt.vhep[number][1]
-Z 	particle vertex position (z component) 	hepevt.vhep[number][2]
- */
-
-/*
- * in "initializeTTree4Something()" methods, a big piece of code was redundant. I implemented that piece of code in another method to eliminate redundancy of code. From now on, "initializeTTree4Something()" will call this method instead of executing redundant code.
- */
-void initializeTTree(TTree* t, Double_t* adresler, int len_Fields, const char* branchNamePrefix, const char* fields[]) {
-    const char* branchName;
-    string branchName_str;
-    const char* leafList;
-    string leafList_str;
-    for (int i = 0; i < len_Fields; i++) {
-        // + does not work for "const char*"
-        //branchName_str = branchNamePrefix + "." + genParticle_Fields[i];      
-        branchName_str = string(branchNamePrefix) + "." + string(fields[i]);
-        branchName = branchName_str.c_str();
-
-        // + does not work for "const char*"
-        //leafList_str = genParticle_Fields[i] + "/D";
-        leafList_str = string(fields[i]) + "/D";
-        leafList = leafList_str.c_str();
-
-        // http://root.cern.ch/root/html/TTree.html#TTree:Branch
-        t->Branch(branchName, &adresler[i], leafList);
-    }
-}
-
 void initializeTTree4Particle(TTree* t, Double_t* adresler, const char* branchNamePrefix) {
 
     // Elements of "lorentzVector_Fields" will be used as suffix for branch names
@@ -647,46 +598,6 @@ void fillTTree4Particle(TTree* t, Double_t* adresler, e6_Class &e6, int indexOfP
     }
 }
 
-void initializeTTree4Jet(TTree* t, Double_t* adresler, const char* branchNamePrefix) {
-
-    // Elements of "jet_Fields" will be used as suffix for branch names
-    // Length of "jet_Fields" is 12. So the "adresler" must be of length 12. The user should have allocated "adresler" with length 12 before calling this function.
-    // http://stackoverflow.com/questions/3814804/initializing-a-static-const-char-array
-    const char* jet_Fields[] = {"fUniqueID", "fBits", "PT", "Eta", "Phi", "Mass", "DeltaEta", "DeltaPhi", "BTag", "TauTag", "Charge", "EhadOverEem"};
-
-    // http://stackoverflow.com/questions/4108313/how-do-i-find-the-length-of-an-array
-    int len_Fields = (sizeof (jet_Fields) / sizeof (*jet_Fields)); // =12
-
-    initializeTTree(t, adresler, len_Fields, branchNamePrefix, jet_Fields);
-}
-
-/*
- * fills branches of the given TTree "t". "t" is a TTree that contains all the fields of type "e6_Class.Jet_ ...".
- * Values are taken from the e6_Class "e6". Branches of "t" are filled with values like e6.Jet_PT[i], where "i" is the index of the jet in a particular event.
- * 
- * "adresler" must be the same addresses that were used during the initialization of the "TTree" object.
- * 
- *  http://www.cplusplus.com/doc/tutorial/pointers/
- */
-void fillTTree4Jet(TTree* t, Double_t* adresler, e6_Class &e6, int indexOfParticle) {
-
-    adresler[0] = e6.Jet_fUniqueID[indexOfParticle];
-    adresler[1] = e6.Jet_fBits[indexOfParticle];
-    adresler[2] = e6.Jet_PT[indexOfParticle];
-    adresler[3] = e6.Jet_Eta[indexOfParticle];
-    adresler[4] = e6.Jet_Phi[indexOfParticle];
-    adresler[5] = e6.Jet_Mass[indexOfParticle];
-    adresler[6] = e6.Jet_DeltaEta[indexOfParticle];
-    adresler[7] = e6.Jet_DeltaPhi[indexOfParticle];
-    adresler[8] = e6.Jet_BTag[indexOfParticle];
-    adresler[9] = e6.Jet_TauTag[indexOfParticle];
-    adresler[10] = e6.Jet_Charge[indexOfParticle];
-    adresler[11] = e6.Jet_EhadOverEem[indexOfParticle];
-
-    t->Fill();
-    //delete t;
-}
-
 void initializeTTree4TLorentzVector(TTree* t, Double_t* adresler, const char* branchNamePrefix) {
 
     // Elements of "lorentzVector_Fields" will be used as suffix for branch names
@@ -767,6 +678,55 @@ void fillTTree4LorentzVector(TTree* t, Double_t* adresler, TLorentzVector &vec) 
 
     t->Fill();
     //delete t;
+}
+
+/*
+ * Delphes-3.0.5/doc/RootTreeDescription.html
+ GenParticle
+PID 	particle HEP ID number 	hepevt.idhep[number]
+Status 	particle status 	hepevt.isthep[number]
+M1 	particle 1st mother 	hepevt.jmohep[number][0] - 1
+M2 	particle 2nd mother 	hepevt.jmohep[number][1] - 1
+D1 	particle 1st daughter 	hepevt.jdahep[number][0] - 1
+D2 	particle last daughter 	hepevt.jdahep[number][1] - 1
+Charge 	particle charge 	
+Mass 	particle mass 	
+E 	particle energy 	hepevt.phep[number][3]
+Px 	particle momentum vector (x component) 	hepevt.phep[number][0]
+Py 	particle momentum vector (y component) 	hepevt.phep[number][1]
+Pz 	particle momentum vector (z component) 	hepevt.phep[number][2]
+PT 	particle transverse momentum 	
+Eta 	particle pseudorapidity 	
+Phi 	particle azimuthal angle 	
+Rapidity 	particle rapidity 	
+T 	particle vertex position (t component) 	hepevt.vhep[number][3]
+X 	particle vertex position (x component) 	hepevt.vhep[number][0]
+Y 	particle vertex position (y component) 	hepevt.vhep[number][1]
+Z 	particle vertex position (z component) 	hepevt.vhep[number][2]
+ */
+
+/*
+ * in "initializeTTree4Something()" methods, a big piece of code was redundant. I implemented that piece of code in another method to eliminate redundancy of code. From now on, "initializeTTree4Something()" will call this method instead of executing redundant code.
+ */
+void initializeTTree(TTree* t, Double_t* adresler, int len_Fields, const char* branchNamePrefix, const char* fields[]) {
+    const char* branchName;
+    string branchName_str;
+    const char* leafList;
+    string leafList_str;
+    for (int i = 0; i < len_Fields; i++) {
+        // + does not work for "const char*"
+        //branchName_str = branchNamePrefix + "." + genParticle_Fields[i];      
+        branchName_str = string(branchNamePrefix) + "." + string(fields[i]);
+        branchName = branchName_str.c_str();
+
+        // + does not work for "const char*"
+        //leafList_str = genParticle_Fields[i] + "/D";
+        leafList_str = string(fields[i]) + "/D";
+        leafList = leafList_str.c_str();
+
+        // http://root.cern.ch/root/html/TTree.html#TTree:Branch
+        t->Branch(branchName, &adresler[i], leafList);
+    }
 }
 
 /*
