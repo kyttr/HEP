@@ -97,6 +97,7 @@ EDIT on 24.04.2013/Çrş :
     "Yeniden yaratılan De" : kütle 500 GeV civarında tavan yapıyor, pek sorun yok gibi. 
     "Yeniden yaratılan Higgs" : en fazla görülen kütle 120 GeV, ama bu diğer kütlelerden sıyrılmıyor.
     "Yeniden yaratılan de" : "De" gibi keskin değil
+    "deltaMass" : 2 kombinasyon arasında pek bir fark yok, ama "H + jet1 --> de ,  Z + jet2 --> De" kombinasyonu daha uygun sanki.
 
 
 As far as I understood : reconstruction = particle1.LorentzVector + particle2.LorentzVector
