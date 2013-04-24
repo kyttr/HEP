@@ -399,7 +399,7 @@ void loop_Reconstruct_Z_from_ee(e6_Class &e6) {
     //t_RecoZ.Draw();
     //t_RecoZ.DrawClone();
     //t_RecoZ.StartViewer();
-    t_RecoZ.Draw("z.M");
+    //t_RecoZ.Draw("z.M");
 
     f.Write();
 }
@@ -458,7 +458,7 @@ void loop_Reconstruct_Z_from_mumu(e6_Class &e6) {
     //t_RecoZ.Draw();
     //t_RecoZ.DrawClone();
     //t_RecoZ.StartViewer();
-    t_RecoZ.Draw("z.M");
+    //t_RecoZ.Draw("z.M");
 
     f.Write();
 }

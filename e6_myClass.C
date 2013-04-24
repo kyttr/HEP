@@ -48,6 +48,9 @@ int e6_myClass() {
     //loop_Reconstruct_Z(t);
     //loop_Particle(t);
     //loop_maxJetPT(t);
+    
+    loop_Reconstruct_Z_from_ee(t);
+    loop_Reconstruct_Z_from_mumu(t);
 
     loop_Reconstruct_Z(t);
     loop_Reconstruct_Higgs(t);
