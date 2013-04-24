@@ -524,6 +524,9 @@ void initializeTTree4Particle(TTree* t, Double_t* adresler, const char* branchNa
     // http://stackoverflow.com/questions/4108313/how-do-i-find-the-length-of-an-array
     int len_Fields = (sizeof (particle_Fields) / sizeof (*particle_Fields)); // =23
 
+    initializeTTree(t, adresler, len_Fields, branchNamePrefix, particle_Fields);
+
+    /*
     const char* branchName;
     string branchName_str;
     const char* leafList;
@@ -543,6 +546,7 @@ void initializeTTree4Particle(TTree* t, Double_t* adresler, const char* branchNa
         // http://root.cern.ch/root/html/TTree.html#TTree:Branch
         t->Branch(branchName, &adresler[i], leafList);
     }
+     */
 }
 
 /*
@@ -604,25 +608,29 @@ void initializeTTree4TLorentzVector(TTree* t, Double_t* adresler, const char* br
     // http://stackoverflow.com/questions/4108313/how-do-i-find-the-length-of-an-array
     int len_Fields = (sizeof (lorentzVector_Fields) / sizeof (*lorentzVector_Fields)); // =32
 
-    const char* branchName;
-    string branchName_str;
-    const char* leafList;
-    string leafList_str;
+    initializeTTree(t, adresler, len_Fields, branchNamePrefix, lorentzVector_Fields);
 
-    for (int i = 0; i < len_Fields; i++) {
-        // + does not work for "const char*"
-        //branchName_str = branchNamePrefix + "." + genParticle_Fields[i];      
-        branchName_str = string(branchNamePrefix) + "." + string(lorentzVector_Fields[i]);
-        branchName = branchName_str.c_str();
+    /*
+        const char* branchName;
+        string branchName_str;
+        const char* leafList;
+        string leafList_str;
 
-        // + does not work for "const char*"
-        //leafList_str = genParticle_Fields[i] + "/D";
-        leafList_str = string(lorentzVector_Fields[i]) + "/D";
-        leafList = leafList_str.c_str();
+        for (int i = 0; i < len_Fields; i++) {
+            // + does not work for "const char*"
+            //branchName_str = branchNamePrefix + "." + genParticle_Fields[i];      
+            branchName_str = string(branchNamePrefix) + "." + string(lorentzVector_Fields[i]);
+            branchName = branchName_str.c_str();
 
-        // http://root.cern.ch/root/html/TTree.html#TTree:Branch
-        t->Branch(branchName, &adresler[i], leafList);
-    }
+            // + does not work for "const char*"
+            //leafList_str = genParticle_Fields[i] + "/D";
+            leafList_str = string(lorentzVector_Fields[i]) + "/D";
+            leafList = leafList_str.c_str();
+
+            // http://root.cern.ch/root/html/TTree.html#TTree:Branch
+            t->Branch(branchName, &adresler[i], leafList);
+        }
+     */
 }
 
 /*
@@ -734,24 +742,27 @@ void initializeTTree4GenParticle(TTree* t, Double_t* adresler, const char* branc
     // http://stackoverflow.com/questions/4108313/how-do-i-find-the-length-of-an-array
     int len_Fields = (sizeof (genParticle_Fields) / sizeof (*genParticle_Fields)); // =20
 
-    const char* branchName;
-    string branchName_str;
-    const char* leafList;
-    string leafList_str;
-    for (int i = 0; i < len_Fields; i++) {
-        // + does not work for "const char*"
-        //branchName_str = branchNamePrefix + "." + genParticle_Fields[i];      
-        branchName_str = string(branchNamePrefix) + "." + string(genParticle_Fields[i]);
-        branchName = branchName_str.c_str();
+    initializeTTree(t, adresler, len_Fields, branchNamePrefix, genParticle_Fields);
+    /*
+        const char* branchName;
+        string branchName_str;
+        const char* leafList;
+        string leafList_str;
+        for (int i = 0; i < len_Fields; i++) {
+            // + does not work for "const char*"
+            //branchName_str = branchNamePrefix + "." + genParticle_Fields[i];      
+            branchName_str = string(branchNamePrefix) + "." + string(genParticle_Fields[i]);
+            branchName = branchName_str.c_str();
 
-        // + does not work for "const char*"
-        //leafList_str = genParticle_Fields[i] + "/D";
-        leafList_str = string(genParticle_Fields[i]) + "/D";
-        leafList = leafList_str.c_str();
+            // + does not work for "const char*"
+            //leafList_str = genParticle_Fields[i] + "/D";
+            leafList_str = string(genParticle_Fields[i]) + "/D";
+            leafList = leafList_str.c_str();
 
-        // http://root.cern.ch/root/html/TTree.html#TTree:Branch
-        t->Branch(branchName, &adresler[i], leafList);
-    }
+            // http://root.cern.ch/root/html/TTree.html#TTree:Branch
+            t->Branch(branchName, &adresler[i], leafList);
+        }
+     */
 }
 
 /*
@@ -767,6 +778,8 @@ void initializeTTree4GenParticle(TTree &t, Double_t* adresler, const char* branc
     // http://stackoverflow.com/questions/4108313/how-do-i-find-the-length-of-an-array
     int len_Fields = (sizeof (genParticle_Fields) / sizeof (*genParticle_Fields)); // =20
 
+    initializeTTree(t, adresler, len_Fields, branchNamePrefix, genParticle_Fields);
+    /*
     const char* branchName;
     string branchName_str;
     const char* leafList;
@@ -785,6 +798,7 @@ void initializeTTree4GenParticle(TTree &t, Double_t* adresler, const char* branc
         // http://root.cern.ch/root/html/TTree.html#TTree:Branch
         t.Branch(branchName, &adresler[i], leafList);
     }
+     */
 }
 
 class GenParticle; // if this does not exist, ~> Warning: Unknown type 'GenParticle' in function argument handled as int
