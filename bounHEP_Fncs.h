@@ -783,8 +783,10 @@ void loop_deltaMass_of_deDe() {
     double delta_j2_j1; // difference of masses if : H + jet2 --> de and Z + jet1 --> De
     //t->Branch("H+jet1_and_Z+jet2",&delta_j1_j2,"delta_jet1_jet2/D");
     //t->Branch("H+jet2_and_Z+jet1",&delta_j2_j1,"delta_jet2_jet1/D");
-    t->Branch("j1j2",&delta_j1_j2,"delta_jet1_jet2/D");
-    t->Branch("j2j1",&delta_j2_j1,"delta_jet2_jet1/D");
+    t->Branch("H,jet1_and_Z,jet2",&delta_j1_j2,"delta_jet1_jet2/D");
+    t->Branch("H,jet2_and_Z,jet1",&delta_j2_j1,"delta_jet2_jet1/D");
+//    t->Branch("j1j2",&delta_j1_j2,"delta_jet1_jet2/D");
+//    t->Branch("j2j1",&delta_j2_j1,"delta_jet2_jet1/D");
 
     //read all entries
     Int_t nentries = (Int_t) t_de1->GetEntries();
