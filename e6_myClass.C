@@ -50,6 +50,7 @@ int e6_myClass() {
     
     //loop_maxJetPT(t);
     loop_Reconstruct_De(t);
+    loop_Reconstruct_Higgs(t);
 
     return 0;
 }
