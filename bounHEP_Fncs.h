@@ -243,6 +243,11 @@ void loop_HiggsMass(e6_Class &e6) {
  * reconstruct Z boson both from e-e+ and mu-mu+
  * and save the reconstructed Z boson to a tree.
  * I consider events with exactly 2 electrons or events with exactly 2 muons
+ * 
+ * !! I think, if Z is to be reconstructed in an event, then in the same event we should have Higgs boson to be reconstructed as well. So before reconstructing a Z in an event, I also should check whether this event can reconstruct a Higgs as well.
+ * 
+ * To reconstruct a Z, one needs 2 muons or 2 electrons.
+ * To reconstuct a Higgs, one needs 4 jets (2 of them will be selected).
  */
 void loop_Reconstruct_Z(e6_Class &e6) {
     if (e6.fChain == 0) return;
@@ -288,6 +293,9 @@ void loop_Reconstruct_Z(e6_Class &e6) {
     TLorentzVector mu1, mu2;
     TLorentzVector reconstructed_Z_mumu;
 
+    bool can_reconstruct_Higgs;
+    int jet_size = 4; // min number of jets we want to observe in the event
+
     Long64_t nentries = e6.fChain->GetEntriesFast();
 
     Long64_t nbytes = 0, nb = 0;
@@ -297,23 +305,28 @@ void loop_Reconstruct_Z(e6_Class &e6) {
         nb = e6.fChain->GetEntry(jentry);
         nbytes += nb;
         // if (Cut(ientry) < 0) continue;
-        if (electron_size == e6.Electron_size) {
 
-            el1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], electron_mass);
-            el2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], electron_mass);
+        can_reconstruct_Higgs = (e6.Jet_size >= jet_size);
 
-            reconstructed_Z_ee = el1 + el2;
-            fillTTree4LorentzVector(t_RecoZ_ee, fields_t_RecoZ_ee, reconstructed_Z_ee);
-            fillTTree4LorentzVector(t_RecoZ, fields_t_RecoZ, reconstructed_Z_ee);
-        }
-        if (mu_size == e6.Muon_size) {
+        if (can_reconstruct_Higgs) {
+            if (electron_size == e6.Electron_size) {
 
-            mu1.SetPtEtaPhiM(e6.Muon_PT[0], e6.Muon_Eta[0], e6.Muon_Phi[0], mu_mass);
-            mu2.SetPtEtaPhiM(e6.Muon_PT[1], e6.Muon_Eta[1], e6.Muon_Phi[1], mu_mass);
+                el1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], electron_mass);
+                el2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], electron_mass);
 
-            reconstructed_Z_mumu = mu1 + mu2;
-            fillTTree4LorentzVector(t_RecoZ_mumu, fields_t_RecoZ_mumu, reconstructed_Z_mumu);
-            fillTTree4LorentzVector(t_RecoZ, fields_t_RecoZ, reconstructed_Z_mumu);
+                reconstructed_Z_ee = el1 + el2;
+                fillTTree4LorentzVector(t_RecoZ_ee, fields_t_RecoZ_ee, reconstructed_Z_ee);
+                fillTTree4LorentzVector(t_RecoZ, fields_t_RecoZ, reconstructed_Z_ee);
+            }
+            if (mu_size == e6.Muon_size) {
+
+                mu1.SetPtEtaPhiM(e6.Muon_PT[0], e6.Muon_Eta[0], e6.Muon_Phi[0], mu_mass);
+                mu2.SetPtEtaPhiM(e6.Muon_PT[1], e6.Muon_Eta[1], e6.Muon_Phi[1], mu_mass);
+
+                reconstructed_Z_mumu = mu1 + mu2;
+                fillTTree4LorentzVector(t_RecoZ_mumu, fields_t_RecoZ_mumu, reconstructed_Z_mumu);
+                fillTTree4LorentzVector(t_RecoZ, fields_t_RecoZ, reconstructed_Z_mumu);
+            }
         }
     }
     //    histMass_RecoZ.Draw(); // does not work, generates empty canvas
@@ -504,6 +517,9 @@ void loop_Reconstruct_De(e6_Class &e6) {
     int index_MaxPT;
     int index_2ndMaxPT;
 
+    bool can_reconstruct_Higgs;
+    int jet_size = 4; // min number of jets we want to observe in the event
+
     Long64_t nentries = e6.fChain->GetEntriesFast();
 
     Long64_t nbytes = 0, nb = 0;
@@ -521,31 +537,36 @@ void loop_Reconstruct_De(e6_Class &e6) {
         jet2.SetPtEtaPhiM(e6.Jet_PT[index_2ndMaxPT], e6.Jet_Eta[index_2ndMaxPT], e6.Jet_Phi[index_2ndMaxPT], e6.Jet_Mass[index_2ndMaxPT]);
 
         // if (Cut(ientry) < 0) continue;
-        if (electron_size == e6.Electron_size) {
 
-            el1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], electron_mass);
-            el2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], electron_mass);
+        can_reconstruct_Higgs = (e6.Jet_size >= jet_size);
 
-            reconstructed_Z = el1 + el2;
+        if (can_reconstruct_Higgs) {
+            if (electron_size == e6.Electron_size) {
 
-            reconstructed_De1 = reconstructed_Z + jet1;
-            reconstructed_De2 = reconstructed_Z + jet2;
+                el1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], electron_mass);
+                el2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], electron_mass);
 
-            fillTTree4LorentzVector(t_RecoDe1, fields_t_RecoDe1, reconstructed_De1);
-            fillTTree4LorentzVector(t_RecoDe2, fields_t_RecoDe2, reconstructed_De2);
-        }
-        if (mu_size == e6.Muon_size) {
+                reconstructed_Z = el1 + el2;
 
-            mu1.SetPtEtaPhiM(e6.Muon_PT[0], e6.Muon_Eta[0], e6.Muon_Phi[0], mu_mass);
-            mu2.SetPtEtaPhiM(e6.Muon_PT[1], e6.Muon_Eta[1], e6.Muon_Phi[1], mu_mass);
+                reconstructed_De1 = reconstructed_Z + jet1;
+                reconstructed_De2 = reconstructed_Z + jet2;
 
-            reconstructed_Z = mu1 + mu2;
+                fillTTree4LorentzVector(t_RecoDe1, fields_t_RecoDe1, reconstructed_De1);
+                fillTTree4LorentzVector(t_RecoDe2, fields_t_RecoDe2, reconstructed_De2);
+            }
+            if (mu_size == e6.Muon_size) {
 
-            reconstructed_De1 = reconstructed_Z + jet1;
-            reconstructed_De2 = reconstructed_Z + jet2;
+                mu1.SetPtEtaPhiM(e6.Muon_PT[0], e6.Muon_Eta[0], e6.Muon_Phi[0], mu_mass);
+                mu2.SetPtEtaPhiM(e6.Muon_PT[1], e6.Muon_Eta[1], e6.Muon_Phi[1], mu_mass);
 
-            fillTTree4LorentzVector(t_RecoDe1, fields_t_RecoDe1, reconstructed_De1);
-            fillTTree4LorentzVector(t_RecoDe2, fields_t_RecoDe2, reconstructed_De2);
+                reconstructed_Z = mu1 + mu2;
+
+                reconstructed_De1 = reconstructed_Z + jet1;
+                reconstructed_De2 = reconstructed_Z + jet2;
+
+                fillTTree4LorentzVector(t_RecoDe1, fields_t_RecoDe1, reconstructed_De1);
+                fillTTree4LorentzVector(t_RecoDe2, fields_t_RecoDe2, reconstructed_De2);
+            }
         }
     }
     //    histMass_RecoZ.Draw(); // does not work, generates empty canvas
@@ -604,6 +625,10 @@ void loop_Reconstruct_de(e6_Class &e6) {
     int index_3rdMaxPT;
     int index_4thMaxPT;
 
+    bool can_reconstruct_Z;
+    int electron_size = 2; // number of electrons we want to observe in the event
+    int mu_size = 2; // number of muons we want to observe in the event
+
     Long64_t nentries = e6.fChain->GetEntriesFast();
 
     Long64_t nbytes = 0, nb = 0;
@@ -613,8 +638,10 @@ void loop_Reconstruct_de(e6_Class &e6) {
         nb = e6.fChain->GetEntry(jentry);
         nbytes += nb;
 
+        can_reconstruct_Z = (e6.Electron_size == electron_size) || (e6.Muon_size == mu_size);
+
         // if (Cut(ientry) < 0) continue;
-        if (e6.Jet_size >= jet_size) {
+        if (e6.Jet_size >= jet_size && can_reconstruct_Z) {
 
             indices_JetPT_descending = sortIndices_Descending(e6.Jet_PT, e6.Jet_size);
 
@@ -648,6 +675,11 @@ void loop_Reconstruct_de(e6_Class &e6) {
  * 4. Higgs bozonunu "jet3+jet4" ikilisi ile yeniden yarat (reconstruct Higgs boson).
  *  jet3 =  PT'si 3. en yüksek olan jet
  *  jet4 =  PT'si 4. en yüksek olan jet
+ * 
+ * !! I think, if Higgs is to be reconstructed in an event, then in the same event we should have Z boson to be reconstructed as well. So before reconstructing a Higgs in an event, I also should check whether this event can reconstruct a Z as well.
+ * 
+ * To reconstruct a Z, one needs 2 muons or 2 electrons.
+ * To reconstuct a Higgs, one needs 4 jets (2 of them will be selected).
  */
 void loop_Reconstruct_Higgs(e6_Class &e6) {
 
@@ -680,6 +712,10 @@ void loop_Reconstruct_Higgs(e6_Class &e6) {
     int index_3rdMaxPT;
     int index_4thMaxPT;
 
+    bool can_reconstruct_Z;
+    int electron_size = 2; // number of electrons we want to observe in the event
+    int mu_size = 2; // number of muons we want to observe in the event
+
     Long64_t nentries = e6.fChain->GetEntriesFast();
 
     Long64_t nbytes = 0, nb = 0;
@@ -690,7 +726,10 @@ void loop_Reconstruct_Higgs(e6_Class &e6) {
         nbytes += nb;
 
         // if (Cut(ientry) < 0) continue;
-        if (e6.Jet_size >= jet_size) {
+
+        can_reconstruct_Z = (e6.Electron_size == electron_size) || (e6.Muon_size == mu_size);
+
+        if (e6.Jet_size >= jet_size && can_reconstruct_Z) {
 
             indices_JetPT_descending = sortIndices_Descending(e6.Jet_PT, e6.Jet_size);
             index_3rdMaxPT = indices_JetPT_descending[2];
@@ -728,7 +767,16 @@ void loop_deltaMass_of_deDe() {
     TTree *t_De2 = (TTree*) f_De->Get(t_Reco_De2_Name);
 
     Float_t mass_de1, mass_de2, mass_De1, mass_De2;
+    string addr_mass_de1 = prefix_t_Reco_de1 + ".M";
+    string addr_mass_de2 = prefix_t_Reco_de2 + ".M";
+    string addr_mass_De1 = prefix_t_RecoDe1 + ".M";
+    string addr_mass_De2 = prefix_t_RecoDe2 + ".M";
 
+    //  root.cern.ch/root/html/TTree.html#TTree:SetBranchAddress@1
+    t_de1->SetBranchAddress(addr_mass_de1.c_str(), &mass_de1);
+    t_de2->SetBranchAddress(addr_mass_de2.c_str(), &mass_de2);
+    t_De1->SetBranchAddress(addr_mass_De1.c_str(), &mass_De1);
+    t_De2->SetBranchAddress(addr_mass_De2.c_str(), &mass_De2);
 }
 
 /*
