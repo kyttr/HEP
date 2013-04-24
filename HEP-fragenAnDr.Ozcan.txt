@@ -92,6 +92,13 @@ Main:numberOfEvents = 200          ! number of events to generate
         (jet1 = PT'si en yüksek olan jet , jet2 = PT'si 2. en yüksek olan jet)
     deltaMass = abs (de.Mass - De.Mass) hesapla. "deltaMass" minimize eden kombinasyonu bul.
 
+EDIT on 24.04.2013/Çrş :
+    "Yeniden yaratılan Z" : kütle 90 GeV civarında tavan yapıyor, pek sorun yok gibi. 
+    "Yeniden yaratılan De" : kütle 500 GeV civarında tavan yapıyor, pek sorun yok gibi. 
+    "Yeniden yaratılan Higgs" : en fazla görülen kütle 120 GeV, ama bu diğer kütlelerden sıyrılmıyor.
+    "Yeniden yaratılan de" : "De" gibi keskin değil
+
+
 As far as I understood : reconstruction = particle1.LorentzVector + particle2.LorentzVector
 
 ".root" dosyası --> MakeClass , ne demek olduğunu eski dosyalara bakarak hatırladım
