@@ -316,8 +316,10 @@ void loop_Reconstruct_De(e6_Class &e6) {
     const char* histoFile_char = histoFile_str.c_str();
     // overwrite existing ".root" file
     TFile f(histoFile_char, "recreate");
+    //TDirectory* dir1=f.mkdir("asdasd");       // ".root" dosyasında dizin oluşturma
 
     TTree *t_RecoDe1 = new TTree("RecoDe1", "Z jet1 -> De");
+    //t_RecoDe1->SetDirectory(dir1);    // ".root" dosyasında dizin oluşturma
     Double_t fields_t_RecoDe1[numOfFields_TLorentzVector];
     const char* prefix_t_RecoDe1 = "De1"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4TLorentzVector(t_RecoDe1, fields_t_RecoDe1, prefix_t_RecoDe1);
