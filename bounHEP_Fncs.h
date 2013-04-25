@@ -42,6 +42,8 @@ void fillTTree4Particle(TTree* t, Double_t* adresler, e6_Class &e6, int indexOfP
 void fillTTree4Particle(TTree* t, Double_t* adresler, e6_Class &e6, int indexOfParticle, int pid);
 void initializeTTree4TLorentzVector(TTree* t, Double_t* adresler, const char* branchNamePrefix);
 void fillTTree4LorentzVector(TTree* t, Double_t* adresler, TLorentzVector &vec);
+void initializeTTree4Jet(TTree* t, Double_t* adresler, const char* branchNamePrefix);
+void fillTTree4Jet(TTree* t, Double_t* adresler, e6_Class &e6, int indexOfParticle);
 void initializeTTree(TTree* t, Double_t* adresler, int len_Fields, const char* branchNamePrefix, const char* fields[]);
 void initializeTTree4GenParticle(TTree* t, Double_t* adresler, const char* branchNamePrefix);
 void initializeTTree4GenParticle(TTree &t, Double_t* adresler, const char* branchNamePrefix);
@@ -51,6 +53,7 @@ void fillTTree4GenParticle(TTree* t, Double_t* adresler, GenParticle* particle, 
 static const int numOfFields_GenParticle = 20;
 static const int numOfFields_TLorentzVector = 32;
 static const int numOfFields_Particle = 32;
+static const int numOfFields_Jet = 32;
 static const char* loop_Reconstruct_de_outputName = "loop_Reconstruct_de.root"; // output file name of the function loop_Reconstruct_de()
 static const char* loop_Reconstruct_De_outputName = "loop_Reconstruct_De.root"; // output file name of the function loop_Reconstruct_De()
 static const char* loop_Reconstruct_Higgs_outputName = "loop_Reconstruct_Higgs.root"; // output file name of the function loop_Reconstruct_Higgs()
@@ -824,22 +827,37 @@ void loop_deltaR_HIGGS_and_JET(e6_Class &e6) {
     // overwrite existing ".root" file
     TFile f(histoFile_char, "recreate");
 
+    // TTree for Higgs bosons
     TTree *t_h = new TTree("higgs", "generated higgs bosons");
     Double_t fields_t_h[numOfFields_Particle];
     const char* prefix_t_h = "h"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4Particle(t_h, fields_t_h, prefix_t_h);
 
-    double jet_massMin = 85;
-    double jet_massMax = 105;
-    string title_t_jet_inRange_Str = "mass in the range [" + jet_massMin + ", " + jet_massMax + "]";
+    // TTree for jets inside the mass range
+    int jet_massMin = 85;
+    int jet_massMax = 105;
+    // must concatenate one by one ( alttaki kod çalışmıyor, teker teker eklemek gerekiyor.) 
+    //string title_t_jet_inRange_Str = "mass in the range [" + jet_massMin + ", " + jet_massMax + "]";
+    string title_t_jet_inRange_Str = "mass in the range [";
+    title_t_jet_inRange_Str += jet_massMin;
+    title_t_jet_inRange_Str += ", ";
+    title_t_jet_inRange_Str += jet_massMax;
+    title_t_jet_inRange_Str += "]";
     const char* title_t_jet_inRange_char = title_t_jet_inRange_Str.c_str();
 
     TTree *t_jet_inRange = new TTree("Jets", title_t_jet_inRange_char);
-    Double_t fields_t_jet_inRange[numOfFields_Particle];
+    Double_t fields_t_jet_inRange[numOfFields_Jet];
     const char* prefix_t_jet_inRange = "jet"; // must start with lowercase letter, dont know the stupid reason for that
-    ini(t_jet_inRange, fields_t_jet_inRange, prefix_t_jet_inRange);
+    initializeTTree4Jet(t_jet_inRange, fields_t_jet_inRange, prefix_t_jet_inRange);
 
-    int i = 0;
+    // TTree for deltaR between Higgs and Jet inside the mass range
+    TTree *t_deltaR = new TTree("deltaR", "between H and Jet inside the mass range");
+    Double_t deltaR_h, deltaR_h_withM120, deltaR_h_withM80;
+    t_deltaR->Branch("deltaR", &deltaR_h, "deltaR_h/D");
+    t_deltaR->Branch("deltaR_with_h.M=120", &deltaR_h_withM120, "deltaR_h_withM120/D");
+    t_deltaR->Branch("deltaR_with_h.M=80", &deltaR_h_withM80, "deltaR_h_withM80/D");
+
+    int i, j;
     int h_ID = 25; // pid of Higgs boson
     double h_massReal = 120; // mass of Higgs in reality
     double h_massSimulation = 80; // mass of Higgs given by simulation
@@ -868,12 +886,28 @@ void loop_deltaR_HIGGS_and_JET(e6_Class &e6) {
                 h_withM80.SetPtEtaPhiM(e6.Particle_PT[i], e6.Particle_Eta[i], e6.Particle_Phi[i], h_massSimulation);
                 h_withM120.SetPtEtaPhiM(e6.Particle_PT[i], e6.Particle_Eta[i], e6.Particle_Phi[i], h_massReal);
 
+                for (j = 0; j < e6.Jet_size; j++) {
+                    if (e6.Jet_Mass[j] >= jet_massMin && e6.Jet_Mass[j] <= jet_massMax) {
+                        jet.SetPtEtaPhiM(e6.Jet_PT[j], e6.Jet_Eta[j], e6.Jet_Phi[j], e6.Jet_Mass[j]);
 
+                        deltaR_h = h.DeltaR(jet);
+                        deltaR_h_withM120 = h_withM120.DeltaR(jet);
+                        deltaR_h_withM80 = h_withM80.DeltaR(jet);
+                        t_deltaR->Fill();
+                    }
+                }
 
                 fillTTree4Particle(t_h, fields_t_h, e6, i, h_ID);
             }
         }
 
+        // loop over jets in the event
+        // this loop is for plotting jets inside the mass range
+        for (i = 0; i < e6.Jet_size; i++) {
+            if (e6.Jet_Mass[i] >= jet_massMin && e6.Jet_Mass[i] <= jet_massMax) {
+                fillTTree4Jet(t_jet_inRange, fields_t_jet_inRange, e6, i);
+            }
+        }
     }
 
     f.Write();
@@ -1099,14 +1133,13 @@ void initializeTTree4Jet(TTree* t, Double_t* adresler, const char* branchNamePre
     // Elements of "jet_Fields" will be used as suffix for branch names
     // Length of "jet_Fields" is 12. So the "adresler" must be of length 12. The user should have allocated "adresler" with length 12 before calling this function.
     // http://stackoverflow.com/questions/3814804/initializing-a-static-const-char-array
-    const char* jet_Fields[] = {"fUniqueID","fBits","PT","Eta","Phi","Mass","DeltaEta","DeltaPhi","BTag","TauTag","Charge","EhadOverEem"};
+    const char* jet_Fields[] = {"fUniqueID", "fBits", "PT", "Eta", "Phi", "Mass", "DeltaEta", "DeltaPhi", "BTag", "TauTag", "Charge", "EhadOverEem"};
 
     // http://stackoverflow.com/questions/4108313/how-do-i-find-the-length-of-an-array
     int len_Fields = (sizeof (jet_Fields) / sizeof (*jet_Fields)); // =12
 
     initializeTTree(t, adresler, len_Fields, branchNamePrefix, jet_Fields);
 }
-
 
 /*
  * fills branches of the given TTree "t". "t" is a TTree that contains all the fields of type "e6_Class.Jet_ ...".
@@ -1117,7 +1150,7 @@ void initializeTTree4Jet(TTree* t, Double_t* adresler, const char* branchNamePre
  *  http://www.cplusplus.com/doc/tutorial/pointers/
  */
 void fillTTree4Jet(TTree* t, Double_t* adresler, e6_Class &e6, int indexOfParticle) {
-    
+
     adresler[0] = e6.Jet_fUniqueID[indexOfParticle];
     adresler[1] = e6.Jet_fBits[indexOfParticle];
     adresler[2] = e6.Jet_PT[indexOfParticle];
@@ -1130,7 +1163,7 @@ void fillTTree4Jet(TTree* t, Double_t* adresler, e6_Class &e6, int indexOfPartic
     adresler[9] = e6.Jet_TauTag[indexOfParticle];
     adresler[10] = e6.Jet_Charge[indexOfParticle];
     adresler[11] = e6.Jet_EhadOverEem[indexOfParticle];
-    
+
     t->Fill();
 }
 
