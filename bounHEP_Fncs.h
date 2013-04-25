@@ -834,14 +834,14 @@ void loop_deltaR_HIGGS_and_JET(e6_Class &e6) {
     initializeTTree4Particle(t_h, fields_t_h, prefix_t_h);
 
     // TTree for jets inside the mass range
-    int jet_massMin = 85;
-    int jet_massMax = 105;
+    double jet_massMin = 85;
+    double jet_massMax = 105;
     // must concatenate one by one ( alttaki kod çalışmıyor, teker teker eklemek gerekiyor.) 
     //string title_t_jet_inRange_Str = "mass in the range [" + jet_massMin + ", " + jet_massMax + "]";
     string title_t_jet_inRange_Str = "mass in the range [";
-    title_t_jet_inRange_Str += jet_massMin;
+    title_t_jet_inRange_Str += Form("%.f",jet_massMin);
     title_t_jet_inRange_Str += ", ";
-    title_t_jet_inRange_Str += jet_massMax;
+    title_t_jet_inRange_Str += Form("%.f",jet_massMax);
     title_t_jet_inRange_Str += "]";
     const char* title_t_jet_inRange_char = title_t_jet_inRange_Str.c_str();
 
