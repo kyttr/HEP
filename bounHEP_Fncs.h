@@ -32,6 +32,8 @@ void loop_Reconstruct_de(e6_Class &e6);
 void loop_Reconstruct_Higgs(e6_Class &e6);
 void loop_Particle(e6_Class &e6);
 void loop_maxJetPT(e6_Class &e6);
+void loop_deltaMass_of_deDe();
+void loop_deltaR_HIGGS_and_JET(e6_Class &e6);
 
 class GenParticle; // if this does not exist, ~> Warning: Unknown type 'GenParticle' in function argument handled as int
 
@@ -64,6 +66,24 @@ static const char* prefix_t_Reco_de1 = "de1";
 static const char* prefix_t_Reco_de2 = "de2";
 static const char* prefix_t_RecoDe1 = "De1";
 static const char* prefix_t_RecoDe2 = "De2";
+
+/*
+ * TEMPLATE for the method "Loop()"
+ * 
+    if (t.fChain == 0) return;
+
+    Long64_t nentries = t.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = t.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = t.fChain->GetEntry(jentry);
+        nbytes += nb;
+        // if (Cut(ientry) < 0) continue;
+        cout << t.Electron_size << endl;
+    }
+ */
 
 /*
  * loop over particles (I guess these are generated particles) and store their fields to a "TTree"
@@ -174,23 +194,6 @@ void loop_maxJetPT(e6_Class &e6) {
     }
 }
 
-/*
- * TEMPLATE for the method "Loop()"
- * 
-    if (t.fChain == 0) return;
-
-    Long64_t nentries = t.fChain->GetEntriesFast();
-
-    Long64_t nbytes = 0, nb = 0;
-    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
-        Long64_t ientry = t.LoadTree(jentry);
-        if (ientry < 0) break;
-        nb = t.fChain->GetEntry(jentry);
-        nbytes += nb;
-        // if (Cut(ientry) < 0) continue;
-        cout << t.Electron_size << endl;
-    }
- */
 void loop_HiggsMass(e6_Class &e6) {
     if (e6.fChain == 0) return;
 
@@ -783,10 +786,10 @@ void loop_deltaMass_of_deDe() {
     double delta_j2_j1; // difference of masses if : H + jet2 --> de and Z + jet1 --> De
     //t->Branch("H+jet1_and_Z+jet2",&delta_j1_j2,"delta_jet1_jet2/D");
     //t->Branch("H+jet2_and_Z+jet1",&delta_j2_j1,"delta_jet2_jet1/D");
-    t->Branch("H,jet1_and_Z,jet2",&delta_j1_j2,"delta_jet1_jet2/D");
-    t->Branch("H,jet2_and_Z,jet1",&delta_j2_j1,"delta_jet2_jet1/D");
-//    t->Branch("j1j2",&delta_j1_j2,"delta_jet1_jet2/D");
-//    t->Branch("j2j1",&delta_j2_j1,"delta_jet2_jet1/D");
+    t->Branch("H,jet1_and_Z,jet2", &delta_j1_j2, "delta_jet1_jet2/D");
+    t->Branch("H,jet2_and_Z,jet1", &delta_j2_j1, "delta_jet2_jet1/D");
+    //    t->Branch("j1j2",&delta_j1_j2,"delta_jet1_jet2/D");
+    //    t->Branch("j2j1",&delta_j2_j1,"delta_jet2_jet1/D");
 
     //read all entries
     Int_t nentries = (Int_t) t_de1->GetEntries();
@@ -797,13 +800,52 @@ void loop_deltaMass_of_deDe() {
         t_de2->GetEntry(i);
         t_De1->GetEntry(i);
         t_De2->GetEntry(i);
-        
-        delta_j1_j2=abs(mass_de1-mass_De2);
-        delta_j2_j1=abs(mass_de2-mass_De1);
-        
+
+        delta_j1_j2 = abs(mass_de1 - mass_De2);
+        delta_j2_j1 = abs(mass_de2 - mass_De1);
+
         t->Fill();
     }
-    
+
+    f.Write();
+}
+
+/*
+ * 1. "Particle" dalında PID=Higgs olan parçacıkları bul. 85<mass<105 olan jetleri bul. Bu Higgs'ler ile jetler arasındaki "deltaR" bul. deltaR=sqrt(deltaEta^2+deltaPhi^2) gibi bir şey.
+ */
+void loop_deltaR_HIGGS_and_JET(e6_Class &e6) {
+    if (e6.fChain == 0) return;
+
+    string histoFile_str = "loop_Particle.root";
+    // TFile constructor accepts type "const char*"
+    const char* histoFile_char = histoFile_str.c_str();
+    // overwrite existing ".root" file
+    TFile f(histoFile_char, "recreate");
+
+    TTree *t_h = new TTree("higgs", "generated higgs bosons");
+    Double_t fields_t_h[numOfFields_Particle];
+    const char* prefix_t_h = "h"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4Particle(t_h, fields_t_h, prefix_t_h);
+
+    int i = 0;
+    int h_ID = 25; // pid of Higgs boson
+
+    Long64_t nentries = e6.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = e6.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = e6.fChain->GetEntry(jentry);
+        nbytes += nb;
+        // if (Cut(ientry) < 0) continue;
+
+        for (i = 0; i < kMaxParticle; i++) {
+            fillTTree4Particle(t_h, fields_t_h, e6, i, h_ID);
+        }
+
+    }
+
     f.Write();
 }
 
