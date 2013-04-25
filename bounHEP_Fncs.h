@@ -811,12 +811,14 @@ void loop_deltaMass_of_deDe() {
 }
 
 /*
+ * Under "Particle" set, Higgs bozons have mass 80 GeV. The true mass is 120 GeV. This method tries to solve this problem.
+ * 
  * 1. "Particle" dalında PID=Higgs olan parçacıkları bul. 85<mass<105 olan jetleri bul. Bu Higgs'ler ile jetler arasındaki "deltaR" bul. deltaR=sqrt(deltaEta^2+deltaPhi^2) gibi bir şey.
  */
 void loop_deltaR_HIGGS_and_JET(e6_Class &e6) {
     if (e6.fChain == 0) return;
 
-    string histoFile_str = "loop_Particle.root";
+    string histoFile_str = "loop_deltaR_HIGGS_and_JET.root";
     // TFile constructor accepts type "const char*"
     const char* histoFile_char = histoFile_str.c_str();
     // overwrite existing ".root" file
@@ -827,8 +829,24 @@ void loop_deltaR_HIGGS_and_JET(e6_Class &e6) {
     const char* prefix_t_h = "h"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4Particle(t_h, fields_t_h, prefix_t_h);
 
+    double jet_massMin = 85;
+    double jet_massMax = 105;
+    string title_t_jet_inRange_Str = "mass in the range [" + jet_massMin + ", " + jet_massMax + "]";
+    const char* title_t_jet_inRange_char = title_t_jet_inRange_Str.c_str();
+
+    TTree *t_jet_inRange = new TTree("Jets", title_t_jet_inRange_char);
+    Double_t fields_t_jet_inRange[numOfFields_Particle];
+    const char* prefix_t_jet_inRange = "jet"; // must start with lowercase letter, dont know the stupid reason for that
+    ini(t_jet_inRange, fields_t_jet_inRange, prefix_t_jet_inRange);
+
     int i = 0;
     int h_ID = 25; // pid of Higgs boson
+    double h_massReal = 120; // mass of Higgs in reality
+    double h_massSimulation = 80; // mass of Higgs given by simulation
+
+    TLorentzVector h; // for now this Higgs will take the mass given by the simulation, that is 80 GeV.
+    TLorentzVector jet;
+    TLorentzVector h_withM120, h_withM80;
 
     Long64_t nentries = e6.fChain->GetEntriesFast();
 
@@ -840,8 +858,20 @@ void loop_deltaR_HIGGS_and_JET(e6_Class &e6) {
         nbytes += nb;
         // if (Cut(ientry) < 0) continue;
 
-        for (i = 0; i < kMaxParticle; i++) {
-            fillTTree4Particle(t_h, fields_t_h, e6, i, h_ID);
+        // loop over generated particles in the event
+        for (i = 0; i < e6.Particle_size; i++) {
+
+            // this particle is Higgs
+            if (e6.Particle_PID[i] == h_ID) {
+
+                h.SetPtEtaPhiM(e6.Particle_PT[i], e6.Particle_Eta[i], e6.Particle_Phi[i], e6.Particle_Mass[i]);
+                h_withM80.SetPtEtaPhiM(e6.Particle_PT[i], e6.Particle_Eta[i], e6.Particle_Phi[i], h_massSimulation);
+                h_withM120.SetPtEtaPhiM(e6.Particle_PT[i], e6.Particle_Eta[i], e6.Particle_Phi[i], h_massReal);
+
+
+
+                fillTTree4Particle(t_h, fields_t_h, e6, i, h_ID);
+            }
         }
 
     }
@@ -1062,6 +1092,46 @@ void fillTTree4LorentzVector(TTree* t, Double_t* adresler, TLorentzVector &vec) 
 
     t->Fill();
     //delete t;
+}
+
+void initializeTTree4Jet(TTree* t, Double_t* adresler, const char* branchNamePrefix) {
+
+    // Elements of "jet_Fields" will be used as suffix for branch names
+    // Length of "jet_Fields" is 12. So the "adresler" must be of length 12. The user should have allocated "adresler" with length 12 before calling this function.
+    // http://stackoverflow.com/questions/3814804/initializing-a-static-const-char-array
+    const char* jet_Fields[] = {"fUniqueID","fBits","PT","Eta","Phi","Mass","DeltaEta","DeltaPhi","BTag","TauTag","Charge","EhadOverEem"};
+
+    // http://stackoverflow.com/questions/4108313/how-do-i-find-the-length-of-an-array
+    int len_Fields = (sizeof (jet_Fields) / sizeof (*jet_Fields)); // =12
+
+    initializeTTree(t, adresler, len_Fields, branchNamePrefix, jet_Fields);
+}
+
+
+/*
+ * fills branches of the given TTree "t". "t" is a TTree that contains all the fields of type "e6_Class.Jet_ ...".
+ * Values are taken from the e6_Class "e6". Branches of "t" are filled with values like e6.Jet_PT[i], where "i" is the index of the particle in a particular event.
+ * 
+ * "adresler" must be the same addresses that were used during the initialization of the "TTree" object.
+ * 
+ *  http://www.cplusplus.com/doc/tutorial/pointers/
+ */
+void fillTTree4Jet(TTree* t, Double_t* adresler, e6_Class &e6, int indexOfParticle) {
+    
+    adresler[0] = e6.Jet_fUniqueID[indexOfParticle];
+    adresler[1] = e6.Jet_fBits[indexOfParticle];
+    adresler[2] = e6.Jet_PT[indexOfParticle];
+    adresler[3] = e6.Jet_Eta[indexOfParticle];
+    adresler[4] = e6.Jet_Phi[indexOfParticle];
+    adresler[5] = e6.Jet_Mass[indexOfParticle];
+    adresler[6] = e6.Jet_DeltaEta[indexOfParticle];
+    adresler[7] = e6.Jet_DeltaPhi[indexOfParticle];
+    adresler[8] = e6.Jet_BTag[indexOfParticle];
+    adresler[9] = e6.Jet_TauTag[indexOfParticle];
+    adresler[10] = e6.Jet_Charge[indexOfParticle];
+    adresler[11] = e6.Jet_EhadOverEem[indexOfParticle];
+    
+    t->Fill();
 }
 
 /*
