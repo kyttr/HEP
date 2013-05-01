@@ -838,6 +838,9 @@ void loop_Reconstruct_Higgs(e6_Class &e6) {
     f.Write();
 }
 
+/*
+ * her olayda "deltaMass_of_deDe" yi minimize eden kombinasyon bul. O kombinasyon kullan, histogram çıkart.
+ */
 void loop_deltaMass_of_deDe() {
     //const char* reconstructed_de_file=loop_Reconstruct_de_outputName;
     //const char* reconstructed_De_file=loop_Reconstruct_De_outputName;
@@ -868,10 +871,12 @@ void loop_deltaMass_of_deDe() {
     TTree *t = new TTree("deltaMass", "difference of masses of de and De");
     double delta_j1_j2; // difference of masses if : H + jet1 --> de and Z + jet2 --> De
     double delta_j2_j1; // difference of masses if : H + jet2 --> de and Z + jet1 --> De
+    double delta_Min;   // minimum of 2 "deltaMass"es in an event
     //t->Branch("H+jet1_and_Z+jet2",&delta_j1_j2,"delta_jet1_jet2/D");
     //t->Branch("H+jet2_and_Z+jet1",&delta_j2_j1,"delta_jet2_jet1/D");
     t->Branch("H,jet1_and_Z,jet2", &delta_j1_j2, "delta_jet1_jet2/D");
     t->Branch("H,jet2_and_Z,jet1", &delta_j2_j1, "delta_jet2_jet1/D");
+    t->Branch("minimum_deltaMass", &delta_Min, "delta_Min/D");
     //    t->Branch("j1j2",&delta_j1_j2,"delta_jet1_jet2/D");
     //    t->Branch("j2j1",&delta_j2_j1,"delta_jet2_jet1/D");
 
@@ -887,6 +892,7 @@ void loop_deltaMass_of_deDe() {
 
         delta_j1_j2 = abs(mass_de1 - mass_De2);
         delta_j2_j1 = abs(mass_de2 - mass_De1);
+        delta_Min=min(delta_j1_j2,delta_j2_j1);
 
         t->Fill();
     }
