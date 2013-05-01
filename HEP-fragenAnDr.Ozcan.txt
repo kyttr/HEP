@@ -132,7 +132,7 @@ Farklı işler/metotlar için farklı ".root" dosyları oluşturma. Hepsini bir 
                     -->    double jet_massMin = 85000; // IMPORTANT, for the jet mass unit is MeV
                            double jet_massMax = 105000; // IMPORTANT, for the jets mass unit is MeV
                            
-             Yukarıdaki değerleri kullanınca Higgs ile Jet arasındaki deltaR sıfıra yaklaştı.
+             Yukarıdaki değerleri kullanınca Higgs ile Jet arasındaki deltaR sıfırda yükseldi.
                            
               Eskiden aşağıdaki değerleri kullanıyordum. Bu da 85 GeV'ye değil, 85 MeV'ye geliyordu ve istediğimiz sonuçları vermiyordu. Beni şaşırtan nokta şu idi : "Particle" setinde kütle birimi GeV, "Jet" setinde ise MeV.
                             //    double jet_massMin = 85;
