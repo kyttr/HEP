@@ -872,14 +872,17 @@ void loop_deltaMass_of_deDe() {
     double delta_j1_j2; // difference of masses if : H + jet1 --> de and Z + jet2 --> De
     double delta_j2_j1; // difference of masses if : H + jet2 --> de and Z + jet1 --> De
     double delta_Min;   // minimum of 2 "deltaMass"es in an event
+    double de_Mass, De_Mass;    // masses of de and De in an event, for which deltaMass is minimized.
     //t->Branch("H+jet1_and_Z+jet2",&delta_j1_j2,"delta_jet1_jet2/D");
     //t->Branch("H+jet2_and_Z+jet1",&delta_j2_j1,"delta_jet2_jet1/D");
     t->Branch("H,jet1_and_Z,jet2", &delta_j1_j2, "delta_jet1_jet2/D");
     t->Branch("H,jet2_and_Z,jet1", &delta_j2_j1, "delta_jet2_jet1/D");
     t->Branch("minimum_deltaMass", &delta_Min, "delta_Min/D");
+    t->Branch("de.M_minimizing_deltaMass", &de_Mass, "de_Mass/D");
+    t->Branch("De.M_minimizing_deltaMass", &De_Mass, "De_Mass/D");
     //    t->Branch("j1j2",&delta_j1_j2,"delta_jet1_jet2/D");
     //    t->Branch("j2j1",&delta_j2_j1,"delta_jet2_jet1/D");
-
+    
     //read all entries
     Int_t nentries = (Int_t) t_de1->GetEntries();
     for (Int_t i = 0; i < nentries; i++) {
@@ -893,7 +896,19 @@ void loop_deltaMass_of_deDe() {
         delta_j1_j2 = abs(mass_de1 - mass_De2);
         delta_j2_j1 = abs(mass_de2 - mass_De1);
         delta_Min=min(delta_j1_j2,delta_j2_j1);
-
+        
+        // assign masses of de and De in an event, for which deltaMass is minimized.
+        if(delta_Min==delta_j1_j2)
+        {
+            de_Mass=mass_de1;
+            De_Mass=mass_De2;
+        }
+        else
+        {
+            de_Mass=mass_de2;
+            De_Mass=mass_De1;        
+        }
+        
         t->Fill();
     }
 
