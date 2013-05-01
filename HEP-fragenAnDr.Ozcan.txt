@@ -127,6 +127,9 @@ Farklı işler/metotlar için farklı ".root" dosyları oluşturma. Hepsini bir 
                 1. kütlesi belirli bir aralıkta olan jetler (85<mass<105 gibi)
                 2. deltaR(Z,jet) değeri belirli bir limitin altında olan jetler (limit_deltaR = 0.5 gibi)
                 3. deltaR(Z,jet) değeri en küçük olan jet (her Z için böyle bir jetten tam 1 tane vardır.)
+                
+             deltaR(Z,jets with 85<mass<105) değerleri 0'a yaklaşmıyor pek.
+
 3. electron_size=2 olaylarında deltaR(jet, herhangi e)<0.2 olan jetleri analizden çıkar. Çünkü, bu jetler aslında jet değil, elektron. Elektron olmalarına rağmen dedektörde elektron olarak tespit edilmişler. Bu jetlerin analizden çıkarılması bize H,Z,de,De yeniden yaratılmasında yardımcı olabailir. Çünkü, bu jetler jet1 ve jet4 arası bir yerde olabilir.
 
 4. kai^2=(mass(jet3+jet4)-120)^2/30^2+(mass(jet1+3+4)-mass(Z+jet2))^2/30^2
