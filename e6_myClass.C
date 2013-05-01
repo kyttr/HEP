@@ -45,28 +45,36 @@ int e6_myClass() {
     f.Write();
      */
 
-    
-//    //loop_Reconstruct_Z(t);
-//    //loop_Particle(t);
-//    //loop_maxJetPT(t);
-//    
-//    loop_Reconstruct_Z_from_ee(t);
-//    loop_Reconstruct_Z_from_mumu(t);
-//
-//    loop_Reconstruct_Z(t);
-//    loop_Reconstruct_Higgs(t);
-//    loop_Reconstruct_de(t);
-//    loop_Reconstruct_De(t);
-//    loop_deltaMass_of_deDe();
-//    
-    
+
+    //    //loop_Reconstruct_Z(t);
+    //    //loop_Particle(t);
+    //    //loop_maxJetPT(t);
+    //    
+    //    loop_Reconstruct_Z_from_ee(t);
+    //    loop_Reconstruct_Z_from_mumu(t);
+    //
+    //    loop_Reconstruct_Z(t);
+    //    loop_Reconstruct_Higgs(t);
+    //    loop_Reconstruct_de(t);
+    //    loop_Reconstruct_De(t);
+    //    loop_deltaMass_of_deDe();
+    //    
+
     loop_deltaR_HIGGS_and_JET(t);
     loop_deltaR_Z_and_JET(t);
-    string filesToBeMerged[]={"loop_deltaR_HIGGS_and_JET.root","loop_deltaR_Z_and_JET.root"};
-    int len_filesToBeMerged=2;
-    const char* outputMerge="deltaR_with_JET.root";
-    mergeROOTFiles(outputMerge, filesToBeMerged, len_filesToBeMerged);    
-    
+    string filesToBeMerged1[] = {"loop_deltaR_HIGGS_and_JET.root", "loop_deltaR_Z_and_JET.root"};
+    int len_filesToBeMerged1 = 2;
+    const char* outputMerge1 = "deltaR_with_JET.root";
+    mergeROOTFiles(outputMerge1, filesToBeMerged1, len_filesToBeMerged1);
+
+    loop_Reconstruct_de(t);
+    loop_Reconstruct_De(t);
+    loop_deltaMass_of_deDe();
+    string filesToBeMerged2[] = {"loop_deltaMass_of_deDe.root", loop_Reconstruct_de_outputName,loop_Reconstruct_De_outputName };
+    int len_filesToBeMerged2 = 3;
+    const char* outputMerge2 = "deltaMass_of_deDe.root";
+    mergeROOTFiles(outputMerge2, filesToBeMerged2, len_filesToBeMerged2);
+
     /*
     // merge output files
     // http://stackoverflow.com/questions/9626722/c-string-array-initialization
@@ -74,8 +82,8 @@ int e6_myClass() {
     int len_filesToBeMerged=4;
     const char* outputMerge="reconstruction_H_Z_de_De.root";
     mergeROOTFiles(outputMerge, filesToBeMerged, len_filesToBeMerged);
-    */
-    
+     */
+
     return 0;
 }
 #endif
