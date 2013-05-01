@@ -60,6 +60,7 @@ int e6_myClass() {
     loop_deltaMass_of_deDe();
 //    
 //    loop_deltaR_HIGGS_and_JET(t);
+    loop_deltaR_Z_and_JET(t);
     
     
     /*
