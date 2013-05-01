@@ -131,6 +131,10 @@ Farklı işler/metotlar için farklı ".root" dosyları oluşturma. Hepsini bir 
              deltaR(Z,jets with 85<mass<105) değerleri 0'a yaklaşmıyor pek. --> Bu sorun halloldu.
                     -->    double jet_massMin = 85000; // IMPORTANT, for the jet mass unit is MeV
                            double jet_massMax = 105000; // IMPORTANT, for the jets mass unit is MeV
+                           
+              Eskiden aşağıdaki değerleri kullanıyordum. Bu da 85 GeV'ye değil, 85 MeV'ye geliyordu ve istediğimiz sonuçları vermiyordu. Beni şaşırtan nokta şu idi : "Particle" setinde kütle birimi GeV, "Jet" setinde ise MeV.
+                            //    double jet_massMin = 85;
+                            //    double jet_massMax = 105;
 
 3. electron_size=2 olaylarında deltaR(jet, herhangi e)<0.2 olan jetleri analizden çıkar. Çünkü, bu jetler aslında jet değil, elektron. Elektron olmalarına rağmen dedektörde elektron olarak tespit edilmişler. Bu jetlerin analizden çıkarılması bize H,Z,de,De yeniden yaratılmasında yardımcı olabailir. Çünkü, bu jetler jet1 ve jet4 arası bir yerde olabilir.
 
