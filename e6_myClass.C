@@ -57,11 +57,15 @@ int e6_myClass() {
 //    loop_Reconstruct_Higgs(t);
 //    loop_Reconstruct_de(t);
 //    loop_Reconstruct_De(t);
-    loop_deltaMass_of_deDe();
+//    loop_deltaMass_of_deDe();
 //    
+    
     loop_deltaR_HIGGS_and_JET(t);
     loop_deltaR_Z_and_JET(t);
-    
+    string filesToBeMerged[]={"loop_deltaR_HIGGS_and_JET.root","loop_deltaR_Z_and_JET.root"};
+    int len_filesToBeMerged=2;
+    const char* outputMerge="deltaR_with_JET.root";
+    mergeROOTFiles(outputMerge, filesToBeMerged, len_filesToBeMerged);    
     
     /*
     // merge output files
