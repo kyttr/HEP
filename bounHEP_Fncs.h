@@ -814,7 +814,7 @@ void loop_deltaMass_of_deDe() {
 }
 
 /*
- * Under "Particle" set, Higgs bozons have mass 80 GeV. The true mass is 120 GeV. This method tries to solve this problem.
+ * Under "Particle" set, Higgs bosons have mass 80 GeV. The true mass is 120 GeV. This method tries to solve this problem.
  * 
  * 1. "Particle" dalında PID=Higgs olan parçacıkları bul. 85<mass<105 olan jetleri bul. Bu Higgs'ler ile jetler arasındaki "deltaR" bul. deltaR=sqrt(deltaEta^2+deltaPhi^2) gibi bir şey.
  */
