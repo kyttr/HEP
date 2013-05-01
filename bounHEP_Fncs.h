@@ -934,8 +934,10 @@ void loop_deltaR_HIGGS_and_JET(e6_Class &e6) {
     initializeTTree4Particle(t_h, fields_t_h, prefix_t_h);
 
     // TTree for jets inside the mass range
-    double jet_massMin = 85;
-    double jet_massMax = 105;
+    //    double jet_massMin = 85;
+    //    double jet_massMax = 105;
+    double jet_massMin = 85000; // IMPORTANT, for the jet mass unit is MeV
+    double jet_massMax = 105000; // IMPORTANT, for the jets mass unit is MeV
     // must concatenate one by one ( alttaki kod çalışmıyor, teker teker eklemek gerekiyor.) 
     //string title_t_jet_inRange_Str = "mass in the range [" + jet_massMin + ", " + jet_massMax + "]";
     string title_t_jet_inRange_Str = "mass in the range [";
@@ -1037,8 +1039,10 @@ void loop_deltaR_Z_and_JET(e6_Class &e6) {
     initializeTTree4Particle(t_Z, fields_t_Z, prefix_t_Z);
 
     // TTree for jets inside the mass range
-    double jet_massMin = 85;
-    double jet_massMax = 105;
+    //    double jet_massMin = 85;
+    //    double jet_massMax = 105;
+    double jet_massMin = 85000; // IMPORTANT, for the jet mass unit is MeV
+    double jet_massMax = 105000; // IMPORTANT, for the jets mass unit is MeV
     // must concatenate one by one ( alttaki kod çalışmıyor, teker teker eklemek gerekiyor.) 
     //string title_t_jet_inRange_Str = "mass in the range [" + jet_massMin + ", " + jet_massMax + "]";
     string title_t_jet_inRange_Str = "range [";
@@ -1125,7 +1129,7 @@ void loop_deltaR_Z_and_JET(e6_Class &e6) {
                         t_deltaR_massRange->Fill();
                     }
                     if (deltaR_Z <= limit_deltaR) {
-                        deltaR_Z_limit=deltaR_Z;
+                        deltaR_Z_limit = deltaR_Z;
                         t_deltaR_limit->Fill();
                         fillTTree4Jet(t_jet_limit_deltaR, fields_t_jet_limit_deltaR, e6, j);
                     }
