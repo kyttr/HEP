@@ -23,6 +23,8 @@ extern "C" {
 }
 #endif
 
+void mergeROOTFiles(const char* outFileName, string* fileNames, int numFiles);
+
 void loop_HiggsMass(e6_Class &e6);
 void loop_Reconstruct_Z(e6_Class &e6);
 void loop_Reconstruct_Z_from_ee(e6_Class &e6);
@@ -69,6 +71,85 @@ static const char* prefix_t_Reco_de1 = "de1";
 static const char* prefix_t_Reco_de2 = "de2";
 static const char* prefix_t_RecoDe1 = "De1";
 static const char* prefix_t_RecoDe2 = "De2";
+
+/*
+ * Farklı işler/metotlar için farklı ".root" dosyları oluşturma. Hepsini bir ".root" dosyasında topla.
+ * 
+ * I spent like 1-1.5 hour to find out the necessary code to perform what I had in my mind. Below are some codes that I used, but which did not work the way I wanted
+ * 
+ *
+    const char* newDirName=f_tmp->GetName();
+    const char* newDirName = "hgjkl";
+    
+    f->mkdir(newDirName);	// WORKS
+
+    // try to change directory and write incoming stuff into that directory
+    f->cd(newDirName);		
+    gDirectory->cd(newDirName);
+    gFile->cd(newDirName);
+
+    f->cd();
+    f->WriteTObject(t_De1);	// try to write each TTree in the file "f_tmp"
+    f->WriteTObject(t_De2);	
+    f->WriteTObject(t_de1);
+    gDirectory->WriteTObject(t_de2);
+
+    f->WriteTObject(f_tmp);	// try to write directly the file "f_tmp"
+                                // does not WORK
+ * 
+ * EDIT : this method became more complicated and less trivial than I thought first.
+ */
+void mergeROOTFiles(const char* outFileName, string* fileNames, int numFiles) {
+    TFile* f = new TFile(outFileName, "recreate");
+
+    TFile* f_tmp;
+    TList* listTmp;
+    TList* listKeys;
+    TTree* t_tmp;
+    const char* keyName;
+    string listName;
+    int i, j, n;
+    for (i = 0; i < numFiles; i++) {
+
+        f_tmp = new TFile(fileNames[i].c_str());
+        //f_tmp->pwd();
+
+        listKeys = f_tmp->GetListOfKeys();
+        // As far as I understand, that method gets all objects in the file.
+
+        //cout << listKeys->GetEntries() << endl;
+        // loop over "keys" of that file
+        for (j = 0; j < listKeys->GetEntries(); j++) {
+            keyName = listKeys->At(j)->GetName();
+            //            cout << keyName << endl;
+
+            // I assume all "keys" in that file correspond to "TTree" objects
+            t_tmp = (TTree*) f_tmp->Get(keyName); // without this, the method writes nothing.
+            n = t_tmp->GetEntry(); // without this, the method it writes a "TTree" with no branches, hence no histograms. Hence a blank "TTree"
+        }
+
+        // As far as I understand, that method gets all objects in the file.
+        // EDIT : I understood wrong, now As far as I understand, that method gets objects that are somehow referred or got above. I returns nothing if I do not call "t_tmp = (TTree*) f_tmp->Get(keyName);"
+        listTmp = f_tmp->GetList();
+
+        // I dont use default name for the list. To avoid ambiguity, I call each list with the name of the file from which this is list created. To avoid long names, I will erase the ".root" suffix in the name of files. That is why I use "string::replace()" to erase last 5 letters of the file name.
+        // http://www.cplusplus.com/reference/string/string/replace/
+        // http://stackoverflow.com/questions/3418231/c-replace-part-of-a-string-with-another-string
+        listName = fileNames[i];
+        //listName.replace(listName.end()-5,listName.end(),"");   // does not work for some stupid reason, maybe because of iterators
+        listName.replace(listName.length()-5,listName.length(),"");  // WORKS
+        listTmp->SetName(listName.c_str());
+
+
+        f->WriteTObject(listTmp);
+
+        // in the next iteration these objects will be reassigned. Doing modification without calling "clear()" causes error.
+        f_tmp->Clear();
+        listKeys->Clear();
+        t_tmp->Clear();
+        listTmp->Clear();
+    }
+}
 
 /*
  * TEMPLATE for the method "Loop()"
@@ -839,9 +920,9 @@ void loop_deltaR_HIGGS_and_JET(e6_Class &e6) {
     // must concatenate one by one ( alttaki kod çalışmıyor, teker teker eklemek gerekiyor.) 
     //string title_t_jet_inRange_Str = "mass in the range [" + jet_massMin + ", " + jet_massMax + "]";
     string title_t_jet_inRange_Str = "mass in the range [";
-    title_t_jet_inRange_Str += Form("%.f",jet_massMin);
+    title_t_jet_inRange_Str += Form("%.f", jet_massMin);
     title_t_jet_inRange_Str += ", ";
-    title_t_jet_inRange_Str += Form("%.f",jet_massMax);
+    title_t_jet_inRange_Str += Form("%.f", jet_massMax);
     title_t_jet_inRange_Str += "]";
     const char* title_t_jet_inRange_char = title_t_jet_inRange_Str.c_str();
 

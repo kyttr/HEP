@@ -45,6 +45,7 @@ int e6_myClass() {
     f.Write();
      */
 
+    /*
     //loop_Reconstruct_Z(t);
     //loop_Particle(t);
     //loop_maxJetPT(t);
@@ -59,7 +60,15 @@ int e6_myClass() {
     loop_deltaMass_of_deDe();
     
     loop_deltaR_HIGGS_and_JET(t);
-
+    */
+    
+    // merge output files
+    // http://stackoverflow.com/questions/9626722/c-string-array-initialization
+    string filesToBeMerged[]={loop_Reconstruct_Z_outputName,loop_Reconstruct_Higgs_outputName,loop_Reconstruct_de_outputName,loop_Reconstruct_De_outputName};
+    int len_filesToBeMerged=4;
+    const char* outputMerge="reconstruction_H_Z_de_De.root";
+    mergeROOTFiles(outputMerge, filesToBeMerged, len_filesToBeMerged);
+    
     return 0;
 }
 #endif
