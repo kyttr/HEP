@@ -24,6 +24,7 @@ extern "C" {
 #endif
 
 void filterJets(e6_Class &e6);
+void filterJets(e6_Class &e6, bool apply_NO_filter);
 void mergeROOTFiles(const char* outFileName, string* fileNames, int numFiles);
 
 void loop_HiggsMass(e6_Class &e6);
@@ -205,6 +206,63 @@ void filterJets(e6_Class &e6) {
             Jet_VALID_Charge[i] = e6.Jet_Charge[i];
             Jet_VALID_EhadOverEem[i] = e6.Jet_EhadOverEem[i];
         }
+    }
+}
+
+/*
+ * do not apply any filter if apply_NO_filter=true
+ */
+void filterJets(e6_Class &e6, bool apply_NO_filter) {
+    if (apply_NO_filter) {
+
+        int numOfVALID = e6.Jet_size;
+
+        delete [] Jet_VALID_fUniqueID;
+        delete [] Jet_VALID_fBits;
+        delete [] Jet_VALID_PT;
+        delete [] Jet_VALID_Eta;
+        delete [] Jet_VALID_Phi;
+        delete [] Jet_VALID_Mass;
+        delete [] Jet_VALID_DeltaEta;
+        delete [] Jet_VALID_DeltaPhi;
+        delete [] Jet_VALID_BTag;
+        delete [] Jet_VALID_TauTag;
+        delete [] Jet_VALID_Charge;
+        delete [] Jet_VALID_EhadOverEem;
+
+        Jet_VALID_fUniqueID = new UInt_t[numOfVALID];
+        Jet_VALID_fBits = new UInt_t[numOfVALID];
+        Jet_VALID_PT = new Float_t[numOfVALID];
+        Jet_VALID_Eta = new Float_t[numOfVALID];
+        Jet_VALID_Phi = new Float_t[numOfVALID];
+        Jet_VALID_Mass = new Float_t[numOfVALID];
+        Jet_VALID_DeltaEta = new Float_t[numOfVALID];
+        Jet_VALID_DeltaPhi = new Float_t[numOfVALID];
+        Jet_VALID_BTag = new Int_t[numOfVALID];
+        Jet_VALID_TauTag = new Int_t[numOfVALID];
+        Jet_VALID_Charge = new Int_t[numOfVALID];
+        Jet_VALID_EhadOverEem = new Float_t[numOfVALID];
+        Jet_VALID_size = numOfVALID;
+
+        // STEP 3
+        int i;
+        for (i = 0; i < e6.Jet_size; i++) {
+            Jet_VALID_fUniqueID[i] = e6.Jet_fUniqueID[i];
+            Jet_VALID_fBits[i] = e6.Jet_fBits[i];
+            Jet_VALID_PT[i] = e6.Jet_PT[i];
+            Jet_VALID_Eta[i] = e6.Jet_Eta[i];
+            Jet_VALID_Phi[i] = e6.Jet_Phi[i];
+            Jet_VALID_Mass[i] = e6.Jet_Mass[i];
+            Jet_VALID_DeltaEta[i] = e6.Jet_DeltaEta[i];
+            Jet_VALID_DeltaPhi[i] = e6.Jet_DeltaPhi[i];
+            Jet_VALID_BTag[i] = e6.Jet_BTag[i];
+            Jet_VALID_TauTag[i] = e6.Jet_TauTag[i];
+            Jet_VALID_Charge[i] = e6.Jet_Charge[i];
+            Jet_VALID_EhadOverEem[i] = e6.Jet_EhadOverEem[i];
+        }
+    }
+    else {
+        filterJets(e6);
     }
 }
 
