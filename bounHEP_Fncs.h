@@ -25,6 +25,7 @@ extern "C" {
 
 void filterJets(e6_Class &e6);
 void filterJets(e6_Class &e6, bool apply_NO_filter);
+void reinitialize_Jet_VALID(int length);
 void mergeROOTFiles(const char* outFileName, string* fileNames, int numFiles);
 
 void loop_HiggsMass(e6_Class &e6);
@@ -100,7 +101,7 @@ volatile TRefArray* Jet_VALID_Constituents;
 volatile TRefArray* Jet_VALID_Particles;
 volatile Int_t Jet_VALID_size;
 
-static const double limit_deltaR_jet_AND_e = 0.2;
+static const double limit_deltaR_jet_AND_e = 2.2;
 
 /*
  * filter out the jets that do not meet our restrictions. 
@@ -163,35 +164,7 @@ void filterJets(e6_Class &e6) {
     }
 
     // STEP 2
-    delete [] Jet_VALID_fUniqueID;
-    delete [] Jet_VALID_fBits;
-    delete [] Jet_VALID_PT;
-    delete [] Jet_VALID_Eta;
-    delete [] Jet_VALID_Phi;
-    delete [] Jet_VALID_Mass;
-    delete [] Jet_VALID_DeltaEta;
-    delete [] Jet_VALID_DeltaPhi;
-    delete [] Jet_VALID_BTag;
-    delete [] Jet_VALID_TauTag;
-    delete [] Jet_VALID_Charge;
-    delete [] Jet_VALID_EhadOverEem;
-
-    Jet_VALID_size = numOfVALID;
-    if (numOfVALID == 0)        // avoid the problem of creating an array of size 0.
-        return;
-
-    Jet_VALID_fUniqueID = new UInt_t[numOfVALID];
-    Jet_VALID_fBits = new UInt_t[numOfVALID];
-    Jet_VALID_PT = new Float_t[numOfVALID];
-    Jet_VALID_Eta = new Float_t[numOfVALID];
-    Jet_VALID_Phi = new Float_t[numOfVALID];
-    Jet_VALID_Mass = new Float_t[numOfVALID];
-    Jet_VALID_DeltaEta = new Float_t[numOfVALID];
-    Jet_VALID_DeltaPhi = new Float_t[numOfVALID];
-    Jet_VALID_BTag = new Int_t[numOfVALID];
-    Jet_VALID_TauTag = new Int_t[numOfVALID];
-    Jet_VALID_Charge = new Int_t[numOfVALID];
-    Jet_VALID_EhadOverEem = new Float_t[numOfVALID];
+    reinitialize_Jet_VALID(numOfVALID);
 
     // STEP 3
     j = 0;
@@ -222,34 +195,7 @@ void filterJets(e6_Class &e6) {
 void filterJets(e6_Class &e6, bool apply_NO_filter) {
     if (apply_NO_filter) {
 
-        int numOfVALID = e6.Jet_size;
-
-        delete [] Jet_VALID_fUniqueID;
-        delete [] Jet_VALID_fBits;
-        delete [] Jet_VALID_PT;
-        delete [] Jet_VALID_Eta;
-        delete [] Jet_VALID_Phi;
-        delete [] Jet_VALID_Mass;
-        delete [] Jet_VALID_DeltaEta;
-        delete [] Jet_VALID_DeltaPhi;
-        delete [] Jet_VALID_BTag;
-        delete [] Jet_VALID_TauTag;
-        delete [] Jet_VALID_Charge;
-        delete [] Jet_VALID_EhadOverEem;
-
-        Jet_VALID_fUniqueID = new UInt_t[numOfVALID];
-        Jet_VALID_fBits = new UInt_t[numOfVALID];
-        Jet_VALID_PT = new Float_t[numOfVALID];
-        Jet_VALID_Eta = new Float_t[numOfVALID];
-        Jet_VALID_Phi = new Float_t[numOfVALID];
-        Jet_VALID_Mass = new Float_t[numOfVALID];
-        Jet_VALID_DeltaEta = new Float_t[numOfVALID];
-        Jet_VALID_DeltaPhi = new Float_t[numOfVALID];
-        Jet_VALID_BTag = new Int_t[numOfVALID];
-        Jet_VALID_TauTag = new Int_t[numOfVALID];
-        Jet_VALID_Charge = new Int_t[numOfVALID];
-        Jet_VALID_EhadOverEem = new Float_t[numOfVALID];
-        Jet_VALID_size = numOfVALID;
+        reinitialize_Jet_VALID(e6.Jet_size);
 
         // STEP 3
         int i;
@@ -270,6 +216,39 @@ void filterJets(e6_Class &e6, bool apply_NO_filter) {
     } else {
         filterJets(e6);
     }
+}
+
+void reinitialize_Jet_VALID(int numOfVALID) {
+    
+    delete [] Jet_VALID_fUniqueID;
+    delete [] Jet_VALID_fBits;
+    delete [] Jet_VALID_PT;
+    delete [] Jet_VALID_Eta;
+    delete [] Jet_VALID_Phi;
+    delete [] Jet_VALID_Mass;
+    delete [] Jet_VALID_DeltaEta;
+    delete [] Jet_VALID_DeltaPhi;
+    delete [] Jet_VALID_BTag;
+    delete [] Jet_VALID_TauTag;
+    delete [] Jet_VALID_Charge;
+    delete [] Jet_VALID_EhadOverEem;
+
+    Jet_VALID_size = numOfVALID;
+    if (numOfVALID == 0) // avoid the problem of creating an array of size 0.
+        return;
+
+    Jet_VALID_fUniqueID = new UInt_t[numOfVALID];
+    Jet_VALID_fBits = new UInt_t[numOfVALID];
+    Jet_VALID_PT = new Float_t[numOfVALID];
+    Jet_VALID_Eta = new Float_t[numOfVALID];
+    Jet_VALID_Phi = new Float_t[numOfVALID];
+    Jet_VALID_Mass = new Float_t[numOfVALID];
+    Jet_VALID_DeltaEta = new Float_t[numOfVALID];
+    Jet_VALID_DeltaPhi = new Float_t[numOfVALID];
+    Jet_VALID_BTag = new Int_t[numOfVALID];
+    Jet_VALID_TauTag = new Int_t[numOfVALID];
+    Jet_VALID_Charge = new Int_t[numOfVALID];
+    Jet_VALID_EhadOverEem = new Float_t[numOfVALID];
 }
 
 /*
@@ -818,7 +797,7 @@ void loop_Reconstruct_De(e6_Class &e6) {
 
         // NOW, this method uses filtered version of JETs.
         filterJets(e6);
-        cout << e6.Jet_size << " , " << Jet_VALID_size << endl;
+//        cout << e6.Jet_size << " , " << Jet_VALID_size << endl;
 
         indices_JetPT_descending = sortIndices_Descending(Jet_VALID_PT, Jet_VALID_size);
         index_MaxPT = indices_JetPT_descending[0];
