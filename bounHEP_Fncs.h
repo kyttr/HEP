@@ -185,7 +185,7 @@ void filterJets(e6_Class &e6) {
     Jet_VALID_TauTag = new Int_t[numOfVALID];
     Jet_VALID_Charge = new Int_t[numOfVALID];
     Jet_VALID_EhadOverEem = new Float_t[numOfVALID];
-    Jet_VALID_size=numOfVALID;
+    Jet_VALID_size = numOfVALID;
 
     // STEP 3
     for (i = 0; i < e6.Jet_size; i++) {
@@ -752,12 +752,15 @@ void loop_Reconstruct_De(e6_Class &e6) {
         nb = e6.fChain->GetEntry(jentry);
         nbytes += nb;
 
-        indices_JetPT_descending = sortIndices_Descending(e6.Jet_PT, e6.Jet_size);
+        // NOW, this method uses filtered version of JETs.
+        filterJets(e6);
+
+        indices_JetPT_descending = sortIndices_Descending(Jet_VALID_PT, Jet_VALID_size);
         index_MaxPT = indices_JetPT_descending[0];
         index_2ndMaxPT = indices_JetPT_descending[1];
 
-        jet1.SetPtEtaPhiM(e6.Jet_PT[index_MaxPT], e6.Jet_Eta[index_MaxPT], e6.Jet_Phi[index_MaxPT], e6.Jet_Mass[index_MaxPT]);
-        jet2.SetPtEtaPhiM(e6.Jet_PT[index_2ndMaxPT], e6.Jet_Eta[index_2ndMaxPT], e6.Jet_Phi[index_2ndMaxPT], e6.Jet_Mass[index_2ndMaxPT]);
+        jet1.SetPtEtaPhiM(Jet_VALID_PT[index_MaxPT], Jet_VALID_Eta[index_MaxPT], Jet_VALID_Phi[index_MaxPT], Jet_VALID_Mass[index_MaxPT]);
+        jet2.SetPtEtaPhiM(Jet_VALID_PT[index_2ndMaxPT], Jet_VALID_Eta[index_2ndMaxPT], Jet_VALID_Phi[index_2ndMaxPT], Jet_VALID_Mass[index_2ndMaxPT]);
 
         // if (Cut(ientry) < 0) continue;
 
