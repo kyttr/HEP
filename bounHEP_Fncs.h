@@ -83,22 +83,22 @@ static const char* prefix_t_RecoDe2 = "De2";
  * Obviously, I will need to reassign the below objects. For reinitialization of arrays I refer to :
  * http://www.cplusplus.com/forum/general/8498/
  */
-Int_t Jet_VALID_;
-UInt_t* Jet_VALID_fUniqueID;
-UInt_t* Jet_VALID_fBits;
-Float_t* Jet_VALID_PT;
-Float_t* Jet_VALID_Eta;
-Float_t* Jet_VALID_Phi;
-Float_t* Jet_VALID_Mass;
-Float_t* Jet_VALID_DeltaEta;
-Float_t* Jet_VALID_DeltaPhi;
-Int_t* Jet_VALID_BTag;
-Int_t* Jet_VALID_TauTag;
-Int_t* Jet_VALID_Charge;
-Float_t* Jet_VALID_EhadOverEem;
-TRefArray* Jet_VALID_Constituents;
-TRefArray* Jet_VALID_Particles;
-Int_t Jet_VALID_size;
+volatile Int_t Jet_VALID_;
+volatile UInt_t* Jet_VALID_fUniqueID;
+volatile UInt_t* Jet_VALID_fBits;
+volatile Float_t* Jet_VALID_PT;
+volatile Float_t* Jet_VALID_Eta;
+volatile Float_t* Jet_VALID_Phi;
+volatile Float_t* Jet_VALID_Mass;
+volatile Float_t* Jet_VALID_DeltaEta;
+volatile Float_t* Jet_VALID_DeltaPhi;
+volatile Int_t* Jet_VALID_BTag;
+volatile Int_t* Jet_VALID_TauTag;
+volatile Int_t* Jet_VALID_Charge;
+volatile Float_t* Jet_VALID_EhadOverEem;
+volatile TRefArray* Jet_VALID_Constituents;
+volatile TRefArray* Jet_VALID_Particles;
+volatile Int_t Jet_VALID_size;
 
 static const double limit_deltaR_jet_AND_e = 0.2;
 
@@ -151,6 +151,8 @@ void filterJets(e6_Class &e6) {
             if (deltaR_jet_AND_e1 >= limit_deltaR_jet_AND_e && deltaR_jet_AND_e2 >= limit_deltaR_jet_AND_e) {
                 numPassed++;
             }
+        } else {
+            numPassed++;
         }
 
 
@@ -174,6 +176,10 @@ void filterJets(e6_Class &e6) {
     delete [] Jet_VALID_Charge;
     delete [] Jet_VALID_EhadOverEem;
 
+    Jet_VALID_size = numOfVALID;
+    if (numOfVALID == 0)        // avoid the problem of creating an array of size 0.
+        return;
+
     Jet_VALID_fUniqueID = new UInt_t[numOfVALID];
     Jet_VALID_fBits = new UInt_t[numOfVALID];
     Jet_VALID_PT = new Float_t[numOfVALID];
@@ -186,25 +192,26 @@ void filterJets(e6_Class &e6) {
     Jet_VALID_TauTag = new Int_t[numOfVALID];
     Jet_VALID_Charge = new Int_t[numOfVALID];
     Jet_VALID_EhadOverEem = new Float_t[numOfVALID];
-    Jet_VALID_size = numOfVALID;
 
     // STEP 3
+    j = 0;
     for (i = 0; i < e6.Jet_size; i++) {
 
         if (valid_arr[i]) // this is a valid jet
         {
-            Jet_VALID_fUniqueID[i] = e6.Jet_fUniqueID[i];
-            Jet_VALID_fBits[i] = e6.Jet_fBits[i];
-            Jet_VALID_PT[i] = e6.Jet_PT[i];
-            Jet_VALID_Eta[i] = e6.Jet_Eta[i];
-            Jet_VALID_Phi[i] = e6.Jet_Phi[i];
-            Jet_VALID_Mass[i] = e6.Jet_Mass[i];
-            Jet_VALID_DeltaEta[i] = e6.Jet_DeltaEta[i];
-            Jet_VALID_DeltaPhi[i] = e6.Jet_DeltaPhi[i];
-            Jet_VALID_BTag[i] = e6.Jet_BTag[i];
-            Jet_VALID_TauTag[i] = e6.Jet_TauTag[i];
-            Jet_VALID_Charge[i] = e6.Jet_Charge[i];
-            Jet_VALID_EhadOverEem[i] = e6.Jet_EhadOverEem[i];
+            Jet_VALID_fUniqueID[j] = e6.Jet_fUniqueID[i];
+            Jet_VALID_fBits[j] = e6.Jet_fBits[i];
+            Jet_VALID_PT[j] = e6.Jet_PT[i];
+            Jet_VALID_Eta[j] = e6.Jet_Eta[i];
+            Jet_VALID_Phi[j] = e6.Jet_Phi[i];
+            Jet_VALID_Mass[j] = e6.Jet_Mass[i];
+            Jet_VALID_DeltaEta[j] = e6.Jet_DeltaEta[i];
+            Jet_VALID_DeltaPhi[j] = e6.Jet_DeltaPhi[i];
+            Jet_VALID_BTag[j] = e6.Jet_BTag[i];
+            Jet_VALID_TauTag[j] = e6.Jet_TauTag[i];
+            Jet_VALID_Charge[j] = e6.Jet_Charge[i];
+            Jet_VALID_EhadOverEem[j] = e6.Jet_EhadOverEem[i];
+            j++;
         }
     }
 }
@@ -260,8 +267,7 @@ void filterJets(e6_Class &e6, bool apply_NO_filter) {
             Jet_VALID_Charge[i] = e6.Jet_Charge[i];
             Jet_VALID_EhadOverEem[i] = e6.Jet_EhadOverEem[i];
         }
-    }
-    else {
+    } else {
         filterJets(e6);
     }
 }
@@ -812,6 +818,7 @@ void loop_Reconstruct_De(e6_Class &e6) {
 
         // NOW, this method uses filtered version of JETs.
         filterJets(e6);
+        cout << e6.Jet_size << " , " << Jet_VALID_size << endl;
 
         indices_JetPT_descending = sortIndices_Descending(Jet_VALID_PT, Jet_VALID_size);
         index_MaxPT = indices_JetPT_descending[0];
@@ -822,7 +829,7 @@ void loop_Reconstruct_De(e6_Class &e6) {
 
         // if (Cut(ientry) < 0) continue;
 
-        can_reconstruct_Higgs = (e6.Jet_size >= jet_size);
+        can_reconstruct_Higgs = (Jet_VALID_size >= jet_size);
 
         if (can_reconstruct_Higgs) {
             if (electron_size == e6.Electron_size) {
