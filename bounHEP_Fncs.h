@@ -101,7 +101,7 @@ volatile TRefArray* Jet_VALID_Constituents;
 volatile TRefArray* Jet_VALID_Particles;
 volatile Int_t Jet_VALID_size;
 
-static const double limit_deltaR_jet_AND_e = 2.2;
+static const double limit_deltaR_jet_AND_e = 0.2;
 
 /*
  * filter out the jets that do not meet our restrictions. 
@@ -797,7 +797,7 @@ void loop_Reconstruct_De(e6_Class &e6) {
 
         // NOW, this method uses filtered version of JETs.
         filterJets(e6);
-//        cout << e6.Jet_size << " , " << Jet_VALID_size << endl;
+//        cout << e6.Jet_size << " , " << Jet_VALID_size << endl;        
 
         indices_JetPT_descending = sortIndices_Descending(Jet_VALID_PT, Jet_VALID_size);
         index_MaxPT = indices_JetPT_descending[0];
