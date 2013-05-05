@@ -23,6 +23,7 @@ extern "C" {
 }
 #endif
 
+void filterJets(e6_Class &e6);
 void mergeROOTFiles(const char* outFileName, string* fileNames, int numFiles);
 
 void loop_HiggsMass(e6_Class &e6);
@@ -74,7 +75,141 @@ static const char* prefix_t_RecoDe1 = "De1";
 static const char* prefix_t_RecoDe2 = "De2";
 
 /*
- * Farklı işler/metotlar için farklı ".root" dosyları oluşturma. Hepsini bir ".root" dosyasında topla.
+ * 3. electron_size=2 olaylarında deltaR(jet, herhangi e)<0.2 olan jetleri analizden çıkar. Çünkü, bu jetler aslında jet değil, elektron. Elektron olmalarına rağmen dedektörde elektron olarak tespit edilmişler. Bu jetlerin analizden çıkarılması bize H,Z,de,De yeniden yaratılmasında yardımcı olabailir. Çünkü, bu jetler jet1 ve jet4 arası bir yerde olabilir.
+ * 
+ * As pointed above, not all jets will be used during event analysis. According to our restrictions we will disgard some of the jet. So the objects below will keep the jets that we want to study in an event. For us, the jets kept in the below objects are "valid". They are filtered version of the original "Jet"s.
+ * 
+ * Obviously, I will need to reassign the below objects. For reinitialization of arrays I refer to :
+ * http://www.cplusplus.com/forum/general/8498/
+ */
+Int_t Jet_VALID_;
+UInt_t* Jet_VALID_fUniqueID;
+UInt_t* Jet_VALID_fBits;
+Float_t* Jet_VALID_PT;
+Float_t* Jet_VALID_Eta;
+Float_t* Jet_VALID_Phi;
+Float_t* Jet_VALID_Mass;
+Float_t* Jet_VALID_DeltaEta;
+Float_t* Jet_VALID_DeltaPhi;
+Int_t* Jet_VALID_BTag;
+Int_t* Jet_VALID_TauTag;
+Int_t* Jet_VALID_Charge;
+Float_t* Jet_VALID_EhadOverEem;
+TRefArray* Jet_VALID_Constituents;
+TRefArray* Jet_VALID_Particles;
+Int_t Jet_VALID_size;
+
+static const double limit_deltaR_jet_AND_e = 0.2;
+
+/*
+ * filter out the jets that do not meet our restrictions. 
+ * The jets that we want to study in an event will be assigned to "Jet_VALID_" objects.
+ * 
+ * for now, I will NOT work with "Jet_VALID_Constituents" and "Jet_VALID_Particles"
+ * 
+ * The method is divided into 3 main steps.
+ * 1. determine the number of jets that are VALID. This information is required for reinitialization of arrays
+ * 2. Reinitialize "Jet_VALID_" objects. 
+ * 3. Assign "Jet_VALID_" objects.
+ */
+void filterJets(e6_Class &e6) {
+
+    // STEP 1
+    int numOfVALID = 0;
+    bool* valid_arr = new bool[e6.Jet_size]; // array keeping the validity of jets
+    int i, j, k;
+
+    int numTests = 1; // number of conditions a JET should satisfy.
+    int numPassed; // number of conditions a JET has satisfied.
+
+    // variables related to filtering
+    double deltaR_jet_AND_e1, deltaR_jet_AND_e2;
+    TLorentzVector v_e1, v_e2, v_jet;
+
+    // loop over jets
+    for (i = 0; i < e6.Jet_size; i++) {
+        // at first every jet is INVALID.
+        valid_arr[i] = false;
+        // at first every jet has passed no test.
+        numPassed = 0;
+
+        // CONDITION 1
+        // electron_size=2 olaylarında deltaR(jet, herhangi e)<0.2 olan jetleri analizden çıkar.
+        if (e6.Electron_size == 2) {
+
+            v_e1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], -1);
+            v_e2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], -1);
+            // for this case, mass of electron is irrelevant.
+
+            v_jet.SetPtEtaPhiM(e6.Jet_PT[i], e6.Jet_Eta[i], e6.Jet_Phi[i], e6.Jet_Mass[i]);
+
+            deltaR_jet_AND_e1 = v_jet.DeltaR(v_e1);
+            deltaR_jet_AND_e2 = v_jet.DeltaR(v_e2);
+
+            // check if VALID
+            if (deltaR_jet_AND_e1 >= limit_deltaR_jet_AND_e && deltaR_jet_AND_e2 >= limit_deltaR_jet_AND_e) {
+                numPassed++;
+            }
+        }
+
+
+        if (numPassed == numTests) {
+            numOfVALID++;
+            valid_arr[i] = true;
+        }
+    }
+
+    // STEP 2
+    delete [] Jet_VALID_fUniqueID;
+    delete [] Jet_VALID_fBits;
+    delete [] Jet_VALID_PT;
+    delete [] Jet_VALID_Eta;
+    delete [] Jet_VALID_Phi;
+    delete [] Jet_VALID_Mass;
+    delete [] Jet_VALID_DeltaEta;
+    delete [] Jet_VALID_DeltaPhi;
+    delete [] Jet_VALID_BTag;
+    delete [] Jet_VALID_TauTag;
+    delete [] Jet_VALID_Charge;
+    delete [] Jet_VALID_EhadOverEem;
+
+    Jet_VALID_fUniqueID = new UInt_t[numOfVALID];
+    Jet_VALID_fBits = new UInt_t[numOfVALID];
+    Jet_VALID_PT = new Float_t[numOfVALID];
+    Jet_VALID_Eta = new Float_t[numOfVALID];
+    Jet_VALID_Phi = new Float_t[numOfVALID];
+    Jet_VALID_Mass = new Float_t[numOfVALID];
+    Jet_VALID_DeltaEta = new Float_t[numOfVALID];
+    Jet_VALID_DeltaPhi = new Float_t[numOfVALID];
+    Jet_VALID_BTag = new Int_t[numOfVALID];
+    Jet_VALID_TauTag = new Int_t[numOfVALID];
+    Jet_VALID_Charge = new Int_t[numOfVALID];
+    Jet_VALID_EhadOverEem = new Float_t[numOfVALID];
+    Jet_VALID_size=numOfVALID;
+
+    // STEP 3
+    for (i = 0; i < e6.Jet_size; i++) {
+
+        if (valid_arr[i]) // this is a valid jet
+        {
+            Jet_VALID_fUniqueID[i] = e6.Jet_fUniqueID[i];
+            Jet_VALID_fBits[i] = e6.Jet_fBits[i];
+            Jet_VALID_PT[i] = e6.Jet_PT[i];
+            Jet_VALID_Eta[i] = e6.Jet_Eta[i];
+            Jet_VALID_Phi[i] = e6.Jet_Phi[i];
+            Jet_VALID_Mass[i] = e6.Jet_Mass[i];
+            Jet_VALID_DeltaEta[i] = e6.Jet_DeltaEta[i];
+            Jet_VALID_DeltaPhi[i] = e6.Jet_DeltaPhi[i];
+            Jet_VALID_BTag[i] = e6.Jet_BTag[i];
+            Jet_VALID_TauTag[i] = e6.Jet_TauTag[i];
+            Jet_VALID_Charge[i] = e6.Jet_Charge[i];
+            Jet_VALID_EhadOverEem[i] = e6.Jet_EhadOverEem[i];
+        }
+    }
+}
+
+/*
+ * Farklı işler/metotlar için farklı ".root" dosyaları oluşturma. Hepsini bir ".root" dosyasında topla.
  * 
  * I spent like 1-1.5 hour to find out the necessary code to perform what I had in my mind. Below are some codes that I used, but which did not work the way I wanted
  * 
