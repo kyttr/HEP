@@ -132,33 +132,32 @@ static const float Z_mass = 91.19; // mass of Higgs boson in GeV
  * 
  */
 int* jetCombination4ChiSquared(float* jet1234_Mass) {
-    int len=4;
-    float* jet_masses= new float[len];
+    int len = 4;
+    float* jet_masses = new float[len];
     int indices[] = {0, 1, 2, 3};
-    
-    int* result=new int[len];
+
+    int* result = new int[len];
     float current_chi_squared;
     // http://cplusplus.com/reference/limits/numeric_limits/
     //float min_chi_squared=std::numeric_limits<float>::max();  // make sure this value will be overwritten
-    float min_chi_squared=99999999;  // make sure this value will be overwritten
-    
+    float min_chi_squared = 99999999; // make sure this value will be overwritten
+
     //http://www.cplusplus.com/reference/algorithm/next_permutation/
     do {
-        jet_masses[0]=jet1234_Mass[indices[0]];
-        jet_masses[1]=jet1234_Mass[indices[1]];
-        jet_masses[2]=jet1234_Mass[indices[2]];
-        jet_masses[3]=jet1234_Mass[indices[3]];
-    
-        current_chi_squared=chi_squared(jet_masses);
-        
+        jet_masses[0] = jet1234_Mass[indices[0]];
+        jet_masses[1] = jet1234_Mass[indices[1]];
+        jet_masses[2] = jet1234_Mass[indices[2]];
+        jet_masses[3] = jet1234_Mass[indices[3]];
+
+        current_chi_squared = chi_squared(jet_masses);
+
         // new best combination
-        if(current_chi_squared<min_chi_squared)
-        {
-            min_chi_squared=current_chi_squared;
-            
+        if (current_chi_squared < min_chi_squared) {
+            min_chi_squared = current_chi_squared;
+
             // http://stackoverflow.com/questions/11530678/copy-all-the-array-into-new-array-without-vectors-c?lq=1
             // http://stackoverflow.com/questions/4729046/memcpy-vs-for-loop-whats-the-proper-way-to-copy-an-array-from-a-pointer
-            copy(indices,indices+len,result);
+            copy(indices, indices + len, result);
         }
     } while (std::next_permutation(indices, indices + len));
 
@@ -176,14 +175,14 @@ int* jetCombination4ChiSquared(float* jet1234_Mass) {
 float chi_squared(vector<float> jet_Mass) {
     float width = 30;
     //http://stackoverflow.com/questions/6321170/is-there-any-advantage-to-using-powx-2-instead-of-xx-with-x-double
-    float chi_sqrd = pow(((jet_Mass(2) + jet_Mass(3)) - 120) / width ,2) + pow(((jet_Mass(0) + jet_Mass(2) + jet_Mass(3))-(Z_mass + jet_Mass(1))) / width ,2);
+    float chi_sqrd = pow(((jet_Mass(2) + jet_Mass(3)) - 120) / width, 2) + pow(((jet_Mass(0) + jet_Mass(2) + jet_Mass(3))-(Z_mass + jet_Mass(1))) / width, 2);
     return chi_sqrd;
 }
 
 float chi_squared(float* jet_Mass) {
     float width = 30;
     //http://stackoverflow.com/questions/6321170/is-there-any-advantage-to-using-powx-2-instead-of-xx-with-x-double
-    float chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - 120) / width,2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass + jet_Mass[1])) / width,2);
+    float chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - 120) / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass + jet_Mass[1])) / width, 2);
     return chi_sqrd;
 }
 
@@ -891,14 +890,14 @@ void loop_Reconstruct_De(e6_Class &e6) {
         jet2.SetPtEtaPhiM(Jet_VALID_PT[index_2ndMaxPT], Jet_VALID_Eta[index_2ndMaxPT], Jet_VALID_Phi[index_2ndMaxPT], Jet_VALID_Mass[index_2ndMaxPT]);
 
         // if (Cut(ientry) < 0) continue;
-        
-        int i3=indices_JetPT_descending[2];
-        int i4=indices_JetPT_descending[3];
-        float a[]={Jet_VALID_Mass[index_MaxPT],Jet_VALID_Mass[index_2ndMaxPT],Jet_VALID_Mass[i3],Jet_VALID_Mass[i4]};
-        int* ptr=jetCombination4ChiSquared(a);
-        for (int ii =0 ; ii <4; ii++) 
-                        cout << ptr[ii] <<" , ";
-        cout<<endl;
+
+        int i3 = indices_JetPT_descending[2];
+        int i4 = indices_JetPT_descending[3];
+        float a[] = {Jet_VALID_Mass[index_MaxPT], Jet_VALID_Mass[index_2ndMaxPT], Jet_VALID_Mass[i3], Jet_VALID_Mass[i4]};
+        int* ptr = jetCombination4ChiSquared(a);
+        for (int ii = 0; ii < 4; ii++)
+            cout << ptr[ii] << " , ";
+        cout << endl;
 
         can_reconstruct_Higgs = (Jet_VALID_size >= jet_size);
 
@@ -1133,8 +1132,7 @@ void loop_Reconstruct_Higgs(e6_Class &e6) {
  * 
  * This method will employ 4 highest PT jets. Different from other methods, this time no jet usage in reconstructions is not fixed. Jets will be used in reconstruction such that chi^2 will be minimized.
  */
-void loop_Reconstruct_All(e6_Class &e6)
-{
+void loop_Reconstruct_All(e6_Class &e6) {
     string histoFile_str = loop_Reconstruct_Higgs_outputName;
     // TFile constructor accepts type "const char*"
     const char* histoFile_char = histoFile_str.c_str();
@@ -1142,11 +1140,29 @@ void loop_Reconstruct_All(e6_Class &e6)
     TFile f(histoFile_char, "recreate");
     //TDirectory* dir1=f.mkdir("asdasd");       // ".root" dosyasında dizin oluşturma
 
-    TTree *t_RecoH = new TTree("RecoHiggs", "jet3 + jet4 -> H");
+    TTree *t_RecoH = new TTree("RecoHiggs", "jet? + jet? -> H");
     //t_RecoDe1->SetDirectory(dir1);    // ".root" dosyasında dizin oluşturma
     Double_t fields_t_RecoH[numOfFields_TLorentzVector];
     const char* prefix_t_RecoH = "h"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4TLorentzVector(t_RecoH, fields_t_RecoH, prefix_t_RecoH);
+
+    // reconstruction of Z such that mu-mu+ -> Z or e-e+ -> Z
+    TTree *t_RecoZ = new TTree("RecoZ", "mu-mu+ -> Z or e-e+ -> Z");
+    Double_t fields_t_RecoZ[numOfFields_TLorentzVector];
+    const char* prefix_t_RecoZ = "z"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4TLorentzVector(t_RecoZ, fields_t_RecoZ, prefix_t_RecoZ);
+
+    TTree *t_RecoDe = new TTree("RecoDe", "Z + jet? -> De");
+    //t_RecoDe1->SetDirectory(dir1);    // ".root" dosyasında dizin oluşturma
+    Double_t fields_t_RecoDe[numOfFields_TLorentzVector];
+    //const char* prefix_t_RecoDe1 = "De1"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4TLorentzVector(t_RecoDe, fields_t_RecoDe, "De");
+
+    TTree *t_Reco_de = new TTree("Recode", "H + jet? -> de");
+    Double_t fields_t_Reco_de[numOfFields_TLorentzVector];
+    //const char* prefix_t_Reco_de2 = "de2"; // must start with lowercase letter, dont know the stupid reason for tha
+    initializeTTree4TLorentzVector(t_Reco_de2, fields_t_Reco_de, "de");
+    
 }
 
 /*
