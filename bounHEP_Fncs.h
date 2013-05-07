@@ -38,6 +38,7 @@ void loop_Reconstruct_Z_from_mumu(e6_Class &e6);
 void loop_Reconstruct_De(e6_Class &e6);
 void loop_Reconstruct_de(e6_Class &e6);
 void loop_Reconstruct_Higgs(e6_Class &e6);
+void loop_Reconstruct_All(e6_Class &e6);
 void loop_Particle(e6_Class &e6);
 void loop_maxJetPT(e6_Class &e6);
 void loop_deltaMass_of_deDe();
@@ -66,6 +67,7 @@ static const int numOfFields_Jet = 32;
 static const char* loop_Reconstruct_de_outputName = "loop_Reconstruct_de.root"; // output file name of the function loop_Reconstruct_de()
 static const char* loop_Reconstruct_De_outputName = "loop_Reconstruct_De.root"; // output file name of the function loop_Reconstruct_De()
 static const char* loop_Reconstruct_Higgs_outputName = "loop_Reconstruct_Higgs.root"; // output file name of the function loop_Reconstruct_Higgs()
+static const char* loop_Reconstruct_All_outputName = "loop_Reconstruct_All.root"; // output file name of the function loop_Reconstruct_All()
 static const char* loop_Reconstruct_Z_outputName = "loop_Reconstruct_Z.root"; // output file name of the function loop_Reconstruct_Z()
 static const char* loop_deltaMass_of_deDe_outputName = "loop_deltaMass_of_deDe.root"; // output file name of the function loop_deltaMass_of_deDe()
 
@@ -137,7 +139,8 @@ int* jetCombination4ChiSquared(float* jet1234_Mass) {
     int* result=new int[len];
     float current_chi_squared;
     // http://cplusplus.com/reference/limits/numeric_limits/
-    float min_chi_squared=numeric_limits<float>.max();  // make sure this value will be overwritten
+    //float min_chi_squared=std::numeric_limits<float>::max();  // make sure this value will be overwritten
+    float min_chi_squared=99999999;  // make sure this value will be overwritten
     
     //http://www.cplusplus.com/reference/algorithm/next_permutation/
     do {
@@ -172,13 +175,15 @@ int* jetCombination4ChiSquared(float* jet1234_Mass) {
  */
 float chi_squared(vector<float> jet_Mass) {
     float width = 30;
-    float chi_sqrd = ((jet_Mass(2) + jet_Mass(3)) - 120)^2 / width^2 + ((jet_Mass(0) + jet_Mass(2) + jet_Mass(3))-(Z_mass + jet_Mass(1)))^2 / width^2;
+    //http://stackoverflow.com/questions/6321170/is-there-any-advantage-to-using-powx-2-instead-of-xx-with-x-double
+    float chi_sqrd = pow(((jet_Mass(2) + jet_Mass(3)) - 120) / width ,2) + pow(((jet_Mass(0) + jet_Mass(2) + jet_Mass(3))-(Z_mass + jet_Mass(1))) / width ,2);
     return chi_sqrd;
 }
 
 float chi_squared(float* jet_Mass) {
     float width = 30;
-    float chi_sqrd = ((jet_Mass[2] + jet_Mass[3]) - 120)^2 / width^2 + ((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass + jet_Mass[1]))^2 / width^2;
+    //http://stackoverflow.com/questions/6321170/is-there-any-advantage-to-using-powx-2-instead-of-xx-with-x-double
+    float chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - 120) / width,2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass + jet_Mass[1])) / width,2);
     return chi_sqrd;
 }
 
@@ -886,6 +891,14 @@ void loop_Reconstruct_De(e6_Class &e6) {
         jet2.SetPtEtaPhiM(Jet_VALID_PT[index_2ndMaxPT], Jet_VALID_Eta[index_2ndMaxPT], Jet_VALID_Phi[index_2ndMaxPT], Jet_VALID_Mass[index_2ndMaxPT]);
 
         // if (Cut(ientry) < 0) continue;
+        
+        int i3=indices_JetPT_descending[2];
+        int i4=indices_JetPT_descending[3];
+        float a[]={Jet_VALID_Mass[index_MaxPT],Jet_VALID_Mass[index_2ndMaxPT],Jet_VALID_Mass[i3],Jet_VALID_Mass[i4]};
+        int* ptr=jetCombination4ChiSquared(a);
+        for (int ii =0 ; ii <4; ii++) 
+                        cout << ptr[ii] <<" , ";
+        cout<<endl;
 
         can_reconstruct_Higgs = (Jet_VALID_size >= jet_size);
 
@@ -1103,6 +1116,37 @@ void loop_Reconstruct_Higgs(e6_Class &e6) {
     //histMass_RecoZ.DrawCopy(); // works
 
     f.Write();
+}
+
+/*
+ * 4. kai^2=(mass(jet3+jet4)-120)^2/30^2+(mass(jet1+3+4)-mass(Z+jet2))^2/30^2
+        her olay için bütün kai^2 kombinasyonlarını bul.
+        En küçük kai^2 değeri veren kombinasyonu kullanarak :
+                H, Z, de, De yeniden yarat.
+                H.Mass histogramı çıkart. Bu histograma Gaussian Fit yap. "Fit" in döndürdüğü "width" değerini kai^2 hesabının paydasındaki 30^2 yerine yaz.
+        H.Mass histogramını keskinleştirmek için kai^2 hesabını 1-2 kere döndür. Her döngüde bir önceki "width" değerini kullan. 1. döngü için "width"=30^2 veya "width"=30.
+ * 
+ *  * !! I think, if Higgs is to be reconstructed in an event, then in the same event we should have Z boson to be reconstructed as well. So before reconstructing a Higgs in an event, I also should check whether this event can reconstruct a Z as well.
+ * 
+ * To reconstruct a Z, one needs 2 muons or 2 electrons.
+ * To reconstuct a Higgs, one needs 4 jets (2 of them will be selected).
+ * 
+ * This method will employ 4 highest PT jets. Different from other methods, this time no jet usage in reconstructions is not fixed. Jets will be used in reconstruction such that chi^2 will be minimized.
+ */
+void loop_Reconstruct_All(e6_Class &e6)
+{
+    string histoFile_str = loop_Reconstruct_Higgs_outputName;
+    // TFile constructor accepts type "const char*"
+    const char* histoFile_char = histoFile_str.c_str();
+    // overwrite existing ".root" file
+    TFile f(histoFile_char, "recreate");
+    //TDirectory* dir1=f.mkdir("asdasd");       // ".root" dosyasında dizin oluşturma
+
+    TTree *t_RecoH = new TTree("RecoHiggs", "jet3 + jet4 -> H");
+    //t_RecoDe1->SetDirectory(dir1);    // ".root" dosyasında dizin oluşturma
+    Double_t fields_t_RecoH[numOfFields_TLorentzVector];
+    const char* prefix_t_RecoH = "h"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4TLorentzVector(t_RecoH, fields_t_RecoH, prefix_t_RecoH);
 }
 
 /*
