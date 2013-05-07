@@ -38,8 +38,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/e6_Class.o \
 	${OBJECTDIR}/altgraphv2.o \
 	${OBJECTDIR}/main_compileFiles.o \
-	${OBJECTDIR}/e6_v3_Class.o \
 	${OBJECTDIR}/e6_rootMacro1.o \
+	${OBJECTDIR}/e6_v3_Class.o \
 	${OBJECTDIR}/altgraph.o \
 	${OBJECTDIR}/e6_rootMacro1vTree.o \
 	${OBJECTDIR}/kaon+-p-pT-eta-phiv2.o \
@@ -92,15 +92,15 @@ ${OBJECTDIR}/main_compileFiles.o: main_compileFiles.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -g -I../PYTHIA/pythia8175/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/main_compileFiles.o main_compileFiles.cpp
 
-${OBJECTDIR}/e6_v3_Class.o: e6_v3_Class.C 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.cc) -g -I../PYTHIA/pythia8175/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/e6_v3_Class.o e6_v3_Class.C
-
 ${OBJECTDIR}/e6_rootMacro1.o: e6_rootMacro1.C 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -I../PYTHIA/pythia8175/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/e6_rootMacro1.o e6_rootMacro1.C
+
+${OBJECTDIR}/e6_v3_Class.o: e6_v3_Class.C 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -I../PYTHIA/pythia8175/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/e6_v3_Class.o e6_v3_Class.C
 
 ${OBJECTDIR}/altgraph.o: altgraph.C 
 	${MKDIR} -p ${OBJECTDIR}

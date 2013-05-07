@@ -219,7 +219,7 @@ void filterJets(e6_Class &e6, bool apply_NO_filter) {
 }
 
 void reinitialize_Jet_VALID(int numOfVALID) {
-    
+
     delete [] Jet_VALID_fUniqueID;
     delete [] Jet_VALID_fBits;
     delete [] Jet_VALID_PT;
@@ -797,7 +797,7 @@ void loop_Reconstruct_De(e6_Class &e6) {
 
         // NOW, this method uses filtered version of JETs.
         filterJets(e6);
-//        cout << e6.Jet_size << " , " << Jet_VALID_size << endl;        
+        //        cout << e6.Jet_size << " , " << Jet_VALID_size << endl;        
 
         indices_JetPT_descending = sortIndices_Descending(Jet_VALID_PT, Jet_VALID_size);
         index_MaxPT = indices_JetPT_descending[0];
@@ -907,24 +907,27 @@ void loop_Reconstruct_de(e6_Class &e6) {
         nb = e6.fChain->GetEntry(jentry);
         nbytes += nb;
 
+        // NOW, this method uses filtered version of JETs.
+        filterJets(e6);
+
         can_reconstruct_Z = (e6.Electron_size == electron_size) || (e6.Muon_size == mu_size);
 
         // if (Cut(ientry) < 0) continue;
         if (e6.Jet_size >= jet_size && can_reconstruct_Z) {
 
-            indices_JetPT_descending = sortIndices_Descending(e6.Jet_PT, e6.Jet_size);
+            indices_JetPT_descending = sortIndices_Descending(Jet_VALID_PT, Jet_VALID_size);
 
             index_3rdMaxPT = indices_JetPT_descending[2];
             index_4thMaxPT = indices_JetPT_descending[3];
-            jet3.SetPtEtaPhiM(e6.Jet_PT[index_3rdMaxPT], e6.Jet_Eta[index_3rdMaxPT], e6.Jet_Phi[index_3rdMaxPT], e6.Jet_Mass[index_3rdMaxPT]);
-            jet4.SetPtEtaPhiM(e6.Jet_PT[index_4thMaxPT], e6.Jet_Eta[index_4thMaxPT], e6.Jet_Phi[index_4thMaxPT], e6.Jet_Mass[index_4thMaxPT]);
+            jet3.SetPtEtaPhiM(Jet_VALID_PT[index_3rdMaxPT], Jet_VALID_Eta[index_3rdMaxPT], Jet_VALID_Phi[index_3rdMaxPT], Jet_VALID_Mass[index_3rdMaxPT]);
+            jet4.SetPtEtaPhiM(Jet_VALID_PT[index_4thMaxPT], Jet_VALID_Eta[index_4thMaxPT], Jet_VALID_Phi[index_4thMaxPT], Jet_VALID_Mass[index_4thMaxPT]);
 
             reconstructed_H = jet3 + jet4;
 
             index_MaxPT = indices_JetPT_descending[0];
             index_2ndMaxPT = indices_JetPT_descending[1];
-            jet1.SetPtEtaPhiM(e6.Jet_PT[index_MaxPT], e6.Jet_Eta[index_MaxPT], e6.Jet_Phi[index_MaxPT], e6.Jet_Mass[index_MaxPT]);
-            jet2.SetPtEtaPhiM(e6.Jet_PT[index_2ndMaxPT], e6.Jet_Eta[index_2ndMaxPT], e6.Jet_Phi[index_2ndMaxPT], e6.Jet_Mass[index_2ndMaxPT]);
+            jet1.SetPtEtaPhiM(Jet_VALID_PT[index_MaxPT], Jet_VALID_Eta[index_MaxPT], Jet_VALID_Phi[index_MaxPT], Jet_VALID_Mass[index_MaxPT]);
+            jet2.SetPtEtaPhiM(Jet_VALID_PT[index_2ndMaxPT], Jet_VALID_Eta[index_2ndMaxPT], Jet_VALID_Phi[index_2ndMaxPT], Jet_VALID_Mass[index_2ndMaxPT]);
 
             reconstructed_de1 = reconstructed_H + jet1;
             reconstructed_de2 = reconstructed_H + jet2;
@@ -993,19 +996,21 @@ void loop_Reconstruct_Higgs(e6_Class &e6) {
         if (ientry < 0) break;
         nb = e6.fChain->GetEntry(jentry);
         nbytes += nb;
-
         // if (Cut(ientry) < 0) continue;
+
+        // NOW, this method uses filtered version of JETs.
+        filterJets(e6);
 
         can_reconstruct_Z = (e6.Electron_size == electron_size) || (e6.Muon_size == mu_size);
 
         if (e6.Jet_size >= jet_size && can_reconstruct_Z) {
 
-            indices_JetPT_descending = sortIndices_Descending(e6.Jet_PT, e6.Jet_size);
+            indices_JetPT_descending = sortIndices_Descending(Jet_VALID_PT, Jet_VALID_size);
             index_3rdMaxPT = indices_JetPT_descending[2];
             index_4thMaxPT = indices_JetPT_descending[3];
 
-            jet3.SetPtEtaPhiM(e6.Jet_PT[index_3rdMaxPT], e6.Jet_Eta[index_3rdMaxPT], e6.Jet_Phi[index_3rdMaxPT], e6.Jet_Mass[index_3rdMaxPT]);
-            jet4.SetPtEtaPhiM(e6.Jet_PT[index_4thMaxPT], e6.Jet_Eta[index_4thMaxPT], e6.Jet_Phi[index_4thMaxPT], e6.Jet_Mass[index_4thMaxPT]);
+            jet3.SetPtEtaPhiM(Jet_VALID_PT[index_3rdMaxPT], Jet_VALID_Eta[index_3rdMaxPT], Jet_VALID_Phi[index_3rdMaxPT], Jet_VALID_Mass[index_3rdMaxPT]);
+            jet4.SetPtEtaPhiM(Jet_VALID_PT[index_4thMaxPT], Jet_VALID_Eta[index_4thMaxPT], Jet_VALID_Phi[index_4thMaxPT], Jet_VALID_Mass[index_4thMaxPT]);
 
             reconstructed_H = jet3 + jet4;
 
