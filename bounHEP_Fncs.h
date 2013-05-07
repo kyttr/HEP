@@ -23,7 +23,9 @@ extern "C" {
 }
 #endif
 
+int* jetCombination4ChiSquared(float* jet_PT_1234);
 float chi_squared(vector<float> jet_Mass);
+float chi_squared(float* jet_Mass);
 void filterJets(e6_Class &e6);
 void filterJets(e6_Class &e6, bool apply_NO_filter);
 void reinitialize_Jet_VALID(int length);
@@ -103,22 +105,81 @@ volatile TRefArray* Jet_VALID_Particles;
 volatile Int_t Jet_VALID_size;
 
 static const double limit_deltaR_jet_AND_e = 0.2;
-static const float h_mass=120;          // mass of Higgs boson in GeV
-static const float Z_mass=91.19;          // mass of Higgs boson in GeV
+static const float h_mass = 120; // mass of Higgs boson in GeV
+static const float Z_mass = 91.19; // mass of Higgs boson in GeV
+
+/*
+ * "jet1234_Mass" : array of jet masses where PT's of these jets are one of the 4 highest PT's in the event.
+ *              "jet1234_Mass[0]" = mass of jet with highest PT in the event.
+ *              "jet1234_Mass[3]" = mass of jet with 4th highest PT in the event.
+ * 
+ * Using permutations of elements of "jet1234_Mass", find the combination that results in the least value for "chi_squared"
+ * 
+ * return an "array of indices of jets" which result in the least value for "chi_squared"
+ * let us call returned array "result"
+ *      jet corresponding to result[0] will be used as jet1 : H + jet1 --> de
+ *      jet corresponding to result[1] will be used as jet2 : Z + jet2 --> De
+ *      jet corresponding to result[2] will be used as jet3 : jet3 + jet4 --> H
+ *      jet corresponding to result[3] will be used as jet4 : jet3 + jet4 --> H
+ *      
+ *      Ex : {3,1,2,0}
+ *      jet with 4th highest PT will be used as jet1 : H + jet1 --> de
+ *      jet with 2nd highest PT will be used as jet2 : Z + jet2 --> De
+ *      jet with 3rd highest PT will be used as jet3 : jet3 + jet4 --> H
+ *      jet with 1st highest PT will be used as jet4 : jet3 + jet4 --> H
+ * 
+ */
+int* jetCombination4ChiSquared(float* jet1234_Mass) {
+    int len=4;
+    float* jet_masses= new float[len];
+    int indices[] = {0, 1, 2, 3};
+    
+    int* result=new int[len];
+    float current_chi_squared;
+    // http://cplusplus.com/reference/limits/numeric_limits/
+    float min_chi_squared=numeric_limits<float>.max();  // make sure this value will be overwritten
+    
+    //http://www.cplusplus.com/reference/algorithm/next_permutation/
+    do {
+        jet_masses[0]=jet1234_Mass[indices[0]];
+        jet_masses[1]=jet1234_Mass[indices[1]];
+        jet_masses[2]=jet1234_Mass[indices[2]];
+        jet_masses[3]=jet1234_Mass[indices[3]];
+    
+        current_chi_squared=chi_squared(jet_masses);
+        
+        // new best combination
+        if(current_chi_squared<min_chi_squared)
+        {
+            min_chi_squared=current_chi_squared;
+            
+            // http://stackoverflow.com/questions/11530678/copy-all-the-array-into-new-array-without-vectors-c?lq=1
+            // http://stackoverflow.com/questions/4729046/memcpy-vs-for-loop-whats-the-proper-way-to-copy-an-array-from-a-pointer
+            copy(indices,indices+len,result);
+        }
+    } while (std::next_permutation(indices, indices + len));
+
+    return result;
+}
 
 /*
  * 4. kai^2=(mass(jet3+jet4)-120)^2/30^2+(mass(jet1+3+4)-mass(Z+jet2))^2/30^2
-	her olay için bütün kai^2 kombinasyonlarını bul.
- 	En küçük kai^2 değeri veren kombinasyonu kullanarak :
-		H, Z, de, De yeniden yarat.
-		H.Mass histogramı çıkart. Bu histograma Gaussian Fit yap. "Fit" in döndürdüğü "width" değerini kai^2 hesabının paydasındaki 30^2 yerine yaz.
-	H.Mass histogramını keskinleştirmek için kai^2 hesabını 1-2 kere döndür. Her döngüde bir önceki "width" değerini kullan. 1. döngü için "width"=30^2 veya "width"=30.
+        her olay için bütün kai^2 kombinasyonlarını bul.
+        En küçük kai^2 değeri veren kombinasyonu kullanarak :
+                H, Z, de, De yeniden yarat.
+                H.Mass histogramı çıkart. Bu histograma Gaussian Fit yap. "Fit" in döndürdüğü "width" değerini kai^2 hesabının paydasındaki 30^2 yerine yaz.
+        H.Mass histogramını keskinleştirmek için kai^2 hesabını 1-2 kere döndür. Her döngüde bir önceki "width" değerini kullan. 1. döngü için "width"=30^2 veya "width"=30.
  */
-float chi_squared(vector<float> jet_Mass)
-{
-    float width=30;   
-    float chi_sqrd=((jet_Mass(2)+jet_Mass(3))-120)^2/width^2+((jet_Mass(0)+jet_Mass(2)+jet_Mass(3))-(Z_mass+jet_Mass(1)))^2/width^2;
-    return chi_sqrd;    
+float chi_squared(vector<float> jet_Mass) {
+    float width = 30;
+    float chi_sqrd = ((jet_Mass(2) + jet_Mass(3)) - 120)^2 / width^2 + ((jet_Mass(0) + jet_Mass(2) + jet_Mass(3))-(Z_mass + jet_Mass(1)))^2 / width^2;
+    return chi_sqrd;
+}
+
+float chi_squared(float* jet_Mass) {
+    float width = 30;
+    float chi_sqrd = ((jet_Mass[2] + jet_Mass[3]) - 120)^2 / width^2 + ((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass + jet_Mass[1]))^2 / width^2;
+    return chi_sqrd;
 }
 
 /*
