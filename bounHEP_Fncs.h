@@ -107,8 +107,10 @@ volatile TRefArray* Jet_VALID_Particles;
 volatile Int_t Jet_VALID_size;
 
 static const double limit_deltaR_jet_AND_e = 0.2;
-static const float h_mass = 120; // mass of Higgs boson in GeV
-static const float Z_mass = 91.19; // mass of Higgs boson in GeV
+static const double h_mass = 120; // mass of Higgs boson in GeV
+static const double Z_mass = 91.19; // mass of Higgs boson in GeV
+static const double h_mass_MeV = 120000; // mass of Higgs boson in MeV
+static const double Z_mass_MeV = 91190; // mass of Z boson in MeV
 
 /*
  * "jet1234_Mass" : array of jet masses where PT's of these jets are one of the 4 highest PT's in the event.
@@ -137,10 +139,10 @@ int* optimizeJets4ChiSquared(float* jet1234_Mass) {
     int indices[] = {0, 1, 2, 3};
 
     int* result = new int[len];
-    float current_chi_squared;
+    double current_chi_squared;
     // http://cplusplus.com/reference/limits/numeric_limits/
     //float min_chi_squared=std::numeric_limits<float>::max();  // make sure this value will be overwritten
-    float min_chi_squared = 99999999; // make sure this value will be overwritten
+    double min_chi_squared = 99999999; // make sure this value will be overwritten
 
     //http://www.cplusplus.com/reference/algorithm/next_permutation/
     do {
@@ -151,6 +153,12 @@ int* optimizeJets4ChiSquared(float* jet1234_Mass) {
 
         current_chi_squared = chi_squared(jet_masses);
 
+        //        for (int j = 0; j < 4; j++) {
+        //            cout << indices[j] << " , ";
+        //            cout << jet_masses[j] << " , ";
+        //        }
+        //        cout << "--> " << current_chi_squared << endl;
+
         // new best combination
         if (current_chi_squared < min_chi_squared) {
             min_chi_squared = current_chi_squared;
@@ -160,6 +168,11 @@ int* optimizeJets4ChiSquared(float* jet1234_Mass) {
             copy(indices, indices + len, result);
         }
     } while (std::next_permutation(indices, indices + len));
+
+    //    for (int j = 0; j < 4; j++) {
+    //        cout << result[j] << " , ";
+    //    }
+    //    cout<<" eND "<<endl;
 
     return result;
 }
@@ -172,17 +185,20 @@ int* optimizeJets4ChiSquared(float* jet1234_Mass) {
                 H.Mass histogramı çıkart. Bu histograma Gaussian Fit yap. "Fit" in döndürdüğü "width" değerini kai^2 hesabının paydasındaki 30^2 yerine yaz.
         H.Mass histogramını keskinleştirmek için kai^2 hesabını 1-2 kere döndür. Her döngüde bir önceki "width" değerini kullan. 1. döngü için "width"=30^2 veya "width"=30.
  */
-float chi_squared(vector<float> jet_Mass) {
-    float width = 30;
+double chi_squared(vector<float> jet_Mass) {
+    double width = 10000;
     //http://stackoverflow.com/questions/6321170/is-there-any-advantage-to-using-powx-2-instead-of-xx-with-x-double
-    float chi_sqrd = pow(((jet_Mass(2) + jet_Mass(3)) - 120) / width, 2) + pow(((jet_Mass(0) + jet_Mass(2) + jet_Mass(3))-(Z_mass + jet_Mass(1))) / width, 2);
+    double chi_sqrd = pow(((jet_Mass(2) + jet_Mass(3)) - h_mass_MeV) / width, 2) + pow(((jet_Mass(0) + jet_Mass(2) + jet_Mass(3))-(Z_mass_MeV + jet_Mass(1))) / width, 2);
     return chi_sqrd;
 }
 
-float chi_squared(float* jet_Mass) {
-    float width = 30;
+double chi_squared(float* jet_Mass) {
+    double width = 10000;
+    double weight1 = 1;
+    double weight2 = 1;
     //http://stackoverflow.com/questions/6321170/is-there-any-advantage-to-using-powx-2-instead-of-xx-with-x-double
-    float chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - 120) / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass + jet_Mass[1])) / width, 2);
+    //    float chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass_MeV + jet_Mass[1])) / width, 2);
+    double chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) * weight1 / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass_MeV + jet_Mass[1])) * weight2 / width, 2);
     return chi_sqrd;
 }
 
@@ -1133,7 +1149,7 @@ void loop_Reconstruct_Higgs(e6_Class &e6) {
  * This method will employ 4 highest PT jets. Different from other methods, this time no jet usage in reconstructions is fixed. Jets will be used in reconstruction such that chi^2 will be minimized.
  */
 void loop_Reconstruct_All(e6_Class &e6) {
-    string histoFile_str = loop_Reconstruct_Higgs_outputName;
+    string histoFile_str = loop_Reconstruct_All_outputName;
     // TFile constructor accepts type "const char*"
     const char* histoFile_char = histoFile_str.c_str();
     // overwrite existing ".root" file
@@ -1153,9 +1169,9 @@ void loop_Reconstruct_All(e6_Class &e6) {
 
     TTree *t_RecoDe = new TTree("RecoDe", "Z + jet? -> De");
     //t_RecoDe1->SetDirectory(dir1);    // ".root" dosyasında dizin oluşturma
-    Double_t fields_t_RecoDe[numOfFields_TLorentzVector];
+    Double_t fields_t_Reco_De[numOfFields_TLorentzVector];
     //const char* prefix_t_RecoDe1 = "De1"; // must start with lowercase letter, dont know the stupid reason for that
-    initializeTTree4TLorentzVector(t_RecoDe, fields_t_RecoDe, "De");
+    initializeTTree4TLorentzVector(t_RecoDe, fields_t_Reco_De, "De");
 
     TTree *t_Reco_de = new TTree("Recode", "H + jet? -> de");
     Double_t fields_t_Reco_de[numOfFields_TLorentzVector];
@@ -1170,11 +1186,9 @@ void loop_Reconstruct_All(e6_Class &e6) {
 
     // objects for reconstruction : e-e+ -> Z
     TLorentzVector el1, el2;
-    TLorentzVector reconstructed_Z_ee;
-
     // objects for reconstruction : mu-mu+ -> Z
     TLorentzVector mu1, mu2;
-    TLorentzVector reconstructed_Z_mumu;
+    TLorentzVector reconstructed_Z;
 
     // objects for reconstruction : H + jet? -> de 
     // objects for reconstruction : Z + jet? -> De 
@@ -1189,7 +1203,10 @@ void loop_Reconstruct_All(e6_Class &e6) {
     int index_2ndMaxPT;
     int index_3rdMaxPT;
     int index_4thMaxPT;
-    float* jet1234_Mass=new float[jet_size];
+    int* indices_MaxPT = new float[jet_size]; // indices of the jets with highest PT in the array "Jet_VALID_PT" 
+    float* jet1234_Mass = new float[jet_size];
+    int* jet1234_indicesAfterChiSquared; // combination of jet indices which minimizes Chi^2
+    int ind_j1, ind_j2, ind_j3, ind_j4; // indices of jets in "Jet_VALID_PT" after calling "optimizeJets4ChiSquared()"
 
     bool can_reconstruct_Z;
     bool can_reconstruct_Higgs;
@@ -1211,48 +1228,112 @@ void loop_Reconstruct_All(e6_Class &e6) {
 
         // NOW, this method uses filtered version of JETs.
         filterJets(e6);
+        //        int jetNumDiff=(e6.Jet_size-Jet_VALID_size);
+        //        cout<<"------"<<jetNumDiff<<"----------"<<endl;
 
         // there should be at least 4 jets and (2 electrons or 2 muons) in the event
         can_reconstruct_Higgs = Jet_VALID_size >= jet_size;
         can_reconstruct_Z = (e6.Electron_size == electron_size) || (e6.Muon_size == mu_size);
 
         // there should be at least 4 jets and (2 electrons or 2 muons) in the event
-        if(can_reconstruct_Higgs && can_reconstruct_Z)
-        {
+        if (can_reconstruct_Higgs && can_reconstruct_Z) {
             // Now, we can reconstruct
-                      
-            indices_JetPT_descending=sortIndices_Descending(Jet_VALID_PT, Jet_VALID_size);
-            index_MaxPT=indices_JetPT_descending[0];
-            index_2ndMaxPT=indices_JetPT_descending[1];
-            index_3rdMaxPT=indices_JetPT_descending[2];
-            index_4thMaxPT=indices_JetPT_descending[3];
-            
-            // assign the array which stores mass of the 4 jets with highest PT
-            jet1234_Mass[0]=Jet_VALID_Mass[index_MaxPT];
-            jet1234_Mass[1]=Jet_VALID_Mass[index_2ndMaxPT];
-            jet1234_Mass[2]=Jet_VALID_Mass[index_3rdMaxPT];
-            jet1234_Mass[3]=Jet_VALID_Mass[index_4thMaxPT];
-            
-            
-        }
-        /*
-        if (e6.Jet_size >= jet_size && can_reconstruct_Z) {
 
             indices_JetPT_descending = sortIndices_Descending(Jet_VALID_PT, Jet_VALID_size);
+            index_MaxPT = indices_JetPT_descending[0];
+            index_2ndMaxPT = indices_JetPT_descending[1];
             index_3rdMaxPT = indices_JetPT_descending[2];
             index_4thMaxPT = indices_JetPT_descending[3];
+            indices_MaxPT[0] = index_MaxPT;
+            indices_MaxPT[1] = index_2ndMaxPT;
+            indices_MaxPT[2] = index_3rdMaxPT;
+            indices_MaxPT[3] = index_4thMaxPT;
 
-            jet3.SetPtEtaPhiM(Jet_VALID_PT[index_3rdMaxPT], Jet_VALID_Eta[index_3rdMaxPT], Jet_VALID_Phi[index_3rdMaxPT], Jet_VALID_Mass[index_3rdMaxPT]);
-            jet4.SetPtEtaPhiM(Jet_VALID_PT[index_4thMaxPT], Jet_VALID_Eta[index_4thMaxPT], Jet_VALID_Phi[index_4thMaxPT], Jet_VALID_Mass[index_4thMaxPT]);
+            //            for (int ind = 0; ind < Jet_VALID_size; ind++) {
+            //                cout << Jet_VALID_PT[ind] << " , ";
+            //            }
+            //            cout<<" END "<<endl;
+            //
+            //            for (int ind = 0; ind < 4; ind++) {
+            //                cout << indices_JetPT_descending[ind] << " , ";
+            //            }
+            //            cout << " | ";
 
+            // assign the array which stores mass of the 4 jets with highest PT
+            jet1234_Mass[0] = Jet_VALID_Mass[index_MaxPT];
+            jet1234_Mass[1] = Jet_VALID_Mass[index_2ndMaxPT];
+            jet1234_Mass[2] = Jet_VALID_Mass[index_3rdMaxPT];
+            jet1234_Mass[3] = Jet_VALID_Mass[index_4thMaxPT];
+
+            // combination of jet indices which minimizes Chi^2
+            jet1234_indicesAfterChiSquared = optimizeJets4ChiSquared(jet1234_Mass);
+            /*
+            jet1234_indicesAfterChiSquared[0]=0;
+            jet1234_indicesAfterChiSquared[1]=1;
+            jet1234_indicesAfterChiSquared[2]=2;
+            jet1234_indicesAfterChiSquared[3]=3;
+             */
+            //            for (int ind = 0; ind < 4; ind++) {
+            //                cout << jet1234_indicesAfterChiSquared[ind] << " , ";
+            //            }
+            //            cout << " | ";
+
+            /*      Ex : {3,1,2,0}
+             *      jet with 4th highest PT will be used as jet1 : H + jet1 --> de
+             *      jet with 2nd highest PT will be used as jet2 : Z + jet2 --> De
+             *      jet with 3rd highest PT will be used as jet3 : jet3 + jet4 --> H
+             *      jet with 1st highest PT will be used as jet4 : jet3 + jet4 --> H
+             */
+
+            ind_j1 = indices_MaxPT[jet1234_indicesAfterChiSquared[0]];
+            ind_j2 = indices_MaxPT[jet1234_indicesAfterChiSquared[1]];
+            ind_j3 = indices_MaxPT[jet1234_indicesAfterChiSquared[2]];
+            ind_j4 = indices_MaxPT[jet1234_indicesAfterChiSquared[3]];
+
+            //            for (int ind = 0; ind < 4; ind++) {
+            //                cout << indices_MaxPT[jet1234_indicesAfterChiSquared[ind]] << " , ";
+            //            }
+            //            cout << " | " << endl;
+
+            // reconstruct Z
+            // reconstruction of Z is irrelevant to optimizing Chi^2, has nothing to do with jets
+            if (electron_size == e6.Electron_size) {
+
+                el1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], electron_mass);
+                el2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], electron_mass);
+
+                reconstructed_Z = el1 + el2;
+            } else if (mu_size == e6.Muon_size) {
+
+                mu1.SetPtEtaPhiM(e6.Muon_PT[0], e6.Muon_Eta[0], e6.Muon_Phi[0], mu_mass);
+                mu2.SetPtEtaPhiM(e6.Muon_PT[1], e6.Muon_Eta[1], e6.Muon_Phi[1], mu_mass);
+
+                reconstructed_Z = mu1 + mu2;
+            }
+
+            // reconstruct H
+            jet3.SetPtEtaPhiM(Jet_VALID_PT[ind_j3], Jet_VALID_Eta[ind_j3], Jet_VALID_Phi[ind_j3], Jet_VALID_Mass[ind_j3]);
+            jet4.SetPtEtaPhiM(Jet_VALID_PT[ind_j4], Jet_VALID_Eta[ind_j4], Jet_VALID_Phi[ind_j4], Jet_VALID_Mass[ind_j4]);
             reconstructed_H = jet3 + jet4;
 
+            // reconstruct De
+            jet2.SetPtEtaPhiM(Jet_VALID_PT[ind_j2], Jet_VALID_Eta[ind_j2], Jet_VALID_Phi[ind_j2], Jet_VALID_Mass[ind_j2]);
+            reconstructed_De = reconstructed_Z + jet2;
+
+            // reconstruct de
+            jet1.SetPtEtaPhiM(Jet_VALID_PT[ind_j1], Jet_VALID_Eta[ind_j1], Jet_VALID_Phi[ind_j1], Jet_VALID_Mass[ind_j1]);
+            reconstructed_de = reconstructed_H + jet1;
+
+
+            // fill trees
+            fillTTree4LorentzVector(t_RecoZ, fields_t_RecoZ, reconstructed_Z);
             fillTTree4LorentzVector(t_RecoH, fields_t_RecoH, reconstructed_H);
-
+            fillTTree4LorentzVector(t_RecoDe, fields_t_Reco_De, reconstructed_De);
+            fillTTree4LorentzVector(t_Reco_de, fields_t_Reco_de, reconstructed_de);
         }
-         */
-
     }
+
+    f.Write();
 }
 
 /*
@@ -1334,7 +1415,7 @@ void loop_deltaMass_of_deDe() {
  * 
  * 1. "Particle" dalında PID=Higgs olan parçacıkları bul. 85<mass<105 olan jetleri bul. Bu Higgs'ler ile jetler arasındaki "deltaR" bul. deltaR=sqrt(deltaEta^2+deltaPhi^2) gibi bir şey.
  */
-void loop_deltaR_HIGGS_and_JET(e6_Class &e6) {
+void loop_deltaR_HIGGS_and_JET(e6_Class & e6) {
     if (e6.fChain == 0) return;
 
     string histoFile_str = "loop_deltaR_HIGGS_and_JET.root";
@@ -1439,7 +1520,7 @@ void loop_deltaR_HIGGS_and_JET(e6_Class &e6) {
  *      2. deltaR(Z,jet) değeri belirli bir limitin altında olan jetler (limit_deltaR = 0.5 gibi)
  *      3. deltaR(Z,jet) değeri en küçük olan jet (her Z için böyle bir jetten tam 1 tane vardır.)
  */
-void loop_deltaR_Z_and_JET(e6_Class &e6) {
+void loop_deltaR_Z_and_JET(e6_Class & e6) {
     if (e6.fChain == 0) return;
 
     string histoFile_str = "loop_deltaR_Z_and_JET.root";
@@ -1744,7 +1825,7 @@ void initializeTTree4TLorentzVector(TTree* t, Double_t* adresler, const char* br
  * 
  *  http://www.cplusplus.com/doc/tutorial/pointers/
  */
-void fillTTree4LorentzVector(TTree* t, Double_t* adresler, TLorentzVector &vec) {
+void fillTTree4LorentzVector(TTree* t, Double_t* adresler, TLorentzVector & vec) {
 
     adresler[0] = vec.Beta();
     adresler[1] = vec.CosTheta();
@@ -1902,7 +1983,7 @@ void initializeTTree4GenParticle(TTree &t, Double_t* adresler, const char* branc
  * 
  *  http://www.cplusplus.com/doc/tutorial/pointers/
  */
-void fillTTree4GenParticle(TTree* t, Double_t* adresler, GenParticle* particle) {
+void fillTTree4GenParticle(TTree* t, Double_t* adresler, GenParticle * particle) {
 
     adresler[0] = particle->PID;
     adresler[1] = particle->Status;
