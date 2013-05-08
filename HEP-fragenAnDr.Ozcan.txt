@@ -118,7 +118,7 @@ http://root.cern.ch/download/doc/ROOTUsersGuideHTML/ch12s21.html
 //    histMass_Higgs->DrawCopy(); //works
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+01.05.2013/Çrş
 Farklı işler/metotlar için farklı ".root" dosyları oluşturma. Hepsini bir ".root" dosyasında topla.
 
 1. her olayda "deltaMass_of_deDe" yi minimize eden kombinasyon bul. O kombinasyon kullan, histogram çıkart.
@@ -146,3 +146,36 @@ Farklı işler/metotlar için farklı ".root" dosyları oluşturma. Hepsini bir 
 		H, Z, de, De yeniden yarat.
 		H.Mass histogramı çıkart. Bu histograma Gaussian Fit yap. "Fit" in döndürdüğü "width" değerini kai^2 hesabının paydasındaki 30^2 yerine yaz.
 	H.Mass histogramını keskinleştirmek için kai^2 hesabını 1-2 kere döndür. Her döngüde bir önceki "width" değerini kullan. 1. döngü için "width"=30^2 veya "width"=30.
+
+08.05.2013/Çrş
+
+deltaR(jet, Z) with : 85<jet.mass<105, Z as (generated) Particle
+	bu deltaR histogramı 0'a çok yakın yerde tavan yapıyor. 
+	Ayrıca "Z->e-e+" elektronları önceki Z bozonuna çok yakın bir yönde ilerliyor. Bu durumda 
+		deltaR(jet,e) with : e as Electron
+			bu deltaR histogramının da 0'a çok yakın çok fazla değeri olması beklenir. Geçen hafta yazdığım notta "electron_size=2 olaylarında deltaR(jet, herhangi e)<0.2 olan jetleri analizden çıkar." demiştim. Ama, hemen hemen hiçbir jet elenmedi. Bu demek ki "deltaR(jet,e) with : e as Electron" değeri 0'a çok yakın olan hemen hiçbir jet yok. Bu durum sorun yaratıyor. ==> Çelişki
+==> çözüm önerisi
+	- "electron_size=2 olaylarında deltaR(jet, herhangi e)<0.2 olan jetleri analizden çıkar." --> bu işi yapan "filterJets()" metodumda hata olabilir.
+	- deltaR(jet,e)<0.2 with : e as Electron 
+		sağlayan jet.mass histogram
+	- deltaR(jet,e+e-)<0.2 with : e as Electron 
+		sağlayan jet.mass histogramı
+	- deltaR(e1 as Particle, e2 as Elektron)=minimum. with : e1 as Particle, e2 as Elektron 
+		deltaR(e as Particle, e as Elektron) minimum olan deltaR histogramı, elektronları yüklerine göre ayırt et.
+	
+TH1F nesnesine fit yapmayı biliyorum. "TTree"deki "Branch" nesnelerine nasıl fir yapacağım?
+	-->	"bracnh->Draw()" sonucunda dönen histograma fit
+
+çabuk ilerlersek, pythia'da "z+jet" background sample oluştur ve onları Delphes'ten geçir.	
+	"z+jet" background sample için "pythia/examples" dizininde "ttbar" içeren örneğe bak.
+Sonrasında "pp->deDe" simulasyonu ile "z+jet" background sample birleştireceğiz. Bunu olayların ağırlıklarına ("weight") göre yapacağız.
+	
+deltaR(jet,e)<0.2 sağlayan jet.mass histogramı
+deltaR(jet,e+e-)<0.2 sağlayan jet.mass histogramı ve bu jetleri ele.
+
+bracnh->Draw()	--> dönen histoya fit
+
+deltaR(e as Particle, e as Elektron) minimum olan deltaR(e as Particle, e as Elektron) histogramı, "e" ları yüklere ayır.
+
+çabuk ilerlersek,
+pythia'da "z+jet" background sample oluştur ve onları Delphes'ten geçir.
