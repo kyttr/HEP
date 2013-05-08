@@ -140,12 +140,12 @@ Farklı işler/metotlar için farklı ".root" dosyları oluşturma. Hepsini bir 
 
 3. electron_size=2 olaylarında deltaR(jet, herhangi e)<0.2 olan jetleri analizden çıkar. Çünkü, bu jetler aslında jet değil, elektron. Elektron olmalarına rağmen dedektörde elektron olarak tespit edilmişler. Bu jetlerin analizden çıkarılması bize H,Z,de,De yeniden yaratılmasında yardımcı olabailir. Çünkü, bu jetler jet1 ve jet4 arası bir yerde olabilir.
 
-4. kai^2=(mass(jet3+jet4)-120)^2/30^2+(mass(jet1+3+4)-mass(Z+jet2))^2/30^2
-	her olay için bütün kai^2 kombinasyonlarını bul.
- 	En küçük kai^2 değeri veren kombinasyonu kullanarak :
+4. chi^2=(mass(jet3+jet4)-120)^2/30^2+(mass(jet1+3+4)-mass(Z+jet2))^2/30^2
+	her olay için bütün chi^2 kombinasyonlarını bul.
+ 	En küçük chi^2 değeri veren kombinasyonu kullanarak :
 		H, Z, de, De yeniden yarat.
-		H.Mass histogramı çıkart. Bu histograma Gaussian Fit yap. "Fit" in döndürdüğü "width" değerini kai^2 hesabının paydasındaki 30^2 yerine yaz.
-	H.Mass histogramını keskinleştirmek için kai^2 hesabını 1-2 kere döndür. Her döngüde bir önceki "width" değerini kullan. 1. döngü için "width"=30^2 veya "width"=30.
+		H.Mass histogramı çıkart. Bu histograma Gaussian Fit yap. "Fit" in döndürdüğü "width" değerini chi^2 hesabının paydasındaki 30^2 yerine yaz.
+	H.Mass histogramını keskinleştirmek için chi^2 hesabını 1-2 kere döndür. Her döngüde bir önceki "width" değerini kullan. 1. döngü için "width"=30^2 veya "width"=30.
 
 08.05.2013/Çrş
 

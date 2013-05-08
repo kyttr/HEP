@@ -109,8 +109,10 @@ volatile Int_t Jet_VALID_size;
 static const double limit_deltaR_jet_AND_e = 0.2;
 static const double h_mass = 120; // mass of Higgs boson in GeV
 static const double Z_mass = 91.19; // mass of Higgs boson in GeV
+static const double de_mass = 500; // mass of de/De in GeV
 static const double h_mass_MeV = 120000; // mass of Higgs boson in MeV
 static const double Z_mass_MeV = 91190; // mass of Z boson in MeV
+static const double de_mass_MeV = 500000; // mass of de/De in GeV
 
 /*
  * "jet1234_Mass" : array of jet masses where PT's of these jets are one of the 4 highest PT's in the event.
@@ -196,9 +198,12 @@ double chi_squared(float* jet_Mass) {
     double width = 10000;
     double weight1 = 1;
     double weight2 = 1;
+    double weight3 = 1;
     //http://stackoverflow.com/questions/6321170/is-there-any-advantage-to-using-powx-2-instead-of-xx-with-x-double
+    double chi_sqrd;
     //    float chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass_MeV + jet_Mass[1])) / width, 2);
-    double chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) * weight1 / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass_MeV + jet_Mass[1])) * weight2 / width, 2);
+    //    chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) * weight1 / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass_MeV + jet_Mass[1])) * weight2 / width, 2);
+    chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) * weight1 / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3]) - de_mass_MeV) * weight2 / width, 2) + pow(((Z_mass_MeV + jet_Mass[1]) - de_mass_MeV) * weight3 / width, 2);
     return chi_sqrd;
 }
 
