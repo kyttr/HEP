@@ -23,7 +23,7 @@ extern "C" {
 }
 #endif
 
-int* jetCombination4ChiSquared(float* jet_PT_1234);
+int* optimizeJets4ChiSquared(float* jet_PT_1234);
 float chi_squared(vector<float> jet_Mass);
 float chi_squared(float* jet_Mass);
 void filterJets(e6_Class &e6);
@@ -131,7 +131,7 @@ static const float Z_mass = 91.19; // mass of Higgs boson in GeV
  *      jet with 1st highest PT will be used as jet4 : jet3 + jet4 --> H
  * 
  */
-int* jetCombination4ChiSquared(float* jet1234_Mass) {
+int* optimizeJets4ChiSquared(float* jet1234_Mass) {
     int len = 4;
     float* jet_masses = new float[len];
     int indices[] = {0, 1, 2, 3};
@@ -894,7 +894,7 @@ void loop_Reconstruct_De(e6_Class &e6) {
         int i3 = indices_JetPT_descending[2];
         int i4 = indices_JetPT_descending[3];
         float a[] = {Jet_VALID_Mass[index_MaxPT], Jet_VALID_Mass[index_2ndMaxPT], Jet_VALID_Mass[i3], Jet_VALID_Mass[i4]};
-        int* ptr = jetCombination4ChiSquared(a);
+        int* ptr = optimizeJets4ChiSquared(a);
         for (int ii = 0; ii < 4; ii++)
             cout << ptr[ii] << " , ";
         cout << endl;
@@ -1130,7 +1130,7 @@ void loop_Reconstruct_Higgs(e6_Class &e6) {
  * To reconstruct a Z, one needs 2 muons or 2 electrons.
  * To reconstuct a Higgs, one needs 4 jets (2 of them will be selected).
  * 
- * This method will employ 4 highest PT jets. Different from other methods, this time no jet usage in reconstructions is not fixed. Jets will be used in reconstruction such that chi^2 will be minimized.
+ * This method will employ 4 highest PT jets. Different from other methods, this time no jet usage in reconstructions is fixed. Jets will be used in reconstruction such that chi^2 will be minimized.
  */
 void loop_Reconstruct_All(e6_Class &e6) {
     string histoFile_str = loop_Reconstruct_Higgs_outputName;
@@ -1141,7 +1141,6 @@ void loop_Reconstruct_All(e6_Class &e6) {
     //TDirectory* dir1=f.mkdir("asdasd");       // ".root" dosyasında dizin oluşturma
 
     TTree *t_RecoH = new TTree("RecoHiggs", "jet? + jet? -> H");
-    //t_RecoDe1->SetDirectory(dir1);    // ".root" dosyasında dizin oluşturma
     Double_t fields_t_RecoH[numOfFields_TLorentzVector];
     const char* prefix_t_RecoH = "h"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4TLorentzVector(t_RecoH, fields_t_RecoH, prefix_t_RecoH);
@@ -1161,8 +1160,99 @@ void loop_Reconstruct_All(e6_Class &e6) {
     TTree *t_Reco_de = new TTree("Recode", "H + jet? -> de");
     Double_t fields_t_Reco_de[numOfFields_TLorentzVector];
     //const char* prefix_t_Reco_de2 = "de2"; // must start with lowercase letter, dont know the stupid reason for tha
-    initializeTTree4TLorentzVector(t_Reco_de2, fields_t_Reco_de, "de");
-    
+    initializeTTree4TLorentzVector(t_Reco_de, fields_t_Reco_de, "de");
+
+    int jet_size = 4; // min number of jets we want to observe in the event
+
+    // objects for reconstruction : jet? + jet? -> H
+    TLorentzVector jet3, jet4;
+    TLorentzVector reconstructed_H;
+
+    // objects for reconstruction : e-e+ -> Z
+    TLorentzVector el1, el2;
+    TLorentzVector reconstructed_Z_ee;
+
+    // objects for reconstruction : mu-mu+ -> Z
+    TLorentzVector mu1, mu2;
+    TLorentzVector reconstructed_Z_mumu;
+
+    // objects for reconstruction : H + jet? -> de 
+    // objects for reconstruction : Z + jet? -> De 
+    TLorentzVector jet1, jet2;
+    TLorentzVector reconstructed_de, reconstructed_De;
+
+    int* indices_JetPT_descending;
+    // indices of the "Jet" sorted such that 
+    // indices_JetPT_descending[0] matches the jet with max. PT
+    // indices_JetPT_descending[len-1] matches the jet with min. PT
+    int index_MaxPT;
+    int index_2ndMaxPT;
+    int index_3rdMaxPT;
+    int index_4thMaxPT;
+    float* jet1234_Mass=new float[jet_size];
+
+    bool can_reconstruct_Z;
+    bool can_reconstruct_Higgs;
+    int electron_size = 2; // number of electrons we want to observe in the event
+    int mu_size = 2; // number of muons we want to observe in the event
+
+    Double_t electron_mass = 0.0005; // mass in GeV
+    Double_t mu_mass = 0.10566; // mass in GeV
+
+    Long64_t nentries = e6.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = e6.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = e6.fChain->GetEntry(jentry);
+        nbytes += nb;
+        // if (Cut(ientry) < 0) continue;
+
+        // NOW, this method uses filtered version of JETs.
+        filterJets(e6);
+
+        // there should be at least 4 jets and (2 electrons or 2 muons) in the event
+        can_reconstruct_Higgs = Jet_VALID_size >= jet_size;
+        can_reconstruct_Z = (e6.Electron_size == electron_size) || (e6.Muon_size == mu_size);
+
+        // there should be at least 4 jets and (2 electrons or 2 muons) in the event
+        if(can_reconstruct_Higgs && can_reconstruct_Z)
+        {
+            // Now, we can reconstruct
+                      
+            indices_JetPT_descending=sortIndices_Descending(Jet_VALID_PT, Jet_VALID_size);
+            index_MaxPT=indices_JetPT_descending[0];
+            index_2ndMaxPT=indices_JetPT_descending[1];
+            index_3rdMaxPT=indices_JetPT_descending[2];
+            index_4thMaxPT=indices_JetPT_descending[3];
+            
+            // assign the array which stores mass of the 4 jets with highest PT
+            jet1234_Mass[0]=Jet_VALID_Mass[index_MaxPT];
+            jet1234_Mass[1]=Jet_VALID_Mass[index_2ndMaxPT];
+            jet1234_Mass[2]=Jet_VALID_Mass[index_3rdMaxPT];
+            jet1234_Mass[3]=Jet_VALID_Mass[index_4thMaxPT];
+            
+            
+        }
+        /*
+        if (e6.Jet_size >= jet_size && can_reconstruct_Z) {
+
+            indices_JetPT_descending = sortIndices_Descending(Jet_VALID_PT, Jet_VALID_size);
+            index_3rdMaxPT = indices_JetPT_descending[2];
+            index_4thMaxPT = indices_JetPT_descending[3];
+
+            jet3.SetPtEtaPhiM(Jet_VALID_PT[index_3rdMaxPT], Jet_VALID_Eta[index_3rdMaxPT], Jet_VALID_Phi[index_3rdMaxPT], Jet_VALID_Mass[index_3rdMaxPT]);
+            jet4.SetPtEtaPhiM(Jet_VALID_PT[index_4thMaxPT], Jet_VALID_Eta[index_4thMaxPT], Jet_VALID_Phi[index_4thMaxPT], Jet_VALID_Mass[index_4thMaxPT]);
+
+            reconstructed_H = jet3 + jet4;
+
+            fillTTree4LorentzVector(t_RecoH, fields_t_RecoH, reconstructed_H);
+
+        }
+         */
+
+    }
 }
 
 /*
