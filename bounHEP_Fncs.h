@@ -54,6 +54,7 @@ void initializeTTree4TLorentzVector(TTree* t, Double_t* adresler, const char* br
 void fillTTree4LorentzVector(TTree* t, Double_t* adresler, TLorentzVector &vec);
 void initializeTTree4Jet(TTree* t, Double_t* adresler, const char* branchNamePrefix);
 void fillTTree4Jet(TTree* t, Double_t* adresler, e6_Class &e6, int indexOfParticle);
+void fillTTree4Jet(TTree* t, Double_t* adresler, int index_VALID_jet);
 void initializeTTree(TTree* t, Double_t* adresler, int len_Fields, const char* branchNamePrefix, const char* fields[]);
 void initializeTTree4GenParticle(TTree* t, Double_t* adresler, const char* branchNamePrefix);
 void initializeTTree4GenParticle(TTree &t, Double_t* adresler, const char* branchNamePrefix);
@@ -155,11 +156,11 @@ int* optimizeJets4ChiSquared(float* jet1234_Mass) {
 
         current_chi_squared = chi_squared(jet_masses);
 
-        //        for (int j = 0; j < 4; j++) {
-        //            cout << indices[j] << " , ";
-        //            cout << jet_masses[j] << " , ";
-        //        }
-        //        cout << "--> " << current_chi_squared << endl;
+        for (int j = 0; j < 4; j++) {
+            cout << indices[j] << " , ";
+            cout << jet_masses[j] << " , ";
+        }
+        cout << "--> " << current_chi_squared << endl;
 
         // new best combination
         if (current_chi_squared < min_chi_squared) {
@@ -171,10 +172,11 @@ int* optimizeJets4ChiSquared(float* jet1234_Mass) {
         }
     } while (std::next_permutation(indices, indices + len));
 
-    //    for (int j = 0; j < 4; j++) {
-    //        cout << result[j] << " , ";
-    //    }
-    //    cout<<" eND "<<endl;
+    for (int j = 0; j < 4; j++) {
+        cout << result[j] << " , ";
+    }
+    cout << "--> " << min_chi_squared << endl;
+    cout << " eND " << endl;
 
     return result;
 }
@@ -203,7 +205,8 @@ double chi_squared(float* jet_Mass) {
     double chi_sqrd;
     //    float chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass_MeV + jet_Mass[1])) / width, 2);
     //    chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) * weight1 / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass_MeV + jet_Mass[1])) * weight2 / width, 2);
-    chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) * weight1 / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3]) - de_mass_MeV) * weight2 / width, 2) + pow(((Z_mass_MeV + jet_Mass[1]) - de_mass_MeV) * weight3 / width, 2);
+    //    chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) * weight1 / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3]) - de_mass_MeV) * weight2 / width, 2) + pow(((Z_mass_MeV + jet_Mass[1]) - de_mass_MeV) * weight3 / width, 2);
+    chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) * weight1 / width, 2);
     return chi_sqrd;
 }
 
@@ -915,10 +918,10 @@ void loop_Reconstruct_De(e6_Class &e6) {
         int i3 = indices_JetPT_descending[2];
         int i4 = indices_JetPT_descending[3];
         float a[] = {Jet_VALID_Mass[index_MaxPT], Jet_VALID_Mass[index_2ndMaxPT], Jet_VALID_Mass[i3], Jet_VALID_Mass[i4]};
-        int* ptr = optimizeJets4ChiSquared(a);
-        for (int ii = 0; ii < 4; ii++)
-            cout << ptr[ii] << " , ";
-        cout << endl;
+        //        int* ptr = optimizeJets4ChiSquared(a);
+        //        for (int ii = 0; ii < 4; ii++)
+        //            cout << ptr[ii] << " , ";
+        //        cout << endl;
 
         can_reconstruct_Higgs = (Jet_VALID_size >= jet_size);
 
@@ -1183,6 +1186,11 @@ void loop_Reconstruct_All(e6_Class &e6) {
     //const char* prefix_t_Reco_de2 = "de2"; // must start with lowercase letter, dont know the stupid reason for tha
     initializeTTree4TLorentzVector(t_Reco_de, fields_t_Reco_de, "de");
 
+    TTree *t_jet_1234 = new TTree("Jets", "within 4 highest PT");
+    Double_t fields_t_jet_1234[numOfFields_Jet];
+    const char* prefix_t_jet_1234 = "jet"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4Jet(t_jet_1234, fields_t_jet_1234, prefix_t_jet_1234);
+
     int jet_size = 4; // min number of jets we want to observe in the event
 
     // objects for reconstruction : jet? + jet? -> H
@@ -1335,6 +1343,10 @@ void loop_Reconstruct_All(e6_Class &e6) {
             fillTTree4LorentzVector(t_RecoH, fields_t_RecoH, reconstructed_H);
             fillTTree4LorentzVector(t_RecoDe, fields_t_Reco_De, reconstructed_De);
             fillTTree4LorentzVector(t_Reco_de, fields_t_Reco_de, reconstructed_de);
+            fillTTree4Jet(t_jet_1234,fields_t_jet_1234,ind_j1);
+            fillTTree4Jet(t_jet_1234,fields_t_jet_1234,ind_j2);
+            fillTTree4Jet(t_jet_1234,fields_t_jet_1234,ind_j3);
+            fillTTree4Jet(t_jet_1234,fields_t_jet_1234,ind_j4);
         }
     }
 
@@ -1904,6 +1916,32 @@ void fillTTree4Jet(TTree* t, Double_t* adresler, e6_Class &e6, int indexOfPartic
     adresler[9] = e6.Jet_TauTag[indexOfParticle];
     adresler[10] = e6.Jet_Charge[indexOfParticle];
     adresler[11] = e6.Jet_EhadOverEem[indexOfParticle];
+
+    t->Fill();
+}
+
+/*
+ * fills branches of the given TTree "t". "t" is a TTree that contains all the fields of type "Jet_VALID_ ...".
+ * Values are taken from the "Jet_VALID_ ..." objects. Branches of "t" are filled with values like Jet_VALID_PT[i], where "i" is the index of the particle in a particular event.
+ * 
+ * "adresler" must be the same addresses that were used during the initialization of the "TTree" object.
+ * 
+ *  http://www.cplusplus.com/doc/tutorial/pointers/
+ */
+void fillTTree4Jet(TTree* t, Double_t* adresler, int index_VALID_jet) {
+
+    adresler[0] = Jet_VALID_fUniqueID[index_VALID_jet];
+    adresler[1] = Jet_VALID_fBits[index_VALID_jet];
+    adresler[2] = Jet_VALID_PT[index_VALID_jet];
+    adresler[3] = Jet_VALID_Eta[index_VALID_jet];
+    adresler[4] = Jet_VALID_Phi[index_VALID_jet];
+    adresler[5] = Jet_VALID_Mass[index_VALID_jet];
+    adresler[6] = Jet_VALID_DeltaEta[index_VALID_jet];
+    adresler[7] = Jet_VALID_DeltaPhi[index_VALID_jet];
+    adresler[8] = Jet_VALID_BTag[index_VALID_jet];
+    adresler[9] = Jet_VALID_TauTag[index_VALID_jet];
+    adresler[10] = Jet_VALID_Charge[index_VALID_jet];
+    adresler[11] = Jet_VALID_EhadOverEem[index_VALID_jet];
 
     t->Fill();
 }
