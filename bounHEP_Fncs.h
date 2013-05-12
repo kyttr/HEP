@@ -23,9 +23,7 @@ extern "C" {
 }
 #endif
 
-int* optimizeJets4ChiSquared(float* jet_PT_1234); // may give wrong results, will not be used any more
 int* optimizeJets4ChiSquared(TLorentzVector* jets, TLorentzVector Z);
-double chi_squared(vector<float> jet_Mass); // gives wrong results, will not be used any more
 double chi_squared(float* jet_Mass); // gives wrong results, will not be used any more
 double chi_squared(TLorentzVector* jets, TLorentzVector Z);
 void filterJets(e6_Class &e6);
