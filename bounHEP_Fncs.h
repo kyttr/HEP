@@ -23,10 +23,10 @@ extern "C" {
 }
 #endif
 
-int* optimizeJets4ChiSquared(float* jet_PT_1234);
+int* optimizeJets4ChiSquared(float* jet_PT_1234); // may give wrong results, will not be used any more
 int* optimizeJets4ChiSquared(TLorentzVector* jets, TLorentzVector Z);
-double chi_squared(vector<float> jet_Mass);
-double chi_squared(float* jet_Mass);
+double chi_squared(vector<float> jet_Mass); // gives wrong results, will not be used any more
+double chi_squared(float* jet_Mass); // gives wrong results, will not be used any more
 double chi_squared(TLorentzVector* jets, TLorentzVector Z);
 void filterJets(e6_Class &e6);
 void filterJets(e6_Class &e6, bool apply_NO_filter);
@@ -119,72 +119,6 @@ static const double Z_mass_MeV = 91190; // mass of Z boson in MeV
 static const double de_mass_MeV = 500000; // mass of de/De in GeV
 
 /*
- * "jet1234_Mass" : array of jet masses where PT's of these jets are one of the 4 highest PT's in the event.
- *              "jet1234_Mass[0]" = mass of jet with highest PT in the event.
- *              "jet1234_Mass[3]" = mass of jet with 4th highest PT in the event.
- * 
- * Using permutations of elements of "jet1234_Mass", find the combination that results in the least value for "chi_squared"
- * 
- * return an "array of indices of jets" which result in the least value for "chi_squared"
- * let us call returned array "result"
- *      jet corresponding to result[0] will be used as jet1 : H + jet1 --> de
- *      jet corresponding to result[1] will be used as jet2 : Z + jet2 --> De
- *      jet corresponding to result[2] will be used as jet3 : jet3 + jet4 --> H
- *      jet corresponding to result[3] will be used as jet4 : jet3 + jet4 --> H
- *      
- *      Ex : {3,1,2,0}
- *      jet with 4th highest PT will be used as jet1 : H + jet1 --> de
- *      jet with 2nd highest PT will be used as jet2 : Z + jet2 --> De
- *      jet with 3rd highest PT will be used as jet3 : jet3 + jet4 --> H
- *      jet with 1st highest PT will be used as jet4 : jet3 + jet4 --> H
- * 
- */
-int* optimizeJets4ChiSquared(float* jet1234_Mass) {
-    int len = 4;
-    float* jet_masses = new float[len];
-    int indices[] = {0, 1, 2, 3};
-
-    int* result = new int[len];
-    double current_chi_squared;
-    // http://cplusplus.com/reference/limits/numeric_limits/
-    //float min_chi_squared=std::numeric_limits<float>::max();  // make sure this value will be overwritten
-    double min_chi_squared = 99999999; // make sure this value will be overwritten
-
-    //http://www.cplusplus.com/reference/algorithm/next_permutation/
-    do {
-        jet_masses[0] = jet1234_Mass[indices[0]];
-        jet_masses[1] = jet1234_Mass[indices[1]];
-        jet_masses[2] = jet1234_Mass[indices[2]];
-        jet_masses[3] = jet1234_Mass[indices[3]];
-
-        current_chi_squared = chi_squared(jet_masses);
-
-        //        for (int j = 0; j < 4; j++) {
-        //            cout << indices[j] << " , ";
-        //            cout << jet_masses[j] << " , ";
-        //        }
-        //        cout << "--> " << current_chi_squared << endl;
-
-        // new best combination
-        if (current_chi_squared < min_chi_squared) {
-            min_chi_squared = current_chi_squared;
-
-            // http://stackoverflow.com/questions/11530678/copy-all-the-array-into-new-array-without-vectors-c?lq=1
-            // http://stackoverflow.com/questions/4729046/memcpy-vs-for-loop-whats-the-proper-way-to-copy-an-array-from-a-pointer
-            copy(indices, indices + len, result);
-        }
-    } while (std::next_permutation(indices, indices + len));
-
-    //    for (int j = 0; j < 4; j++) {
-    //        cout << result[j] << " , ";
-    //    }
-    //    cout << "--> " << min_chi_squared << endl;
-    //    cout << " eND " << endl;
-
-    return result;
-}
-
-/*
  * "jets" : array of TLorentzVector objects of jets where PT's of these jets are one of the 4 highest PT's in the event.
  *              "jets[0]" = TLorentzVector for jet with highest PT in the event.
  *              "jets[3]" = TLorentzVector for jet with 4th highest PT in the event.
@@ -227,11 +161,11 @@ int* optimizeJets4ChiSquared(TLorentzVector* jets, TLorentzVector Z) {
 
         current_chi_squared = chi_squared(jets_tmp, Z);
 
-//                for (int j = 0; j < 4; j++) {
-//                    cout << indices[j] << " , ";
-//                    cout << jets_tmp[j].M() << " , ";
-//                }
-//                cout << "--> " << current_chi_squared << endl;
+        //                for (int j = 0; j < 4; j++) {
+        //                    cout << indices[j] << " , ";
+        //                    cout << jets_tmp[j].M() << " , ";
+        //                }
+        //                cout << "--> " << current_chi_squared << endl;
 
         // new best combination
         if (current_chi_squared < min_chi_squared) {
@@ -243,11 +177,11 @@ int* optimizeJets4ChiSquared(TLorentzVector* jets, TLorentzVector Z) {
         }
     } while (std::next_permutation(indices, indices + len));
 
-//        for (int j = 0; j < 4; j++) {
-//            cout << result[j] << " , ";
-//        }
-//        cout << "--> " << min_chi_squared << endl;
-//        cout << " eND " << endl;
+    //        for (int j = 0; j < 4; j++) {
+    //            cout << result[j] << " , ";
+    //        }
+    //        cout << "--> " << min_chi_squared << endl;
+    //        cout << " eND " << endl;
 
     return result;
 }
@@ -259,24 +193,15 @@ int* optimizeJets4ChiSquared(TLorentzVector* jets, TLorentzVector Z) {
                 H, Z, de, De yeniden yarat.
                 H.Mass histogramı çıkart. Bu histograma Gaussian Fit yap. "Fit" in döndürdüğü "width" değerini kai^2 hesabının paydasındaki 30^2 yerine yaz.
         H.Mass histogramını keskinleştirmek için kai^2 hesabını 1-2 kere döndür. Her döngüde bir önceki "width" değerini kullan. 1. döngü için "width"=30^2 veya "width"=30.
+ *  
+ * gives wrong results, will not be used any more
  */
-double chi_squared(vector<float> jet_Mass) {
-    double width = width_chi_squared;
-    //http://stackoverflow.com/questions/6321170/is-there-any-advantage-to-using-powx-2-instead-of-xx-with-x-double
-    double chi_sqrd = pow(((jet_Mass(2) + jet_Mass(3)) - h_mass_MeV) / width, 2) + pow(((jet_Mass(0) + jet_Mass(2) + jet_Mass(3))-(Z_mass_MeV + jet_Mass(1))) / width, 2);
-    return chi_sqrd;
-}
-
 double chi_squared(float* jet_Mass) {
     double width = width_chi_squared;
-    double weight1 = 1;
-    double weight2 = 1;
-    double weight3 = 1;
+
     //http://stackoverflow.com/questions/6321170/is-there-any-advantage-to-using-powx-2-instead-of-xx-with-x-double
-    double chi_sqrd;
-    //    float chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass_MeV + jet_Mass[1])) / width, 2);
-    //    chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) * weight1 / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass_MeV + jet_Mass[1])) * weight2 / width, 2);
-    chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) * weight1 / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3]) - de_mass_MeV) * weight2 / width, 2) + pow(((Z_mass_MeV + jet_Mass[1]) - de_mass_MeV) * weight3 / width, 2);
+    double chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass_MeV + jet_Mass[1])) / width, 2);
+    
     return chi_sqrd;
 }
 
@@ -306,7 +231,7 @@ double chi_squared(TLorentzVector* jets, TLorentzVector Z) {
     jet2Z_De = Z + jets[1];
 
     double chi_sqrd = pow((jet34_higgs.M() - h_mass_MeV) / width, 2) + pow((jet1higgs_de.M() - jet2Z_De.M()) / width, 2);
-//    cout<<"h="<<jet34_higgs.M()<<" , de="<<jet1higgs_de.M()<<", De="<<jet2Z_De.M()<<endl;
+    //    cout<<"h="<<jet34_higgs.M()<<" , de="<<jet1higgs_de.M()<<", De="<<jet2Z_De.M()<<endl;
 
     return chi_sqrd;
 }
@@ -1410,7 +1335,7 @@ void loop_Reconstruct_All(e6_Class &e6) {
             jet1234[3] = jet1234_4;
 
             // combination of jet indices which minimizes Chi^2
-//            jet1234_indicesAfterChiSquared = optimizeJets4ChiSquared(jet1234_Mass);
+            //            jet1234_indicesAfterChiSquared = optimizeJets4ChiSquared(jet1234_Mass);
             jet1234_indicesAfterChiSquared = optimizeJets4ChiSquared(jet1234, reconstructed_Z);
             /*
             jet1234_indicesAfterChiSquared[0]=0;
