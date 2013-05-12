@@ -199,7 +199,7 @@ double chi_squared(float* jet_Mass) {
 
     //http://stackoverflow.com/questions/6321170/is-there-any-advantage-to-using-powx-2-instead-of-xx-with-x-double
     double chi_sqrd = pow(((jet_Mass[2] + jet_Mass[3]) - h_mass_MeV) / width, 2) + pow(((jet_Mass[0] + jet_Mass[2] + jet_Mass[3])-(Z_mass_MeV + jet_Mass[1])) / width, 2);
-    
+
     return chi_sqrd;
 }
 
@@ -1241,7 +1241,6 @@ void loop_Reconstruct_All(e6_Class &e6) {
     int index_3rdMaxPT;
     int index_4thMaxPT;
     int* indices_MaxPT = new float[jet_size]; // indices of the jets with highest PT in the array "Jet_VALID_PT" 
-    float* jet1234_Mass = new float[jet_size];
     int* jet1234_indicesAfterChiSquared; // combination of jet indices which minimizes Chi^2
     int ind_j1, ind_j2, ind_j3, ind_j4; // indices of jets in "Jet_VALID_PT" after calling "optimizeJets4ChiSquared()"
 
@@ -1282,6 +1281,7 @@ void loop_Reconstruct_All(e6_Class &e6) {
 
             // reconstruct Z
             // reconstruction of Z is irrelevant to optimizing Chi^2, has nothing to do with jets
+            //   EDIT : With new version of "optimizeJets4ChiSquared" reconstructed Z became relevant to optimizing Chi^2 in that reconstruct Z will be used during optimization of Chi^2, but reconstruct Z will not be effected by that optimization.
             if (electron_size == e6.Electron_size) {
 
                 el1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], electron_mass);
@@ -1306,22 +1306,17 @@ void loop_Reconstruct_All(e6_Class &e6) {
             indices_MaxPT[2] = index_3rdMaxPT;
             indices_MaxPT[3] = index_4thMaxPT;
 
-            //                        for (int ind = 0; ind < Jet_VALID_size; ind++) {
-            //                            cout << Jet_VALID_PT[ind] << " , ";
-            //                        }
-            //                        cout<<" END "<<endl;
-            //            
-            //                        for (int ind = 0; ind < 4; ind++) {
-            //                            cout << indices_JetPT_descending[ind] << " , ";
-            //                        }
+            //            for (int ind = 0; ind < Jet_VALID_size; ind++) {
+            //                cout << Jet_VALID_PT[ind] << " , ";
+            //            }
+            //            cout << " END " << endl;
+            //
+            //            for (int ind = 0; ind < 4; ind++) {
+            //                cout << indices_JetPT_descending[ind] << " , ";
+            //            }
             //                        cout << " | ";
 
-            // assign the array which stores mass of the 4 jets with highest PT
-            jet1234_Mass[0] = Jet_VALID_Mass[index_MaxPT];
-            jet1234_Mass[1] = Jet_VALID_Mass[index_2ndMaxPT];
-            jet1234_Mass[2] = Jet_VALID_Mass[index_3rdMaxPT];
-            jet1234_Mass[3] = Jet_VALID_Mass[index_4thMaxPT];
-
+            // assign the array which stores 4 jets with highest PT
             // for optimization of chi^2 using chi_squared(vector<TLorentzVector> jets, TLorentzVector Z)
             jet1234_1.SetPtEtaPhiM(Jet_VALID_PT[index_MaxPT], Jet_VALID_Eta[index_MaxPT], Jet_VALID_Phi[index_MaxPT], Jet_VALID_Mass[index_MaxPT]);
             jet1234_2.SetPtEtaPhiM(Jet_VALID_PT[index_2ndMaxPT], Jet_VALID_Eta[index_2ndMaxPT], Jet_VALID_Phi[index_2ndMaxPT], Jet_VALID_Mass[index_2ndMaxPT]);
@@ -1333,14 +1328,8 @@ void loop_Reconstruct_All(e6_Class &e6) {
             jet1234[3] = jet1234_4;
 
             // combination of jet indices which minimizes Chi^2
-            //            jet1234_indicesAfterChiSquared = optimizeJets4ChiSquared(jet1234_Mass);
             jet1234_indicesAfterChiSquared = optimizeJets4ChiSquared(jet1234, reconstructed_Z);
-            /*
-            jet1234_indicesAfterChiSquared[0]=0;
-            jet1234_indicesAfterChiSquared[1]=1;
-            jet1234_indicesAfterChiSquared[2]=2;
-            jet1234_indicesAfterChiSquared[3]=3;
-             */
+
             //            for (int ind = 0; ind < 4; ind++) {
             //                cout << jet1234_indicesAfterChiSquared[ind] << " , ";
             //            }
@@ -1352,7 +1341,6 @@ void loop_Reconstruct_All(e6_Class &e6) {
              *      jet with 3rd highest PT will be used as jet3 : jet3 + jet4 --> H
              *      jet with 1st highest PT will be used as jet4 : jet3 + jet4 --> H
              */
-
             ind_j1 = indices_MaxPT[jet1234_indicesAfterChiSquared[0]];
             ind_j2 = indices_MaxPT[jet1234_indicesAfterChiSquared[1]];
             ind_j3 = indices_MaxPT[jet1234_indicesAfterChiSquared[2]];
@@ -1362,24 +1350,6 @@ void loop_Reconstruct_All(e6_Class &e6) {
             //                cout << indices_MaxPT[jet1234_indicesAfterChiSquared[ind]] << " , ";
             //            }
             //            cout << " | " << endl;
-
-            /*
-            // reconstruct Z
-            // reconstruction of Z is irrelevant to optimizing Chi^2, has nothing to do with jets
-            if (electron_size == e6.Electron_size) {
-
-                el1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], electron_mass);
-                el2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], electron_mass);
-
-                reconstructed_Z = el1 + el2;
-            } else if (mu_size == e6.Muon_size) {
-
-                mu1.SetPtEtaPhiM(e6.Muon_PT[0], e6.Muon_Eta[0], e6.Muon_Phi[0], mu_mass);
-                mu2.SetPtEtaPhiM(e6.Muon_PT[1], e6.Muon_Eta[1], e6.Muon_Phi[1], mu_mass);
-
-                reconstructed_Z = mu1 + mu2;
-            }
-             */
 
             // reconstruct H
             jet3.SetPtEtaPhiM(Jet_VALID_PT[ind_j3], Jet_VALID_Eta[ind_j3], Jet_VALID_Phi[ind_j3], Jet_VALID_Mass[ind_j3]);
@@ -1393,7 +1363,6 @@ void loop_Reconstruct_All(e6_Class &e6) {
             // reconstruct de
             jet1.SetPtEtaPhiM(Jet_VALID_PT[ind_j1], Jet_VALID_Eta[ind_j1], Jet_VALID_Phi[ind_j1], Jet_VALID_Mass[ind_j1]);
             reconstructed_de = reconstructed_H + jet1;
-
 
             // fill trees
             fillTTree4LorentzVector(t_RecoZ, fields_t_RecoZ, reconstructed_Z);
