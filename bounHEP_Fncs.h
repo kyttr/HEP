@@ -26,6 +26,7 @@ extern "C" {
 int* optimizeJets4ChiSquared(TLorentzVector* jets, TLorentzVector Z);
 double chi_squared(float* jet_Mass); // gives wrong results, will not be used any more
 double chi_squared(TLorentzVector* jets, TLorentzVector Z);
+double chi_squared(TLorentzVector* jets, TLorentzVector Z,double width);
 void filterJets(e6_Class &e6);
 void filterJets(e6_Class &e6, bool apply_NO_filter);
 void reinitialize_Jet_VALID(int length);
@@ -203,6 +204,13 @@ double chi_squared(float* jet_Mass) {
     return chi_sqrd;
 }
 
+double chi_squared(TLorentzVector* jets, TLorentzVector Z) {
+
+    double width = width_chi_squared;
+    
+    return chi_squared(jets, Z,width);
+}
+
 /*
  * 4. kai^2=(mass(jet3+jet4)-120)^2/30^2+(mass(jet1+3+4)-mass(Z+jet2))^2/30^2
         her olay için bütün kai^2 kombinasyonlarını bul.
@@ -217,9 +225,8 @@ double chi_squared(float* jet_Mass) {
  * I was getting wrong results just because I did not know this fact. It took me 1-1.5 days.
  * 
  */
-double chi_squared(TLorentzVector* jets, TLorentzVector Z) {
-
-    double width = width_chi_squared;
+double chi_squared(TLorentzVector* jets, TLorentzVector Z,double width)
+{
     TLorentzVector jet34_higgs; // in general, jet3 + jet4 --> Higgs
     TLorentzVector jet1higgs_de; // assume, H + jet1 --> de
     TLorentzVector jet2Z_De; // assume, Z + jet2 --> De
