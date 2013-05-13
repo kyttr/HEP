@@ -59,7 +59,7 @@ int e6_myClass() {
     //    loop_Reconstruct_De(t);
     //    loop_deltaMass_of_deDe();
     //
-          loop_Reconstruct_All(t);
+          loop_Reconstruct_All_chiSquared(t);
 
     /*
     loop_deltaR_HIGGS_and_JET(t);

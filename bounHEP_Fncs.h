@@ -39,7 +39,7 @@ void loop_Reconstruct_Z_from_mumu(e6_Class &e6);
 void loop_Reconstruct_De(e6_Class &e6);
 void loop_Reconstruct_de(e6_Class &e6);
 void loop_Reconstruct_Higgs(e6_Class &e6);
-void loop_Reconstruct_All(e6_Class &e6);
+void loop_Reconstruct_All_chiSquared(e6_Class &e6);
 void loop_Particle(e6_Class &e6);
 void loop_maxJetPT(e6_Class &e6);
 void loop_deltaMass_of_deDe();
@@ -69,7 +69,7 @@ static const int numOfFields_Jet = 32;
 static const char* loop_Reconstruct_de_outputName = "loop_Reconstruct_de.root"; // output file name of the function loop_Reconstruct_de()
 static const char* loop_Reconstruct_De_outputName = "loop_Reconstruct_De.root"; // output file name of the function loop_Reconstruct_De()
 static const char* loop_Reconstruct_Higgs_outputName = "loop_Reconstruct_Higgs.root"; // output file name of the function loop_Reconstruct_Higgs()
-static const char* loop_Reconstruct_All_outputName = "loop_Reconstruct_All.root"; // output file name of the function loop_Reconstruct_All()
+static const char* loop_Reconstruct_All_chiSquared_outputName = "loop_Reconstruct_All_chiSquared.root"; // output file name of the function loop_Reconstruct_All()
 static const char* loop_Reconstruct_Z_outputName = "loop_Reconstruct_Z.root"; // output file name of the function loop_Reconstruct_Z()
 static const char* loop_deltaMass_of_deDe_outputName = "loop_deltaMass_of_deDe.root"; // output file name of the function loop_deltaMass_of_deDe()
 
@@ -1187,8 +1187,8 @@ void loop_Reconstruct_Higgs(e6_Class &e6) {
  * 
  * This method will employ 4 highest PT jets. Different from other methods, this time no jet usage in reconstructions is fixed. Jets will be used in reconstruction such that chi^2 will be minimized.
  */
-void loop_Reconstruct_All(e6_Class &e6) {
-    string histoFile_str = loop_Reconstruct_All_outputName;
+void loop_Reconstruct_All_chiSquared(e6_Class &e6) {
+    string histoFile_str = loop_Reconstruct_All_chiSquared_outputName;
     // TFile constructor accepts type "const char*"
     const char* histoFile_char = histoFile_str.c_str();
     // overwrite existing ".root" file
