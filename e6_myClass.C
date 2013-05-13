@@ -53,13 +53,13 @@ int e6_myClass() {
     //    loop_Reconstruct_Z_from_ee(t);
     //    loop_Reconstruct_Z_from_mumu(t);
     //
-    //    loop_Reconstruct_Z(t);
-    //    loop_Reconstruct_Higgs(t);
-    //    loop_Reconstruct_de(t);
-    //    loop_Reconstruct_De(t);
-    //    loop_deltaMass_of_deDe();
+        loop_Reconstruct_Z(t);
+        loop_Reconstruct_Higgs(t);
+        loop_Reconstruct_de(t);
+        loop_Reconstruct_De(t);
+        loop_deltaMass_of_deDe();
     //
-          loop_Reconstruct_All_chiSquared(t);
+//          loop_Reconstruct_All_chiSquared(t);
 
     /*
     loop_deltaR_HIGGS_and_JET(t);
