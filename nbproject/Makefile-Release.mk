@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/e6_myClass.o \
 	${OBJECTDIR}/e6_Class.o \
+	${OBJECTDIR}/mergeROOTFiles.o \
 	${OBJECTDIR}/altgraphv2.o \
 	${OBJECTDIR}/main_compileFiles.o \
 	${OBJECTDIR}/e6_rootMacro1.o \
@@ -81,6 +82,11 @@ ${OBJECTDIR}/e6_Class.o: e6_Class.C
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/e6_Class.o e6_Class.C
+
+${OBJECTDIR}/mergeROOTFiles.o: mergeROOTFiles.C 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/mergeROOTFiles.o mergeROOTFiles.C
 
 ${OBJECTDIR}/altgraphv2.o: altgraphv2.C 
 	${MKDIR} -p ${OBJECTDIR}

@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="80">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
-    <logicalFolder name="f1"
-                   displayName="e6_MadeClass"
-                   projectFiles="true"
-                   kind="ROOT">
+    <logicalFolder name="f1" displayName="e6_MadeClass" projectFiles="true">
       <itemPath>e6_Class.C</itemPath>
       <itemPath>e6_Class.h</itemPath>
       <itemPath>e6_myClass.C</itemPath>
@@ -32,6 +29,7 @@
       <itemPath>kaon+-p-pT-eta-phi.cc</itemPath>
       <itemPath>kaon+-p-pT-eta-phiv2.cc</itemPath>
       <itemPath>kaon+-p-pT-eta-phivTree.cc</itemPath>
+      <itemPath>mergeROOTFiles.C</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"

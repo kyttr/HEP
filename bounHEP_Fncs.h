@@ -85,7 +85,7 @@ static const char* prefix_t_RecoDe1 = "De1";
 static const char* prefix_t_RecoDe2 = "De2";
 
 /*
- * 3. electron_size=2 olaylarında deltaR(jet, herhangi e)<0.2 olan jetleri analizden çıkar. Çünkü, bu jetler aslında jet değil, elektron. Elektron olmalarına rağmen dedektörde elektron olarak tespit edilmişler. Bu jetlerin analizden çıkarılması bize H,Z,de,De yeniden yaratılmasında yardımcı olabailir. Çünkü, bu jetler jet1 ve jet4 arası bir yerde olabilir.
+ * 3. electron_size=2 olaylarında deltaR(jet, herhangi e)<0.2 olan jetleri analizden çıkar. Çünkü, bu jetler aslında jet değil, Electron. Electron olmalarına rağmen dedektörde Electron olarak tespit edilmişler. Bu jetlerin analizden çıkarılması bize H,Z,de,De yeniden yaratılmasında yardımcı olabailir. Çünkü, bu jetler jet1 ve jet4 arası bir yerde olabilir.
  * 
  * As pointed above, not all jets will be used during event analysis. According to our restrictions we will disgard some of the jet. So the objects below will keep the jets that we want to study in an event. For us, the jets kept in the below objects are "valid". They are filtered version of the original "Jet"s.
  * 
@@ -1701,7 +1701,7 @@ void loop_deltaR_Z_and_JET(e6_Class & e6) {
 /*
  * deltaR(jet, Z) with : 85<jet.mass<105, Z as (generated) Particle
         bu deltaR histogramı 0'a çok yakın yerde tavan yapıyor. 
-        Ayrıca "Z->e-e+" elektronları önceki Z bozonuna çok yakın bir yönde ilerliyor. Bu durumda 
+        Ayrıca "Z->e-e+" Electronları önceki Z bozonuna çok yakın bir yönde ilerliyor. Bu durumda 
                 deltaR(jet,e) with : e as Electron
                         bu deltaR histogramının da 0'a çok yakın çok fazla değeri olması beklenir. Geçen hafta yazdığım notta "electron_size=2 olaylarında deltaR(jet, herhangi e)<0.2 olan jetleri analizden çıkar." demiştim. Ama, hemen hemen hiçbir jet elenmedi. Bu demek ki "deltaR(jet,e) with : e as Electron" değeri 0'a çok yakın olan hemen hiçbir jet yok. Bu durum sorun yaratıyor. ==> Çelişki
 ==> çözüm önerisi
@@ -1710,14 +1710,14 @@ void loop_deltaR_Z_and_JET(e6_Class & e6) {
                 sağlayan jet.mass histogram
         - deltaR(jet,e+e-)<0.2 with : e as Electron 
                 sağlayan jet.mass histogramı
-        - deltaR(e1 as Particle, e2 as Elektron)=minimum. with : e1 as Particle, e2 as Elektron 
-                deltaR(e as Particle, e as Elektron) minimum olan deltaR histogramı, elektronları yüklerine göre ayırt et. 
+        - deltaR(e1 as Particle, e2 as Electron)=minimum. with : e1 as Particle, e2 as Electron 
+                deltaR(e as Particle, e as Electron) minimum olan deltaR histogramı, Electronları yüklerine göre ayırt et. 
  * 
  *
  *  deltaR(jet,e)<0.2 sağlayan jet.mass histogramı
     deltaR(jet,e+e-)<0.2 sağlayan jet.mass histogramı ve bu jetleri ele.
 
-    deltaR(e as Particle, e as Elektron) minimum olan deltaR(e as Particle, e as Elektron) histogramı, "e" ları yüklere ayır.
+    deltaR(e as Particle, e as Electron) minimum olan deltaR(e as Particle, e as Electron) histogramı, "e" ları yüklere ayır.
  */
 void loop_deltaR_e_and_JET(e6_Class &e6) {
     if (e6.fChain == 0) return;
@@ -1728,12 +1728,6 @@ void loop_deltaR_e_and_JET(e6_Class &e6) {
     // overwrite existing ".root" file
     TFile f(histoFile_char, "recreate");
 
-    // TTree for Z bosons
-    TTree *t_Z = new TTree("Z-as-Particle", "generated Z bosons");
-    Double_t fields_t_Z[numOfFields_Particle];
-    const char* prefix_t_Z = "z"; // must start with lowercase letter, dont know the stupid reason for that
-    initializeTTree4Particle(t_Z, fields_t_Z, prefix_t_Z);
-
     double limit_deltaR = limit_deltaR_jet_AND_e;
 
     //    	- deltaR(jet,e)<0.2 with : e as Electron 
@@ -1742,10 +1736,10 @@ void loop_deltaR_e_and_JET(e6_Class &e6) {
     // must concatenate one by one ( alttaki kod çalışmıyor, teker teker eklemek gerekiyor.) 
     //string title_t_jet_inRange_Str = "mass in the range [" + jet_massMin + ", " + jet_massMax + "]";
     string title_underLim_Str = "deltaR(jet,e)<";
-    title_underLim_Str += Form("%.f", limit_deltaR);
-    title_underLim_Str+=", e:Electron";
+    title_underLim_Str += Form("%.2f", limit_deltaR);
+    title_underLim_Str += ", e:Electron";
     const char* title_underLim_char = title_underLim_Str.c_str();
-    string name_t_jet_underLim_Str="jet, "+title_underLim_Str;
+    string name_t_jet_underLim_Str = "jet, " + title_underLim_Str;
     const char* name_t_jet_underLim_char = name_t_jet_underLim_Str.c_str();
 
     TTree *t_jet_underLim = new TTree(name_t_jet_underLim_char, title_underLim_char);
@@ -1754,9 +1748,9 @@ void loop_deltaR_e_and_JET(e6_Class &e6) {
     initializeTTree4Jet(t_jet_underLim, fields_t_jet_underLim, prefix_t_jet_inRange);
 
     // TTree for deltaR where deltaR(jet,e)<0.2 with : e as Electron 
-    string name_t_deltaR_underLim_Str="deltaR, "+title_underLim_Str;
-    const char* name_t_deltaR_underLim_char = name_t_deltaR_underLim_Str.c_str();    
-    TTree *t_deltaR_underLim = new TTree(name_t_deltaR_underLim_Str, title_underLim_char);
+    string name_t_deltaR_underLim_Str = "deltaR, " + title_underLim_Str;
+    const char* name_t_deltaR_underLim_char = name_t_deltaR_underLim_Str.c_str();
+    TTree *t_deltaR_underLim = new TTree(name_t_deltaR_underLim_char, title_underLim_char);
     Double_t deltaR_underLim;
     t_deltaR_underLim->Branch("deltaR", &deltaR_underLim, "deltaR/D");
 
@@ -1765,57 +1759,62 @@ void loop_deltaR_e_and_JET(e6_Class &e6) {
     // TTree for jets under deltaR limit, but note that this deltaR is different from the above one.
     // must concatenate one by one ( alttaki kod çalışmıyor, teker teker eklemek gerekiyor.) 
     //string title_t_jet_inRange_Str = "mass in the range [" + jet_massMin + ", " + jet_massMax + "]";
-    string title_t_jet_underLim2_Str = "deltaR(jet,e+e-)<";
-    title_t_jet_underLim2_Str += Form("%.f", limit_deltaR);
-    const char* title_t_jet_underLim2_char = title_t_jet_underLim2_Str.c_str();
+    string title_underLim2_Str = "deltaR(jet,e+e-)<";
+    title_underLim2_Str += Form("%.2f", limit_deltaR);
+    const char* title_underLim2_char = title_underLim2_Str.c_str();
+    string name_t_jet_underLim2_Str = "jet, " + title_underLim2_Str;
+    const char* name_t_jet_underLim2_char = name_t_jet_underLim2_Str.c_str();
 
-    TTree *t_jet_underLim2 = new TTree("Jets-underLim", title_t_jet_underLim2_char);
+    TTree *t_jet_underLim2 = new TTree(name_t_jet_underLim2_char, title_underLim2_char);
     Double_t fields_t_jet_underLim2[numOfFields_Jet];
     const char* prefix_t_jet_underLim2 = "jet"; // must start with lowercase letter, dont know the stupid reason for that
     initializeTTree4Jet(t_jet_underLim2, fields_t_jet_underLim2, prefix_t_jet_underLim2);
 
     // TTree for deltaR where deltaR(jet,e+e-)<0.2 with : e as Electron 
-    TTree *t_deltaR_underLim2 = new TTree("deltaR-underLim2", title_t_jet_underLim2_char);
+    string name_t_deltaR_underLim2_Str = "deltaR, " + title_underLim2_Str;
+    const char* name_t_deltaR_underLim2_char = name_t_deltaR_underLim2_Str.c_str();
+    TTree *t_deltaR_underLim2 = new TTree(name_t_deltaR_underLim2_char, title_underLim2_char);
     Double_t deltaR_underLim2;
-    t_deltaR_underLim2->Branch("deltaR_jet_e+e-", &deltaR_underLim2, "deltaR_jet_e+e-/D");
+    t_deltaR_underLim2->Branch("deltaR", &deltaR_underLim2, "deltaR/D");
 
-    //    -deltaR(e1 as Particle, e2 as Elektron) = minimum. with : e1 as Particle, e2 as Elektron
-    //            deltaR(e as Particle, e as Elektron) minimum olan deltaR histogramı, elektronları yüklerine göre ayırt et.
-    // TTree for e1 as Particle where deltaR(e1 as Particle, e2 as Elektron) = minimum
+    //    -deltaR(e1 as Particle, e2 as Electron) = minimum. with : e1 as Particle, e2 as Electron
+    //            deltaR(e as Particle, e as Electron) minimum olan deltaR histogramı, Electronları yüklerine göre ayırt et.
+    // TTree for e1 as Particle where deltaR(e1 as Particle, e2 as Electron) = minimum
     // note : e1.charge = e2.charge must be satisfied
-    TTree *t_e1_min_deltaR=new TTree("e1, deltaR(e1,e2)=min, e1:Particle, e2:Electron");
+    const char* title_t_min_deltaR_char = "deltaR(e1,e2)=min, e1:Particle, e2:Electron";
+    //http://stackoverflow.com/questions/6214160/how-to-store-a-const-char-in-std-string
+    string name_t_e1_min_deltaR_Str = "e1, " + string(title_t_min_deltaR_char);
+    const char* name_t_e1_min_deltaR_char = name_t_e1_min_deltaR_Str.c_str();
 
-    // TTree for jets with under limit deltaR(Z,jet)
-    double limit_deltaR = 0.5;
-    string title_t_jet_limit_deltaR_Str = "limit is ";
-    title_t_jet_limit_deltaR_Str += Form("%.2f", limit_deltaR);
-    const char* title_t_jet_limit_deltaR_char = title_t_jet_limit_deltaR_Str.c_str();
+    TTree *t_e1_min_deltaR = new TTree(name_t_e1_min_deltaR_char, title_t_min_deltaR_char);
+    Double_t fields_t_e1_min_deltaR[numOfFields_Particle];
+    const char* prefix_t_e1_min_deltaR = "e"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4Particle(t_e1_min_deltaR, fields_t_e1_min_deltaR, prefix_t_e1_min_deltaR);
 
-    TTree *t_jet_limit_deltaR = new TTree("Jets-with-under-limit-deltaR", title_t_jet_limit_deltaR_char);
-    Double_t fields_t_jet_limit_deltaR[numOfFields_Jet];
-    const char* prefix_t_jet_limit_deltaR = "jet"; // must start with lowercase letter, dont know the stupid reason for that
-    initializeTTree4Jet(t_jet_limit_deltaR, fields_t_jet_limit_deltaR, prefix_t_jet_limit_deltaR);
+    // TTree for deltaR where deltaR(e1 as Particle, e2 as Electron) = minimum. with : e1 as Particle, e2 as Electron
+    //http://stackoverflow.com/questions/6214160/how-to-store-a-const-char-in-std-string
+    string name_t_deltaR_min_deltaR_Str = "deltaR, " + string(title_t_min_deltaR_char);
+    const char* name_t_deltaR_min_deltaR_char = name_t_deltaR_min_deltaR_Str.c_str();
 
-    // TTree for jets minimizing deltaR(Z,jet) in the event
-    TTree *t_jet_min_deltaR = new TTree("Jets-minimizing-deltaR", "jets for which deltaR(Z,jet) is minimum");
-    Double_t fields_t_jet_min_deltaR[numOfFields_Jet];
-    const char* prefix_t_jet_min_deltaR = "jet"; // must start with lowercase letter, dont know the stupid reason for that
-    initializeTTree4Jet(t_jet_min_deltaR, fields_t_jet_min_deltaR, prefix_t_jet_min_deltaR);
+    TTree *t_deltaR_min_deltaR = new TTree(name_t_deltaR_min_deltaR_char, title_t_min_deltaR_char);
+    Double_t deltaR_min_deltaR;
+    t_deltaR_min_deltaR->Branch("deltaR", &deltaR_min_deltaR, "deltaR/D");
 
-    // TTree for minimum deltaR between Z and Jet
-    TTree *t_deltaR_min = new TTree("deltaR-min", "deltaR(Z,jet) is minimum");
-    Double_t deltaR_Z_min;
-    int indexOfJet_with_min_DeltaR;
-    t_deltaR_min->Branch("deltaR_jet_min", &deltaR_Z_min, "deltaR_Z_min/D");
+    int i, j, k;
+    int electron_size = 2; // number of electrons we want to observe in the event
+    int electron_PID = 11;
 
-    int i, j;
-    int Z_ID = 23; // pid of Z boson
-    //    double h_massReal = 120; // mass of Higgs in reality
-    //    double h_massSimulation = 80; // mass of Higgs given by simulation
-
-    TLorentzVector z;
+    TLorentzVector e1, e2; // e1, e2 as Electron, do not use them at the moment, these are defined just to note that we consider 2 electron events. I decided to loop over 2 electrons in the event
+    TLorentzVector e; // e as Electron, that one will be used for deltaR(jet,e1), deltaR(jet,e2) calculations
+    TLorentzVector e1e2; // e1e2=e1+e2 where e1, e2 as Electron, that one will be used for deltaR(jet,e+e-) calculations
+    TLorentzVector e_Particle; //  e_Particle as Particle, that one will be used deltaR(e_Particle,e)=min calculations where e as Electron and e_Particle.charge=e.charge
     TLorentzVector jet;
-    //    TLorentzVector h_withM120, h_withM80;
+
+    Double_t deltaR;
+    //Double_t current_deltaR_e_Particle_AND_e;
+    Double_t min_deltaR_e_Particle_AND_e = 99999999; // make sure this value will be overwritten
+    int index_e_Particle_4min_deltaR; // index of e as Particle in "Particle" which minimizes deltaR(e_Particle,e)
+    bool min_deltaR_found;
 
     Long64_t nentries = e6.fChain->GetEntriesFast();
 
@@ -1827,41 +1826,101 @@ void loop_deltaR_e_and_JET(e6_Class &e6) {
         nbytes += nb;
         // if (Cut(ientry) < 0) continue;
 
-        // loop over generated particles in the event
-        for (i = 0; i < e6.Particle_size; i++) {
+        // for the moment, do not use filtered version of JETs.
+        filterJets(e6, true); // apply_NO_filter = true;
+//        filterJets(e6); // apply_NO_filter = true;
+//        if(e6.Jet_size==Jet_VALID_size)
+//            cout<<e6.Jet_size-Jet_VALID_size<<endl;
 
-            // this particle is Z
-            if (e6.Particle_PID[i] == Z_ID) {
+        // want to have 2 electrons in the event
+        if (e6.Electron_size = electron_size) {
 
-                z.SetPtEtaPhiM(e6.Particle_PT[i], e6.Particle_Eta[i], e6.Particle_Phi[i], e6.Particle_Mass[i]);
+            e1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], -1);
+            e2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], -1);
+            // for this case, mass of electron is irrelevant.
 
-                deltaR_Z_min = 9999; // assign a big value so that it will be overwritten in first iteration easily
-                indexOfJet_with_min_DeltaR = -1;
-                for (j = 0; j < e6.Jet_size; j++) {
+            e1e2 = e1 + e2;
 
-                    jet.SetPtEtaPhiM(e6.Jet_PT[j], e6.Jet_Eta[j], e6.Jet_Phi[j], e6.Jet_Mass[j]);
-                    deltaR_Z = z.DeltaR(jet);
-                    if (e6.Jet_Mass[j] >= jet_massMin && e6.Jet_Mass[j] <= jet_massMax) {
+            // loop over jets in the event
+            for (i = 0; i < Jet_VALID_size; i++) {
+                jet.SetPtEtaPhiM(Jet_VALID_PT[i], Jet_VALID_Eta[i], Jet_VALID_Phi[i], Jet_VALID_Mass[i]);
 
-                        fillTTree4Jet(t_jet_underLim, fields_t_jet_underLim, e6, j);
-                        t_deltaR_massRange->Fill();
-                    }
-                    if (deltaR_Z <= limit_deltaR) {
-                        deltaR_underLim = deltaR_Z;
+                // deltaR(jet,e+e-)<0.2 with : e as Electron 
+                deltaR = jet.DeltaR(e1e2);
+                if (deltaR < limit_deltaR) {
+                    deltaR_underLim2 = deltaR;
+
+                    // fill deltaR tree
+                    t_deltaR_underLim2->Fill();
+                    // fill the tree for jet
+                    fillTTree4Jet(t_jet_underLim2, fields_t_jet_underLim2, i);
+                }
+
+                // loop over the 2 electrons in the event
+                for (j = 0; j < electron_size; j++) {
+
+                    e.SetPtEtaPhiM(e6.Electron_PT[j], e6.Electron_Eta[j], e6.Electron_Phi[j], -1);
+                    // for this case, mass of electron is irrelevant.
+
+                    deltaR = jet.DeltaR(e);
+                    // aşağıdaki uyarıyı veriyor.
+                    // Warning in <TVector3::PseudoRapidity>: transvers momentum = 0! return +/- 10e10
+
+                    // fill trees
+                    if (deltaR < limit_deltaR) {
+                        deltaR_underLim = deltaR;
+
+                        // fill deltaR tree
                         t_deltaR_underLim->Fill();
-                        fillTTree4Jet(t_jet_limit_deltaR, fields_t_jet_limit_deltaR, e6, j);
+                        // fill the tree for jet
+                        fillTTree4Jet(t_jet_underLim, fields_t_jet_underLim, i);
                     }
-                    if (deltaR_Z <= deltaR_Z_min) {
-                        deltaR_Z_min = deltaR_Z;
-                        indexOfJet_with_min_DeltaR = j;
-                    }
-                }
-                fillTTree4Particle(t_jet_min_deltaR, fields_t_jet_min_deltaR, e6, indexOfJet_with_min_DeltaR);
-                if (deltaR_Z_min != 9999) {
-                    t_deltaR_min->Fill();
                 }
 
-                fillTTree4Particle(t_Z, fields_t_Z, e6, i, Z_ID);
+
+            }
+
+            // in that event, we are done with analysis referring to jets
+            // loop over "Particle" objects 
+            min_deltaR_found = false;   // ensures whether we found some minimal deltaR value in that event, if there is no e as Particle in the event, then we do not have a deltaR value for that event.
+            min_deltaR_e_Particle_AND_e=99999999; // make sure this value will be overwritten
+            for (i = 0; i < e6.Particle_size; i++) {
+                // this "Particle" is electron
+                if (abs(e6.Particle_PID[i]) == electron_PID) {
+
+                    e_Particle.SetPtEtaPhiM(e6.Particle_PT[i], e6.Particle_Eta[i], e6.Particle_Phi[i], e6.Particle_Mass[i]);
+
+                    // loop over the 2 electrons in the event
+                    for (j = 0; j < electron_size; j++) {
+
+                        // e_Particle and e must have the same charge.
+                        if (e6.Particle_Charge[i] == e6.Electron_Charge[j]) {
+
+                            e.SetPtEtaPhiM(e6.Electron_PT[j], e6.Electron_Eta[j], e6.Electron_Phi[j], -1);
+                            // for this case, mass of electron is irrelevant.
+
+                            //-deltaR(e1 as Particle, e2 as Electron) = minimum. with : e1 as Particle, e2 as Electron   
+                            deltaR = e_Particle.DeltaR(e);
+
+                            // check if this is deltaR=min
+                            if (deltaR < min_deltaR_e_Particle_AND_e) {
+                                min_deltaR_e_Particle_AND_e = deltaR;
+                                index_e_Particle_4min_deltaR = i;
+                                min_deltaR_found = true;
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            // in that event, we are done with selection referring to e as Particle
+            if (min_deltaR_found) {
+                // fill trees
+                // fill deltaR tree
+                t_deltaR_min_deltaR->Fill();
+                // fill the tree for jet
+                fillTTree4Particle(t_e1_min_deltaR, fields_t_e1_min_deltaR, e6, index_e_Particle_4min_deltaR);
             }
         }
     }
