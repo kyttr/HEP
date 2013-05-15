@@ -179,3 +179,39 @@ deltaR(e as Particle, e as Elektron) minimum olan deltaR(e as Particle, e as Ele
 
 çabuk ilerlersek,
 pythia'da "z+jet" background sample oluştur ve onları Delphes'ten geçir.
+
+15.05.2013/Çrş
+
+1.
+"loop_deltaR_Z_and_JET" --> electron ve muon olan olaylar için ayrı ayrı analiz yap. Bunun için z'nin "daughter" larını kontrol et. Ayrıca deltaR(jet, daughter of Z) histogramla.
+        "loop_deltaR_Z_and_JET()" metodunda deltaR(jet,Z) : Z as Particle hesaplanıyor. Yani "Particle" setindeki Z bozonları alınıyor ve bunlar ile olaydaki her jet arasındaki deltaR hesaplanıyordu. Şimdi ise aynı Z bozonlarını 2 gruba ayıracağız.
+        1. grup : Z.daughter = e  : Z as Particle  --> çocukları elektron olan Z
+        2. grup : Z.daughter = mu : Z as Particle  --> çocukları muon olan Z
+            
+            --> Her bir "daughter" (çocuk) için deltaR(jet,"daughter" of Z) histogram.
+                    ==> histogram deltaR(jet,"daughter" of Z)
+
+2.  
+deltaR(jet,Z as Particle)<0.2 olan olaylar için (e+e-).mass histogramla (recoZ.mass : e+e- --> Z , e+/e- as Electron)
+        histogram recoZ.mass : e+ e- --> recoZ , e+/e- as Electron , there is a "deltaR(jet,Z as Particle)<0.2" case in the event.
+	
+3.
+pythia : Z+jet üret. Delphes'ten geçir. 
+        ==> De.mass=500 peak'i zayıflamalı.
+
+        Delphes'in ürettiği ".root" dosyasında çalışmak için "makeClass" ile ayrıca bir "class" üretmeye gerek yok. "Z+jet background" içeren bu yeni ".root" dosyası aslında bizim "main42hepMC_E6_v4_by_delphes.root" dosyası ile aynı yapıya sahip. Sonuçta "main42hepMC_E6_v4_by_delphes.root" dosyasından "makeClass" ile üretilen "e6_Class" isimli "class" yeni dosya üzerinde de çalışabilir. Bunun için "e6_Class" ın ana metodunda "class"ın hangi dosya ile çalışacağını belirtmek gerek. Dosya belirtilmez ise "e6_Class" varsayılan olarak "main42hepMC_E6_v4_by_delphes.root" dosyasını seçecek. Çalışılacak dosyayı ayrıca belirtmek için:
+            
+        // bu koddan tam emin değilim.
+            int e6_myClass() {
+                TFile *f = new TFile("main42hepMC_E6_v4_by_delphes.root");
+                TTree *tree = (TTree*) gDirectory->Get("Delphes");
+                e6_Class t(tree);
+                ...                 
+	
+Ayrıca, "Z+jet background" içeren bu yeni ".root" dosyasındaki "kMaxSomething" değişkenleri "e6_Class"taki ile aynı değere sahip olmayabilir. Bu durum sorun çıkarabilir.
+    Ex : const Int_t kMaxParticle = 3751; // "e6_Class.h", line 21
+	
+SORUNLAR :
+        H.mass=80 : H as Particle      ---(true higgs mass=80)
+        jet.mass=90 civarında peak     ---özellikle bu (most !)
+	de.mass broad : H + jet --> de, H is reco.       ---de.mass=500'de peak yok, geniş bir dağılım var.
