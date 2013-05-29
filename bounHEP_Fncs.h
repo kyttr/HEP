@@ -1569,6 +1569,10 @@ void loop_deltaR_HIGGS_and_JET(e6_Class & e6) {
  *      1. kütlesi belirli bir aralıkta olan jetler (85<mass<105 gibi)
  *      2. deltaR(Z,jet) değeri belirli bir limitin altında olan jetler (limit_deltaR = 0.5 gibi)
  *      3. deltaR(Z,jet) değeri en küçük olan jet (her Z için böyle bir jetten tam 1 tane vardır.)
+ *
+ * EK :  
+ *deltaR(jet,Z as Particle)<0.2 olan olaylar için (e+e-).mass histogramla (recoZ.mass : e+e- --> Z , e+/e- as Electron)
+ *       histogram recoZ.mass : e+ e- --> recoZ , e+/e- as Electron , there is a "deltaR(jet,Z as Particle)<0.2" case in the event.
  */
 void loop_deltaR_Z_and_JET(e6_Class & e6) {
     if (e6.fChain == 0) return;
@@ -1625,6 +1629,12 @@ void loop_deltaR_Z_and_JET(e6_Class & e6) {
     Double_t deltaR_Z_limit;
     t_deltaR_limit->Branch("deltaR_jet_limit", &deltaR_Z_limit, "deltaR_Z_limit/D");
 
+    // TTree for reconstructed Z bosons (from e+e-), where there is a "deltaR(jet,Z as Particle)<0.2" case in the event. reconstructed Z bosons of that tree will be reconstructed by electrons. So, after satisfying "deltaR(jet,Z as Particle)<0.2" condition, the event should also contain 2 e+/e- as Electron.
+    TTree *t_RecoZ_limit_deltaR = new TTree("RecoZ-with-under-limit-deltaR", title_t_jet_limit_deltaR_char);
+    Double_t fields_t_RecoZ_limit_deltaR[numOfFields_TLorentzVector];
+    const char* prefix_t_RecoZ_limit_deltaR = "RecoZ";
+    initializeTTree4TLorentzVector(t_RecoZ_limit_deltaR, fields_t_RecoZ_limit_deltaR, prefix_t_RecoZ_limit_deltaR);
+
     // TTree for jets minimizing deltaR(Z,jet) in the event
     TTree *t_jet_min_deltaR = new TTree("Jets-minimizing-deltaR", "jets for which deltaR(Z,jet) is minimum");
     Double_t fields_t_jet_min_deltaR[numOfFields_Jet];
@@ -1646,6 +1656,10 @@ void loop_deltaR_Z_and_JET(e6_Class & e6) {
     TLorentzVector jet;
     //    TLorentzVector h_withM120, h_withM80;
 
+    // for "t_RecoZ_limit_deltaR"
+    TLorentzVector e1, e2, recoZ;
+    bool under_limit_deltaR_found, two_electrons_in_the_event;
+
     Long64_t nentries = e6.fChain->GetEntriesFast();
 
     Long64_t nbytes = 0, nb = 0;
@@ -1656,6 +1670,8 @@ void loop_deltaR_Z_and_JET(e6_Class & e6) {
         nbytes += nb;
         // if (Cut(ientry) < 0) continue;
 
+        under_limit_deltaR_found = false;
+        two_electrons_in_the_event = (e6.Electron_size == 2);
         // loop over generated particles in the event
         for (i = 0; i < e6.Particle_size; i++) {
 
@@ -1679,6 +1695,8 @@ void loop_deltaR_Z_and_JET(e6_Class & e6) {
                         deltaR_Z_limit = deltaR_Z;
                         t_deltaR_limit->Fill();
                         fillTTree4Jet(t_jet_limit_deltaR, fields_t_jet_limit_deltaR, e6, j);
+
+                        under_limit_deltaR_found = true;
                     }
                     if (deltaR_Z <= deltaR_Z_min) {
                         deltaR_Z_min = deltaR_Z;
@@ -1692,6 +1710,18 @@ void loop_deltaR_Z_and_JET(e6_Class & e6) {
 
                 fillTTree4Particle(t_Z, fields_t_Z, e6, i, Z_ID);
             }
+        }
+
+        // consider filling "t_RecoZ_limit_deltaR"
+        if (under_limit_deltaR_found && two_electrons_in_the_event) {
+            
+            e1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], -1);
+            e2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], -1);
+            // for this case, mass of electron is irrelevant.
+            
+            recoZ=e1+e2;
+            
+            fillTTree4LorentzVector(t_RecoZ_limit_deltaR,fields_t_RecoZ_limit_deltaR,recoZ);
         }
     }
 
@@ -1828,9 +1858,9 @@ void loop_deltaR_e_and_JET(e6_Class &e6) {
 
         // for the moment, do not use filtered version of JETs.
         filterJets(e6, true); // apply_NO_filter = true;
-//        filterJets(e6); // apply_NO_filter = true;
-//        if(e6.Jet_size==Jet_VALID_size)
-//            cout<<e6.Jet_size-Jet_VALID_size<<endl;
+        //        filterJets(e6); // apply_NO_filter = true;
+        //        if(e6.Jet_size==Jet_VALID_size)
+        //            cout<<e6.Jet_size-Jet_VALID_size<<endl;
 
         // want to have 2 electrons in the event
         if (e6.Electron_size = electron_size) {
@@ -1882,8 +1912,8 @@ void loop_deltaR_e_and_JET(e6_Class &e6) {
 
             // in that event, we are done with analysis referring to jets
             // loop over "Particle" objects 
-            min_deltaR_found = false;   // ensures whether we found some minimal deltaR value in that event, if there is no e as Particle in the event, then we do not have a deltaR value for that event.
-            min_deltaR_e_Particle_AND_e=99999999; // make sure this value will be overwritten
+            min_deltaR_found = false; // ensures whether we found some minimal deltaR value in that event, if there is no e as Particle in the event, then we do not have a deltaR value for that event.
+            min_deltaR_e_Particle_AND_e = 99999999; // make sure this value will be overwritten
             for (i = 0; i < e6.Particle_size; i++) {
                 // this "Particle" is electron
                 if (abs(e6.Particle_PID[i]) == electron_PID) {
