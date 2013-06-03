@@ -1852,14 +1852,14 @@ void loop_deltaR_ZDaughter_and_JET(e6_Class & e6) {
                             // 1st daughter muon
                             deltaR_mu = d1_mu_deltaR;
                             deltaR_all = deltaR_mu;
-                            b_deltaR_mu->Fill();
-                            b_deltaR_all->Fill();
+                            b_deltaR_mu->Fill();        // I guess this does NOT work
+                            b_deltaR_all->Fill();       // I guess this does NOT work
 
                             // 2nd daughter muon
                             deltaR_mu = d2_mu_deltaR;
                             deltaR_all = deltaR_mu;
-                            b_deltaR_mu->Fill();
-                            b_deltaR_all->Fill();
+                            b_deltaR_mu->Fill();        // I guess this does NOT work
+                            b_deltaR_all->Fill();       // I guess this does NOT work
                         } else if (daughtersAreElectron) {
                             d1_e_deltaR = d1_e.DeltaR(jet);
                             d2_e_deltaR = d2_e.DeltaR(jet);
@@ -1867,14 +1867,14 @@ void loop_deltaR_ZDaughter_and_JET(e6_Class & e6) {
                             // 1st daughter electron
                             deltaR_e = d1_e_deltaR;
                             deltaR_all = deltaR_e;
-                            b_deltaR_e->Fill();
-                            b_deltaR_all->Fill();
+                            b_deltaR_e->Fill();         // I guess this does NOT work
+                            b_deltaR_all->Fill();       // I guess this does NOT work
 
                             // 2nd daughter electron
                             deltaR_e = d2_e_deltaR;
                             deltaR_all = deltaR_e;
-                            b_deltaR_e->Fill();
-                            b_deltaR_all->Fill();
+                            b_deltaR_e->Fill();         // I guess this does NOT work
+                            b_deltaR_all->Fill();       // I guess this does NOT work
                         }
                     }
                 }
