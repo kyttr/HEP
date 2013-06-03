@@ -215,3 +215,24 @@ SORUNLAR :
         H.mass=80 : H as Particle      ---(true higgs mass=80)
         jet.mass=90 civarında peak     ---özellikle bu (most !)
 	de.mass broad : H + jet --> de, H is reco.       ---de.mass=500'de peak yok, geniş bir dağılım var.
+
+
+30.05.2013/Çrş
+
+z+jet backgroud :
+	main03.cc dosyasına bak.
+	1000 event çalıştır --> c-s kontrol
+	google --> z+jet c-s at LHC, your c-s must be same order of mag. as LHC result
+	
+
+deltaR(jet,Z as Particle)<0.2 olan olaylar için (e+e-).mass histogramla (recoZ.mass : e+e- --> Z , e+/e- as Electron)
+    histogram recoZ.mass : e+ e- --> recoZ , e+/e- as Electron , there is a "deltaR(jet,Z as Particle)<0.2" case in
+the event.
+	EDIT :
+	Yukarıdaki işi yaptım. Sonuçlar "loop_deltaR_Z_and_JET.root" dosyasının "RecoZ-with-under-limit-deltaR" isimli TTree'sinde duruyor. Burada dikkat çeken nokta gereken : "deltaR(jet,Z as Particle)<0.5" durumunu sağlayan 1208 jet var. Ama, "deltaR(jet,Z as Particle)<0.5" sağlayan olaylar ile 8 tane Z bozonu yeniden yaratabildim. Bu sayı 1208'e göre çok düşük. ==> Bir olayda hem "deltaR(jet,Z as Particle)<0.5" hem "electron_size=2" sağlanması düşük bir olasılık. Veya, bir olayda "deltaR(jet,Z as Particle)<0.5" sağlayan bir jet var ise o zaman o olayda 2 tane e+/e- (e as Electron) bulmamız düşük bir olasılık.
+	
+Şu ana kadar neden deltaR(jet,Z as Particle) durumlarını inceledik? Çünkü, "loop_Reconstruct_All*" dosyalarındaki "jet.Mass" histogramlarında 90 GeV civarında bir tepecik var. 90 GeV, Z bozonu kütlesine karşılık geliyor. ==> jet.mass=90 GeV civarı olan jetler aslında Z olabilir. Z bozonunun jet olarak tespit edilmesine neden olabilecek durum olarak şunu önerdik : Z bozonu yüksek momentum ile ilerliyor. Birbirine yakın 2 e+/e- olarak bozunuyor. Bu 2 e+/e- yakın olarak ilerledikleri için dedektörde jet olarak tespit ediliyor. ==> Dedektör, Z'ten çıkan elektronları "e as Electron" olarak değil, jet olarak algılıyor. Böyle bir olayda elimizde "e as Electron" olmadığı için reconstructed Z üretemiyoruz. Üretmemiz gereken reconstructed Z, jet olarak gözüküyor. Bu hipotez, yukarıdaki "EDIT" ile örtüşüyor : "deltaR(jet,Z as Particle)<0.5" sağlanmışsa o olaydaki Z as Particle'dan çıkan 2 e+/e- (as Particle) ve çevresi muhtemelen jet olarak tespit edilmiştir. O zaman elimizdeki 2 e+/e- as Particle, jet olarak göründüğü için e+/e- as Electron olarak yeniden yaratılamadı. ==> "deltaR(jet,Z as Particle)<0.5" sağlanan olayda 2 tane e+/e- (e as Electron) bulmamız düşük bir olasılık, çünkü Z'den çıkan elektronlar (e as Particle) jet olarak göründü.
+	
+"filterJets()" metodunda şu ana kadar (e as Electron) ile eşleşen jetleri elemeye çalıştım. Yukarıdaki notları gördükten sonra (e as Particle) ile eşleşen jetleri elemek daha mantıklı olacak.
+
+Bir olayda ortalama 2 tane (Z as Particle) var. Bu olmaması gereken bir şey. Muhtemelen bir Z diğer Z'in çocuğu. Analizde çocukları {mu+,mu-} veya {e+,e-} olan Z bozonlarını (Z as Particle) kullan.
