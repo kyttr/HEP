@@ -1677,7 +1677,7 @@ void loop_deltaR_Z_and_JET(e6_Class & e6) {
 
             // this particle is Z
             if (e6.Particle_PID[i] == Z_ID) {
-                
+
                 z.SetPtEtaPhiM(e6.Particle_PT[i], e6.Particle_Eta[i], e6.Particle_Phi[i], e6.Particle_Mass[i]);
 
                 deltaR_Z_min = 9999; // assign a big value so that it will be overwritten in first iteration easily
@@ -1714,15 +1714,170 @@ void loop_deltaR_Z_and_JET(e6_Class & e6) {
 
         // consider filling "t_RecoZ_limit_deltaR"
         if (under_limit_deltaR_found && two_electrons_in_the_event) {
-            
+
             e1.SetPtEtaPhiM(e6.Electron_PT[0], e6.Electron_Eta[0], e6.Electron_Phi[0], -1);
             e2.SetPtEtaPhiM(e6.Electron_PT[1], e6.Electron_Eta[1], e6.Electron_Phi[1], -1);
             // for this case, mass of electron is irrelevant.
-            
-            recoZ=e1+e2;
-            
-            fillTTree4LorentzVector(t_RecoZ_limit_deltaR,fields_t_RecoZ_limit_deltaR,recoZ);
+
+            recoZ = e1 + e2;
+
+            fillTTree4LorentzVector(t_RecoZ_limit_deltaR, fields_t_RecoZ_limit_deltaR, recoZ);
         }
+    }
+
+    f.Write();
+}
+
+/*
+ * "loop_deltaR_Z_and_JET" --> electron ve muon olan olaylar için ayrı ayrı analiz yap. Bunun için z'nin "daughter" larını kontrol et. Ayrıca deltaR(jet, daughter of Z) histogramla.
+        "loop_deltaR_Z_and_JET()" metodunda deltaR(jet,Z) : Z as Particle hesaplanıyor. Yani "Particle" setindeki Z bozonları alınıyor ve bunlar ile olaydaki her jet arasındaki deltaR hesaplanıyordu. Şimdi ise aynı Z bozonlarını 2 gruba ayıracağız.
+        1. grup : Z.daughter = e  : Z as Particle  --> çocukları elektron olan Z
+        2. grup : Z.daughter = mu : Z as Particle  --> çocukları muon olan Z
+            
+            --> Her bir "daughter" (çocuk) için deltaR(jet,"daughter" of Z) histogram.
+                    ==> histogram deltaR(jet,"daughter" of Z)
+ */
+void loop_deltaR_ZDaughter_and_JET(e6_Class & e6) {
+    if (e6.fChain == 0) return;
+
+    string histoFile_str = "loop_deltaR_ZDaughter_and_JET.root";
+    // TFile constructor accepts type "const char*"
+    const char* histoFile_char = histoFile_str.c_str();
+    // overwrite existing ".root" file
+    TFile f(histoFile_char, "recreate");
+
+    // TTree for muons which are daughter of a Z boson
+    TTree *t_mu = new TTree("muon-as-Particle-daughter-of-Z-as-Particle", "daughter of generated Z bosons");
+    Double_t fields_t_mu[numOfFields_Particle];
+    const char* prefix_t_mu = "mu"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4Particle(t_mu, fields_t_mu, prefix_t_mu);
+
+    // TTree for muons which are daughter of a Z boson
+    TTree *t_e = new TTree("electron-as-Particle-daughter-of-Z-as-Particle", "daughter of generated Z bosons");
+    Double_t fields_t_e[numOfFields_Particle];
+    const char* prefix_t_e = "e"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4Particle(t_e, fields_t_e, prefix_t_e);
+
+    // TTree for jets
+    TTree *t_jet = new TTree("Jets", "all valid jets");
+    Double_t fields_t_jet[numOfFields_Jet];
+    const char* prefix_t_jet = "jet"; // must start with lowercase letter, dont know the stupid reason for that
+    initializeTTree4Jet(t_jet, fields_t_jet, prefix_t_jet);
+
+    // TTree for deltaR between {muons, electrons} and Jet
+    TTree *t_deltaR = new TTree("deltaR", "between {muons, electrons} and Jet");
+    Double_t deltaR_mu, deltaR_e, deltaR_all;
+    // I will need to fill branches of that TTree separately. That is why I keep "TBranch" objects.
+    TBranch *b_deltaR_mu = t_deltaR->Branch("deltaR_muon_AND_jet", &deltaR_mu, "deltaR_mu/D"); // branch for deltaR between muon and Jet
+    TBranch *b_deltaR_e = t_deltaR->Branch("deltaR_electron_AND_jet", &deltaR_e, "deltaR_e/D"); // branch for deltaR between electron and Jet
+    TBranch *b_deltaR_all = t_deltaR->Branch("deltaR_ALL_AND_jet", &deltaR_all, "deltaR_all/D"); // branch for deltaR between muon and Jet
+
+    int i, j;
+    int Z_ID = 23; // pid of Z boson
+    int mu_ID = 13; // pid of muon
+    int e_ID = 11; // pid of muon
+    //    double h_massReal = 120; // mass of Higgs in reality
+    //    double h_massSimulation = 80; // mass of Higgs given by simulation
+
+    //TLorentzVector z;
+    TLorentzVector jet;
+    TLorentzVector d1_mu, d2_mu, d1_e, d2_e; // d1_mu : TLorentzVector for Z bosons' 1st daughter which is muon.
+    int d1_mu_index, d2_mu_index, d1_e_index, d2_e_index; // d1_mu_index : index of d1_mu in "Particle_" set
+    Double_t d1_mu_deltaR, d2_mu_deltaR, d1_e_deltaR, d2_e_deltaR; // d1_mu_deltaR : deltaR of d1_mu with a jet
+
+    bool daughtersAreMuon, daughtersAreElectron;
+
+    Long64_t nentries = e6.fChain->GetEntriesFast();
+
+    Long64_t nbytes = 0, nb = 0;
+    for (Long64_t jentry = 0; jentry < nentries; jentry++) {
+        Long64_t ientry = e6.LoadTree(jentry);
+        if (ientry < 0) break;
+        nb = e6.fChain->GetEntry(jentry);
+        nbytes += nb;
+        // if (Cut(ientry) < 0) continue;
+
+        filterJets(e6);
+
+        // loop over generated particles in the event
+        for (i = 0; i < e6.Particle_size; i++) {
+
+            // this particle is Z
+            if (e6.Particle_PID[i] == Z_ID) {
+
+                daughtersAreMuon = (e6.Particle_D1[i] == mu_ID && e6.Particle_D2[i] == mu_ID);
+                daughtersAreElectron = (e6.Particle_D1[i] == e_ID && e6.Particle_D2[i] == e_ID);
+
+                if (daughtersAreMuon) {
+                    d1_mu_index = e6.Particle_D1[i];
+                    d2_mu_index = e6.Particle_D2[i];
+
+                    d1_mu.SetPtEtaPhiM(e6.Particle_PT[d1_mu_index], e6.Particle_Eta[d1_mu_index], e6.Particle_Phi[d1_mu_index], e6.Particle_Mass[d1_mu_index]);
+                    d2_mu.SetPtEtaPhiM(e6.Particle_PT[d2_mu_index], e6.Particle_Eta[d2_mu_index], e6.Particle_Phi[d2_mu_index], e6.Particle_Mass[d2_mu_index]);
+                    
+                    fillTTree4LorentzVector(t_mu,fields_t_mu,d1_mu);
+                    fillTTree4LorentzVector(t_mu,fields_t_mu,d2_mu);
+
+                } else if (daughtersAreElectron) {
+                    d1_e_index = e6.Particle_D1[i];
+                    d2_e_index = e6.Particle_D2[i];
+
+                    d1_e.SetPtEtaPhiM(e6.Particle_PT[d1_e_index], e6.Particle_Eta[d1_e_index], e6.Particle_Phi[d1_e_index], e6.Particle_Mass[d1_e_index]);
+                    d2_e.SetPtEtaPhiM(e6.Particle_PT[d2_e_index], e6.Particle_Eta[d2_e_index], e6.Particle_Phi[d2_e_index], e6.Particle_Mass[d2_e_index]);
+
+                    fillTTree4LorentzVector(t_e,fields_t_e,d1_e);
+                    fillTTree4LorentzVector(t_e,fields_t_e,d2_e);
+                }
+
+                // loop over jets if that Z has muon or electron daughters
+                if (daughtersAreMuon || daughtersAreElectron) {
+                    for (j = 0; j < Jet_VALID_size; j++) {
+
+                        fillTTree4Jet(t_jet,fields_t_jet,j);
+                        
+                        jet.SetPtEtaPhiM(Jet_VALID_PT[j], Jet_VALID_Eta[j], Jet_VALID_Phi[j], Jet_VALID_Mass[j]);
+                       
+                        if (daughtersAreMuon) {
+                            d1_mu_deltaR = d1_mu.DeltaR(jet);
+                            d2_mu_deltaR = d2_mu.DeltaR(jet);
+
+                            // 1st daughter muon
+                            deltaR_mu = d1_mu_deltaR;
+                            deltaR_all=deltaR_mu;
+                            b_deltaR_mu->Fill();
+                            b_deltaR_all->Fill();
+                            
+                            // 2nd daughter muon
+                            deltaR_mu = d2_mu_deltaR;
+                            deltaR_all=deltaR_mu;
+                            b_deltaR_mu->Fill();
+                            b_deltaR_all->Fill();
+                        }
+                        else if(daughtersAreElectron)
+                        {
+                            d1_e_deltaR = d1_e.DeltaR(jet);
+                            d2_e_deltaR = d2_e.DeltaR(jet);
+
+                            // 1st daughter electron
+                            deltaR_e = d1_e_deltaR;
+                            deltaR_all=deltaR_e;
+                            b_deltaR_e->Fill();
+                            b_deltaR_all->Fill();
+                            
+                            // 2nd daughter electron
+                            deltaR_e = d2_e_deltaR;
+                            deltaR_all=deltaR_e;
+                            b_deltaR_e->Fill();                        
+                            b_deltaR_all->Fill();
+                        }
+                    }
+
+                    fillTTree4Particle(t_mu, fields_t_mu, e6, i, Z_ID);
+                }
+            }
+        }
+
+
     }
 
     f.Write();
