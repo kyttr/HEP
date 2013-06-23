@@ -236,3 +236,32 @@ the event.
 "filterJets()" metodunda şu ana kadar (e as Electron) ile eşleşen jetleri elemeye çalıştım. Yukarıdaki notları gördükten sonra (e as Particle) ile eşleşen jetleri elemek daha mantıklı olacak.
 
 Bir olayda ortalama 2 tane (Z as Particle) var. Bu olmaması gereken bir şey. Muhtemelen bir Z diğer Z'in çocuğu. Analizde çocukları {mu+,mu-} veya {e+,e-} olan Z bozonlarını (Z as Particle) kullan.
+
+
+23.06.2013/Pzr
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Bu proje için kullandığım shell komutlarını aşağıya not edeceğim:
+
+make main32 
+./main32.exe MC4BSM-single.lhe MC4BSM-single-hepmc > MC4BSM-single-out
+
+./DelphesHepMC examples/delphes_card_CMS.tcl main42hepMC  main42hepMC_by_delphes.root
+./DelphesHepMC examples/delphes_card_CMS.tcl  main42hepMC_by_delphes.root main42hepMC 
+./DelphesHepMC examples/delphes_card_CMS.tcl  main42hepMC_E6_by_delphes.root main42hepMC_E6 
+./DelphesHepMC examples/delphes_card_ATLAS.tcl main42hepMC_E6_v2_by_delphes.root main42hepMC_E6_v2 
+
+make clean
+pythia
+./configure --with-hepmc=path
+./configure --with-hepmc=path --with-hepmcversion=2.06.07
+make clean
+./configure --with-hepmc=path
+./configure --with-hepmc=path --with-hepmcversion=2.06.08
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+z+jet cross section verisi için:
+http://arxiv.org/abs/1111.2690
+http://arxiv.org/abs/1110.3226
+http://www.pa.msu.edu/~huston/atlas/helmholtz_huston.pdf
+https://indico.cern.ch/getFile.py/access?contribId=11&sessionId=3&resId=0&materialId=slides&confId=180665
